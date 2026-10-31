@@ -1,4 +1,5 @@
-const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
+const configuredApiUrl = import.meta.env.VITE_API_URL;
+const API_BASE = (configuredApiUrl || (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api')).replace(/\/$/, '');
 export const API_ORIGIN = API_BASE.replace(/\/api$/i, '');
 
 const safeRes = async (res) => {
@@ -15,7 +16,7 @@ const safeRes = async (res) => {
 };
 
 const adminHeaders = () => {
-  const token = localStorage.getItem('mim_token');
+  const token = localStorage.getItem('mim_admin_token') || localStorage.getItem('mim_token');
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 

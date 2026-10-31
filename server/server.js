@@ -83,15 +83,18 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Start Server & Connect Database
-server.listen(PORT, async () => {
-  console.log(`\n=================================================`);
-  console.log(`🚀 Med in Minutes Backend Server is running on port ${PORT}`);
-  console.log(`⚡ 10-Minute Express Medicine Delivery Network Ready`);
-  console.log(`🌐 API Endpoint: http://localhost:${PORT}/api/health`);
-  console.log(`=================================================\n`);
-  
-  await connectDB();
-});
+// Vercel imports the Express app as a serverless function. Keep the listener
+// for local and traditional Node deployments only.
+if (process.env.VERCEL !== '1') {
+  server.listen(PORT, async () => {
+    console.log(`\n=================================================`);
+    console.log(`🚀 Med in Minutes Backend Server is running on port ${PORT}`);
+    console.log(`⚡ 10-Minute Express Medicine Delivery Network Ready`);
+    console.log(`🌐 API Endpoint: http://localhost:${PORT}/api/health`);
+    console.log(`=================================================\n`);
+
+    await connectDB();
+  });
+}
 
 export default app;

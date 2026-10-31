@@ -101,6 +101,7 @@ export const AuthModal = () => {
 
   const handleLogout = async () => {
     try { await supabaseAuth.signOut(); } catch { /* Local accounts do not have a Supabase session. */ }
+    localStorage.removeItem('mim_admin_token');
     localStorage.removeItem('mim_token');
     localStorage.removeItem('mim_active_order');
     setActiveOrderId('');

@@ -28,7 +28,11 @@ export const AppProvider = ({ children }) => {
       localStorage.removeItem('mim_token');
       return null;
     }
-    const hasLocalAdminToken = Boolean(localStorage.getItem('mim_token'));
+    const legacyAdminToken = savedUser?.role === 'admin' ? localStorage.getItem('mim_token') : null;
+    if (legacyAdminToken && !localStorage.getItem('mim_admin_token')) {
+      localStorage.setItem('mim_admin_token', legacyAdminToken);
+    }
+    const hasLocalAdminToken = Boolean(localStorage.getItem('mim_admin_token') || legacyAdminToken);
     return savedUser ? { ...savedUser, role: savedUser.role === 'admin' && hasLocalAdminToken ? 'admin' : 'buyer' } : null;
   });
 
@@ -121,6 +125,9 @@ export const AppProvider = ({ children }) => {
     let subscription = null;
     supabaseAuth.onAuthStateChange((event, session) => {
       if (!mounted) return;
+      // Admin accounts authenticate against the Express API and keep a
+      // separate token. A late Supabase session restore must not replace them.
+      if (localStorage.getItem('mim_admin_token')) return;
       if (session?.user) {
         const sbUser = session.user;
         setUser({

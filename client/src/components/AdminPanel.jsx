@@ -119,10 +119,11 @@ export const AdminPanel = () => {
     setLoginLoading(true);
     try {
       const response = await api.login({ email: adminEmail, password: adminPassword });
-      if (!response?.success || response.user?.role !== 'admin' || !response.token) {
-        throw new Error('This account is not authorized for website administration.');
-      }
-      localStorage.setItem('mim_token', response.token);
+      if (!response?.success) throw new Error(response?.message || 'Admin sign in failed.');
+      if (response.user?.role !== 'admin') throw new Error('This account is not authorized for website administration.');
+      if (!response.token) throw new Error('The server did not return an admin session. Restart the backend and try again.');
+      localStorage.setItem('mim_admin_token', response.token);
+      localStorage.removeItem('mim_token');
       setUser({ ...response.user, role: 'admin' });
       showToast('Administrator signed in.');
     } catch (error) {
