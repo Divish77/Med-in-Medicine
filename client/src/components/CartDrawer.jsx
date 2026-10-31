@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShoppingBag, X, Plus, Minus, Trash2, ShieldAlert, ArrowRight, Zap, Upload, MapPin, Check } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { api } from '../api';
 
 export const CartDrawer = () => {
   const {
@@ -15,18 +16,28 @@ export const CartDrawer = () => {
     cartDiscount,
     deliveryFee,
     packagingFee,
+    cartTax,
     cartTotal,
     hasPrescriptionItems,
     attachedPrescription,
+    setAttachedPrescription,
     setIsPrescriptionModalOpen,
     deliveryLocation,
     setIsLocationModalOpen,
-    setIsCheckoutModalOpen
+    setIsCheckoutModalOpen,
+    user,
+    setIsAuthModalOpen,
+    showToast
   } = useApp();
 
   if (!isCartOpen) return null;
 
-  const handleCheckoutClick = () => {
+  const handleCheckoutClick = async () => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      showToast('Sign in before checking out.', 'info');
+      return;
+    }
     if (!deliveryLocation.serviceable) {
       setIsLocationModalOpen(true);
       return;
@@ -34,6 +45,21 @@ export const CartDrawer = () => {
     if (hasPrescriptionItems && !attachedPrescription) {
       setIsPrescriptionModalOpen(true);
       return;
+    }
+    if (hasPrescriptionItems && attachedPrescription?.status !== 'Verified by Pharmacist') {
+      try {
+        const latest = await api.getPrescription(attachedPrescription._id);
+        if (latest.success && latest.prescription) setAttachedPrescription(latest.prescription);
+        if (latest.prescription?.status !== 'Verified by Pharmacist') {
+          showToast(latest.prescription?.status === 'Rejected'
+            ? 'Prescription was rejected. Upload a clear, valid prescription.'
+            : 'Prescription is awaiting pharmacist review.', 'info');
+          return;
+        }
+      } catch {
+        showToast('Could not check prescription review status. Try again.', 'error');
+        return;
+      }
     }
     setIsCartOpen(false);
     setIsCheckoutModalOpen(true);
@@ -89,7 +115,7 @@ export const CartDrawer = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <MapPin size={16} color={deliveryLocation.serviceable ? '#059669' : '#dc2626'} />
             <span style={{ fontWeight: 600, color: deliveryLocation.serviceable ? '#064e3b' : '#991b1b' }}>
-              {deliveryLocation.serviceable ? `Delivering to ${deliveryLocation.area || deliveryLocation.pincode} in ${deliveryLocation.etaMinutes || 10} mins` : 'Delivery location not serviceable'}
+              {deliveryLocation.serviceable ? `Delivering to ${deliveryLocation.area || deliveryLocation.pincode} · ${deliveryLocation.etaLabel || `${deliveryLocation.etaMinutes || 10} mins`}` : 'Delivery location not serviceable'}
             </span>
           </div>
           <button
@@ -235,6 +261,10 @@ export const CartDrawer = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
                 <span>Insulated Sterile Packaging</span>
                 <span>₹{packagingFee}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
+                <span>GST</span>
+                <span>₹{cartTax}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-main)', fontWeight: 800, fontSize: '1.1rem', borderTop: '1px dashed #cbd5e1', paddingTop: '8px', marginTop: '4px' }}>
                 <span>Total Amount to Pay</span>

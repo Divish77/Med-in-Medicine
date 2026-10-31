@@ -120,6 +120,10 @@ class PersistentStore {
     return true;
   }
 
+  delete(collection, predicate) {
+    return this.deleteOne(collection, predicate);
+  }
+
   seedInitialData(medicines, pharmacies) {
     if (this.cache.medicines.length === 0 && medicines && medicines.length > 0) {
       this.cache.medicines = medicines;

@@ -20,54 +20,27 @@ router.post('/register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const defaultAddresses = [
-      {
-        id: 'addr_default_1',
-        label: 'Home',
-        street: 'Flat 402, Green Avenue, Connaught Place',
-        city: 'New Delhi',
-        state: 'Delhi',
-        pincode: '110001',
-        landmark: 'Near Central Park Gate 2',
-        fullAddress: 'Flat 402, Green Avenue, Near Central Park Gate 2, Connaught Place, New Delhi - 110001',
-        lat: 28.6315,
-        lng: 77.2167,
-        isDefault: true
-      },
-      {
-        id: 'addr_default_2',
-        label: 'Work',
-        street: 'Cyber Tower 4, Barakhamba Road',
-        city: 'New Delhi',
-        state: 'Delhi',
-        pincode: '110001',
-        landmark: 'Opposite Metro Gate 3',
-        fullAddress: 'Cyber Tower 4, Barakhamba Road, Connaught Place, New Delhi - 110001',
-        lat: 28.6300,
-        lng: 77.2250,
-        isDefault: false
-      }
-    ];
-
     const newUser = dbStore.insert('users', {
       name,
       email: email.toLowerCase(),
       password: hashedPassword,
-      phone: phone || '+91 98765 43210',
-      addresses: defaultAddresses
+      phone: phone || '',
+      role: 'buyer',
+      addresses: []
     });
 
-    const token = jwt.sign({ id: newUser._id, email: newUser.email }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: newUser._id, email: newUser.email, role: newUser.role }, JWT_SECRET, { expiresIn: '7d' });
 
     res.status(201).json({
       success: true,
-      message: 'Account created successfully',
+      message: 'Customer account created successfully',
       token,
       user: {
         id: newUser._id,
         name: newUser.name,
         email: newUser.email,
         phone: newUser.phone,
+        role: newUser.role,
         addresses: newUser.addresses
       }
     });
@@ -106,6 +79,7 @@ router.post('/login', async (req, res) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        role: user.role || 'buyer',
         addresses: user.addresses || []
       }
     });
@@ -137,6 +111,9 @@ router.get('/me', (req, res) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        role: user.role || 'buyer',
+        pharmacyName: user.pharmacyName || '',
+        licenseNumber: user.licenseNumber || '',
         addresses: user.addresses || []
       }
     });

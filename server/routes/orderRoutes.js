@@ -1,8 +1,23 @@
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import { dbStore } from '../services/store.js';
 import { ORDER_STAGES } from '../services/socketService.js';
 
 const router = express.Router();
+const JWT_SECRET = process.env.JWT_SECRET || 'med_in_minutes_secret_key_2026';
+
+const requireAdmin = (req, res, next) => {
+  const token = req.headers.authorization?.startsWith('Bearer ') ? req.headers.authorization.slice(7) : '';
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const admin = dbStore.findOne('users', (user) => user._id === decoded.id && user.role === 'admin');
+    if (!admin) return res.status(403).json({ success: false, message: 'Website administrator access is required.' });
+    req.adminUser = admin;
+    next();
+  } catch {
+    return res.status(401).json({ success: false, message: 'Sign in again to manage orders.' });
+  }
+};
 
 // Generate unique order ID
 const generateOrderId = () => {
@@ -26,17 +41,12 @@ router.post('/', (req, res) => {
       customerPhone = '+91 98765 43210',
       deliveryAddress,
       items = [],
-      subtotal = 0,
-      deliveryFee = 0,
-      discount = 0,
-      tax = 0,
-      totalAmount = 0,
       paymentMethod = 'UPI',
       prescriptionId = null,
       notes = ''
     } = req.body;
 
-    if (!deliveryAddress || !deliveryAddress.pincode) {
+    if (!deliveryAddress || typeof deliveryAddress.pincode !== 'string' || !/^[1-9]\d{5}$/.test(deliveryAddress.pincode.trim())) {
       return res.status(400).json({ success: false, message: 'Valid delivery address with PIN code is required.' });
     }
 
@@ -46,29 +56,60 @@ router.post('/', (req, res) => {
 
     // Check serviceability
     const pincode = deliveryAddress.pincode.trim();
-    if (pincode === '999999' || pincode.startsWith('0') || pincode.startsWith('9')) {
-      return res.status(400).json({
-        success: false,
-        message: `Delivery is currently not available for PIN code ${pincode}. Please select a serviceable location.`
-      });
-    }
+    const pharmacies = dbStore.get('pharmacies');
+    const localPharmacy = pharmacies.find((p) => p.pincode === pincode && p.isOpen !== false);
+    const matchedPharmacy = localPharmacy || {
+      name: '10 MN Company nationwide delivery',
+      address: `Standard delivery to PIN code ${pincode}`,
+      licenseNumber: '', phone: '', lat: null, lng: null,
+      pincode, expressAvailable: false, isDemoFulfillment: true
+    };
 
     // Check prescription requirement
-    const hasRxItems = items.some((item) => item.prescriptionRequired);
-    if (hasRxItems && !prescriptionId) {
-      // Auto-attach a demo verified prescription if user is ordering Rx items in demo
+    const inventory = dbStore.get('medicines');
+    const quantities = new Map();
+    for (const item of items) {
+      if (!item?._id || !Number.isInteger(Number(item.quantity)) || Number(item.quantity) < 1) {
+        return res.status(400).json({ success: false, message: 'Each order item must have a valid medicine and quantity.' });
+      }
+      quantities.set(item._id, (quantities.get(item._id) || 0) + Number(item.quantity));
     }
+    const canonicalItems = [];
+    for (const [medicineId, quantity] of quantities) {
+      const medicine = inventory.find((m) => m._id === medicineId);
+      if (!medicine || !medicine.inStock || Number(medicine.stock) < quantity) {
+        return res.status(400).json({ success: false, message: `${medicine?.name || 'A selected medicine'} is unavailable in the requested quantity.` });
+      }
+      canonicalItems.push({
+        _id: medicine._id, name: medicine.name, brand: medicine.brand,
+        genericName: medicine.genericName, price: Number(medicine.price), mrp: Number(medicine.mrp),
+        quantity, packSize: medicine.packSize, prescriptionRequired: Boolean(medicine.prescriptionRequired), image: medicine.image
+      });
+    }
+    const hasRxItems = canonicalItems.some((item) => item.prescriptionRequired);
+    const prescription = prescriptionId && dbStore.findOne('prescriptions', (p) => p._id === prescriptionId);
+    if (hasRxItems && (!prescription || prescription.status !== 'Verified by Pharmacist')) {
+      return res.status(400).json({ success: false, message: 'A pharmacist-verified prescription is required for prescription medicines.' });
+    }
+    const subtotal = canonicalItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const safeDeliveryFee = matchedPharmacy.expressAvailable ? 0 : 25;
+    const packagingFee = 15;
+    const safeDiscount = 0;
+    const safeTax = +(subtotal * 0.05).toFixed(2);
+    const totalAmount = +(subtotal + safeDeliveryFee + packagingFee).toFixed(2);
 
     const orderId = generateOrderId();
     const invoiceNumber = generateInvoiceNumber();
     const orderTimestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     // Calculate delivery time
-    const isExpressPin = ['110001', '110016', '110024', '560001', '560034', '400050', '160017', '147001', '122002', '201301'].includes(pincode);
-    const etaMinutes = isExpressPin ? 10 : 18;
+    const isExpressPin = Boolean(localPharmacy?.expressAvailable) && ['110001', '110016', '110024', '560001', '560034', '400050', '160017', '147001', '122002', '201301'].includes(pincode);
+    const etaMinutes = matchedPharmacy.isDemoFulfillment ? 2 * 24 * 60 : isExpressPin ? 10 : 18;
 
     const arrivalDate = new Date(Date.now() + etaMinutes * 60 * 1000);
-    const estimatedArrivalTime = arrivalDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const estimatedArrivalTime = matchedPharmacy.isDemoFulfillment
+      ? arrivalDate.toLocaleDateString([], { month: 'short', day: 'numeric' })
+      : arrivalDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     // Build timeline
     const timeline = ORDER_STAGES.map((stage, idx) => {
@@ -99,9 +140,6 @@ router.post('/', (req, res) => {
     });
 
     // Pharmacy selection
-    const pharmacies = dbStore.get('pharmacies');
-    const matchedPharmacy = pharmacies.find((p) => p.pincode === pincode) || pharmacies[0];
-
     const newOrder = {
       orderId,
       invoiceNumber,
@@ -109,18 +147,19 @@ router.post('/', (req, res) => {
       customerName,
       customerPhone,
       deliveryAddress,
-      items,
+      items: canonicalItems,
       subtotal,
-      deliveryFee,
-      discount,
-      tax,
+      deliveryFee: safeDeliveryFee,
+      packagingFee,
+      discount: safeDiscount,
+      tax: safeTax,
       totalAmount,
       paymentMethod,
       paymentStatus: paymentMethod === 'Cash on Delivery' ? 'Pending' : 'Paid',
       transactionId: 'TXN_' + Math.random().toString(36).substring(2, 10).toUpperCase(),
       prescriptionId,
       prescriptionRequired: hasRxItems,
-      prescriptionVerified: true,
+      prescriptionVerified: !hasRxItems || prescription.status === 'Verified by Pharmacist',
       status: 'Order Placed',
       stageIndex: 0,
       timeline,
@@ -128,21 +167,15 @@ router.post('/', (req, res) => {
         name: matchedPharmacy.name,
         address: matchedPharmacy.address,
         licenseNumber: matchedPharmacy.licenseNumber,
-        phone: matchedPharmacy.phone
+        phone: matchedPharmacy.phone,
+        lat: matchedPharmacy.lat,
+        lng: matchedPharmacy.lng
       },
-      deliveryPartner: {
-        name: 'Rahul Sharma',
-        phone: '+91 98112 34567',
-        vehicleNumber: 'DL 01 EV 4421',
-        rating: 4.95,
-        deliveriesCount: 1840,
-        currentLat: matchedPharmacy.lat || 28.6315,
-        currentLng: matchedPharmacy.lng || 77.2167,
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
-      },
+      deliveryPartner: null,
       estimatedDeliveryMinutes: etaMinutes,
+      estimatedDeliveryLabel: matchedPharmacy.isDemoFulfillment ? '2–5 business days' : `${etaMinutes} minutes`,
       estimatedArrivalTime,
-      deliveryConfirmationOtp: '4821',
+      deliveryConfirmationOtp: String(Math.floor(1000 + Math.random() * 9000)),
       deliveredAt: null,
       rating: null,
       feedback: null,
@@ -150,6 +183,13 @@ router.post('/', (req, res) => {
     };
 
     const savedOrder = dbStore.insert('orders', newOrder);
+    for (const item of canonicalItems) {
+      const medicine = inventory.find((m) => m._id === item._id);
+      dbStore.updateOne('medicines', (m) => m._id === item._id, {
+        stock: Number(medicine.stock) - item.quantity,
+        inStock: Number(medicine.stock) - item.quantity > 0
+      });
+    }
 
     // Notify connected sockets via global io if attached to app
     const io = req.app.get('io');
@@ -186,6 +226,16 @@ router.get('/:id', (req, res) => {
 router.get('/', (req, res) => {
   try {
     const { userId } = req.query;
+    if (!userId) return requireAdmin(req, res, () => listOrders(req, res));
+    return listOrders(req, res);
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+const listOrders = (req, res) => {
+  try {
+    const { userId } = req.query;
     let orders = dbStore.get('orders');
 
     if (userId) {
@@ -199,10 +249,10 @@ router.get('/', (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
-});
+};
 
-// Advance order stage (Simulated Delivery Tracking Flow for demo mode)
-router.post('/:id/advance-stage', (req, res) => {
+// Advance an order to the next fulfillment stage.
+router.post('/:id/advance-stage', requireAdmin, (req, res) => {
   try {
     const { id } = req.params;
     const { targetStageIndex } = req.body;
@@ -212,9 +262,21 @@ router.post('/:id/advance-stage', (req, res) => {
       return res.status(404).json({ success: false, message: 'Order not found.' });
     }
 
+    if (targetStageIndex !== undefined && !Number.isInteger(targetStageIndex)) {
+      return res.status(400).json({ success: false, message: 'Target stage must be a whole number.' });
+    }
+
     const nextIndex = typeof targetStageIndex === 'number'
-      ? targetStageIndex
+      ? Math.max(0, Math.min(targetStageIndex, ORDER_STAGES.length - 2))
       : Math.min(order.stageIndex + 1, ORDER_STAGES.length - 2); // Do not jump to delivered without confirmation
+    if (order.status === 'Successfully Delivered' || order.status === 'Cancelled' || nextIndex < order.stageIndex) {
+      const message = order.status === 'Cancelled'
+        ? 'A cancelled order cannot be advanced.'
+        : order.status === 'Successfully Delivered'
+          ? 'A delivered order cannot be changed.'
+          : 'Order progress cannot be moved backwards.';
+      return res.status(409).json({ success: false, message });
+    }
 
     const stageInfo = ORDER_STAGES[nextIndex];
     const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -230,24 +292,10 @@ router.post('/:id/advance-stage', (req, res) => {
       return step;
     });
 
-    // Simulated rider coordinates moving closer
-    const ratio = nextIndex / (ORDER_STAGES.length - 1);
-    const startLat = 28.6315, startLng = 77.2167;
-    const destLat = order.deliveryAddress.lat || 28.6139;
-    const destLng = order.deliveryAddress.lng || 77.2090;
-
-    const currentLat = +(startLat + (destLat - startLat) * ratio).toFixed(4);
-    const currentLng = +(startLng + (destLng - startLng) * ratio).toFixed(4);
-
     const updatedOrder = dbStore.updateOne('orders', (o) => o.orderId === order.orderId, {
       stageIndex: nextIndex,
       status: stageInfo.status,
-      timeline: updatedTimeline,
-      deliveryPartner: {
-        ...order.deliveryPartner,
-        currentLat,
-        currentLng
-      }
+      timeline: updatedTimeline
     });
 
     const io = req.app.get('io');
@@ -256,6 +304,51 @@ router.post('/:id/advance-stage', (req, res) => {
     }
 
     res.json({ success: true, order: updatedOrder });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Cancel an active order and release its reserved stock back to the catalog.
+router.post('/:id/cancel', requireAdmin, (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = dbStore.findOne('orders', (item) => item.orderId === id || item._id === id);
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found.' });
+    if (['Successfully Delivered', 'Cancelled'].includes(order.status)) {
+      return res.status(409).json({ success: false, message: `This order is already ${order.status.toLowerCase()}.` });
+    }
+
+    for (const item of order.items || []) {
+      const medicine = dbStore.findOne('medicines', (candidate) => candidate._id === item._id);
+      if (!medicine) continue;
+      const restoredStock = Number(medicine.stock || 0) + Number(item.quantity || 0);
+      dbStore.updateOne('medicines', (candidate) => candidate._id === item._id, {
+        stock: restoredStock,
+        inStock: restoredStock > 0
+      });
+    }
+
+    const timestamp = new Date().toISOString();
+    const cancellationReason = String(req.body?.reason || 'Cancelled by website administrator').trim().slice(0, 250);
+    const updatedOrder = dbStore.updateOne('orders', (item) => item.orderId === order.orderId, {
+      status: 'Cancelled',
+      cancelledAt: timestamp,
+      cancelledBy: req.adminUser._id,
+      cancellationReason,
+      paymentStatus: order.paymentStatus === 'Paid' ? 'Refund Pending' : order.paymentStatus,
+      timeline: [...(order.timeline || []), {
+        status: 'Cancelled',
+        description: cancellationReason,
+        icon: 'X',
+        completed: true,
+        timestamp: new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }]
+    });
+
+    const io = req.app.get('io');
+    if (io) io.to(`order_${order.orderId}`).emit('order_updated', updatedOrder);
+    res.json({ success: true, message: 'Order cancelled and reserved stock returned to inventory.', order: updatedOrder });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -270,6 +363,24 @@ router.post('/:id/deliver', (req, res) => {
     const order = dbStore.findOne('orders', (o) => o.orderId === id || o._id === id);
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+
+    if (order.status === 'Successfully Delivered') {
+      return res.status(409).json({ success: false, message: 'This order has already been delivered.' });
+    }
+    if (order.status === 'Cancelled') {
+      return res.status(409).json({ success: false, message: 'A cancelled order cannot be delivered.' });
+    }
+    if (order.stageIndex < ORDER_STAGES.length - 2) {
+      return res.status(409).json({ success: false, message: 'Advance the order to Out for Delivery before confirming handover.' });
+    }
+
+    // Verify the customer handover code.
+    if (!otp || !order.deliveryConfirmationOtp || otp.toString().trim() !== order.deliveryConfirmationOtp.toString().trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'A valid delivery handover OTP is required.'
+      });
     }
 
     const finalIdx = ORDER_STAGES.length - 1;
@@ -388,6 +499,7 @@ router.get('/:id/invoice', (req, res) => {
       })),
       subtotal: order.subtotal,
       deliveryFee: order.deliveryFee,
+      packagingFee: order.packagingFee || 0,
       discount: order.discount,
       tax: order.tax,
       totalAmount: order.totalAmount,

@@ -103,7 +103,7 @@ export const InteractiveMap = ({
 
       const riderMarker = L.marker(riderPos, { icon: riderIcon })
         .addTo(map)
-        .bindPopup(`<b>Delivery Partner: Rahul Sharma</b><br>Speed: 28 km/h • On the way!`);
+        .bindPopup(`<b>Delivery Partner: Delivery partner not assigned</b><br>Speed: 28 km/h • On the way!`);
       markersRef.current.push(riderMarker);
     }
 
@@ -133,7 +133,10 @@ export const InteractiveMap = ({
 
     // Cleanup on unmount
     return () => {
-      // Keep map intact or clean layers
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
     };
   }, [center, zoom, pharmacyPos, deliveryPos, riderPos, isDraggable]);
 

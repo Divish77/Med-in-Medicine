@@ -142,6 +142,12 @@ export const InvoiceModal = () => {
               <span>10-Minute Express Delivery</span>
               <span style={{ color: '#059669', fontWeight: 700 }}>{invoiceData.deliveryFee === 0 ? 'FREE' : `₹${invoiceData.deliveryFee}`}</span>
             </div>
+            {invoiceData.packagingFee > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
+                <span>Packaging Fee</span>
+                <span>₹{invoiceData.packagingFee}</span>
+              </div>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
               <span>GST (CGST 2.5% + SGST 2.5%)</span>
               <span>₹{invoiceData.tax || '0.00'}</span>

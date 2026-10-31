@@ -4,7 +4,7 @@ import { useApp } from '../context/AppContext';
 import { api } from '../api';
 
 export const MedicinesPage = () => {
-  const { addToCart, setIsPrescriptionModalOpen, deliveryLocation, showToast } = useApp();
+  const { addToCart, setIsPrescriptionModalOpen, deliveryLocation, showToast, user } = useApp();
 
   const [medicines, setMedicines] = useState([]);
   const [categories, setCategories] = useState(['All']);
@@ -65,7 +65,7 @@ export const MedicinesPage = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
             <span className="badge badge-express">⚡ 10-MIN EXPRESS CATALOG</span>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Nearest Store: <strong>{deliveryLocation.pharmacyName || 'Apollo Pharmacy Express'}</strong>
+              Nearest Store: <strong>{deliveryLocation.pharmacyName || 'No pharmacy selected'}</strong>
             </span>
           </div>
           <h1 style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.5px' }}>
@@ -238,6 +238,11 @@ export const MedicinesPage = () => {
                   <p style={{ fontSize: '0.785rem', color: 'var(--text-muted)', lineHeight: 1.3, marginBottom: '8px', minHeight: '32px' }}>
                     {med.genericName}
                   </p>
+                  {med.benefits && (
+                    <p style={{ fontSize: '0.78rem', color: '#475569', lineHeight: 1.45, margin: '0 0 10px' }}>
+                      {med.benefits.length > 110 ? `${med.benefits.slice(0, 107)}…` : med.benefits}
+                    </p>
+                  )}
 
                   <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '14px' }}>
                     Pack: <strong>{med.packSize}</strong>
@@ -265,10 +270,11 @@ export const MedicinesPage = () => {
 
                     <button
                       onClick={() => addToCart(med, 1)}
+                      disabled={Number(med.stock) < 1 || med.inStock === false}
                       className="btn btn-primary"
-                      style={{ padding: '8px 14px', fontSize: '0.825rem', borderRadius: '8px' }}
+                      style={{ padding: '8px 14px', fontSize: '0.825rem', borderRadius: '8px', opacity: Number(med.stock) < 1 || med.inStock === false ? 0.55 : 1, cursor: Number(med.stock) < 1 || med.inStock === false ? 'not-allowed' : 'pointer' }}
                     >
-                      <Plus size={15} /> Add
+                      <Plus size={15} /> {Number(med.stock) < 1 || med.inStock === false ? 'Out of stock' : user ? 'Add' : 'Sign in to add'}
                     </button>
                   </div>
                 </div>
@@ -317,9 +323,9 @@ export const MedicinesPage = () => {
               </div>
 
               <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '12px', marginBottom: '16px' }}>
-                <h4 style={{ fontSize: '0.85rem', fontWeight: 800, marginBottom: '4px' }}>Description & Uses</h4>
+                <h4 style={{ fontSize: '0.85rem', fontWeight: 800, marginBottom: '4px' }}>Benefits & Uses</h4>
                 <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                  {selectedMedicine.description}
+                  {selectedMedicine.benefits || selectedMedicine.description || 'Product information has not been added yet.'}
                 </p>
               </div>
 
@@ -337,8 +343,9 @@ export const MedicinesPage = () => {
                   addToCart(selectedMedicine, 1);
                   setSelectedMedicine(null);
                 }}
+                disabled={Number(selectedMedicine.stock) < 1 || selectedMedicine.inStock === false}
                 className="btn btn-primary"
-                style={{ width: '100%', padding: '12px' }}
+                style={{ width: '100%', padding: '12px', opacity: Number(selectedMedicine.stock) < 1 || selectedMedicine.inStock === false ? 0.55 : 1, cursor: Number(selectedMedicine.stock) < 1 || selectedMedicine.inStock === false ? 'not-allowed' : 'pointer' }}
               >
                 Add to Cart • ₹{selectedMedicine.price}
               </button>

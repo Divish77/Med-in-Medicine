@@ -148,7 +148,7 @@ export const ContactPage = () => {
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.785rem', fontWeight: 700, marginBottom: '4px' }}>Your Name</label>
-                  <input type="text" required placeholder="Priya Sharma" style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }} />
+                  <input type="text" required placeholder="Customer" style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }} />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.785rem', fontWeight: 700, marginBottom: '4px' }}>Phone / WhatsApp Number</label>

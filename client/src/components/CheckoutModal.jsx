@@ -26,8 +26,10 @@ export const CheckoutModal = () => {
     cartSubtotal,
     deliveryFee,
     packagingFee,
+    cartTax,
     cartTotal,
     user,
+    setIsAuthModalOpen,
     hasPrescriptionItems,
     attachedPrescription,
     trackOrder,
@@ -41,6 +43,16 @@ export const CheckoutModal = () => {
   if (!isCheckoutModalOpen) return null;
 
   const handlePlaceOrder = async () => {
+    if (!user) {
+      setIsCheckoutModalOpen(false);
+      setIsAuthModalOpen(true);
+      showToast('Sign in before placing an order.', 'info');
+      return;
+    }
+    if (hasPrescriptionItems && attachedPrescription?.status !== 'Verified by Pharmacist') {
+      showToast('A pharmacist must approve the prescription before checkout.', 'info');
+      return;
+    }
     if (!deliveryLocation.serviceable) {
       showToast('Selected location is not serviceable', 'error');
       return;
@@ -49,9 +61,9 @@ export const CheckoutModal = () => {
     setIsPlacing(true);
     try {
       const orderPayload = {
-        userId: user ? user.id : 'usr_guest',
-        customerName: user ? user.name : 'Priya Sharma',
-        customerPhone: user ? user.phone : '+91 98765 43210',
+        userId: user.id,
+        customerName: user.name,
+        customerPhone: user.phone || '',
         deliveryAddress: {
           label: deliveryLocation.label || 'Home',
           fullAddress: deliveryLocation.fullAddress,
@@ -62,6 +74,7 @@ export const CheckoutModal = () => {
           lng: deliveryLocation.lng || 77.2167
         },
         items: cart.map((item) => ({
+          _id: item._id,
           medicineId: item._id,
           name: item.name,
           price: item.price,
@@ -73,7 +86,7 @@ export const CheckoutModal = () => {
         subtotal: cartSubtotal,
         deliveryFee,
         discount: 0,
-        tax: +(cartSubtotal * 0.05).toFixed(2),
+        tax: cartTax,
         totalAmount: cartTotal,
         paymentMethod: paymentMethod === 'COD' ? 'Cash on Delivery' : paymentMethod,
         prescriptionId: attachedPrescription ? attachedPrescription._id : null
@@ -126,7 +139,7 @@ export const CheckoutModal = () => {
                 Deliver To: {deliveryLocation.label || 'Home'}
               </span>
               <span className="badge badge-express" style={{ fontSize: '0.65rem', padding: '1px 6px' }}>
-                {deliveryLocation.etaMinutes || 10} Mins
+                {deliveryLocation.etaLabel || `${deliveryLocation.etaMinutes || 10} Mins`}
               </span>
             </div>
             <button
@@ -143,7 +156,7 @@ export const CheckoutModal = () => {
             {deliveryLocation.fullAddress}
           </p>
           <p style={{ fontSize: '0.785rem', color: 'var(--primary-dark)', marginTop: '4px', fontWeight: 600 }}>
-            🏥 Nearest Partner Pharmacy: {deliveryLocation.pharmacyName || 'Apollo Pharmacy Express (Connaught Place)'}
+            🏥 Nearest Partner Pharmacy: {deliveryLocation.pharmacyName || 'A pharmacy has not been selected'}
           </p>
         </div>
 
@@ -152,7 +165,7 @@ export const CheckoutModal = () => {
           <div style={{ padding: '12px 14px', background: '#ecfdf5', borderRadius: '10px', border: '1px solid #a7f3d0', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <ShieldCheck size={22} color="#059669" />
             <div style={{ fontSize: '0.825rem', color: '#064e3b' }}>
-              <strong>Prescription Verified:</strong> Dr. Neha Kapoor (Reg: PH-98214) verified medication schedule.
+              <strong>Prescription Verified:</strong> Reviewed by {attachedPrescription?.verifiedBy || 'a licensed pharmacist'}.
             </div>
           </div>
         )}

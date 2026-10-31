@@ -14,6 +14,7 @@ import { CheckoutModal } from './components/CheckoutModal';
 import { DeliverySuccessModal } from './components/DeliverySuccessModal';
 import { InvoiceModal } from './components/InvoiceModal';
 import { AuthModal } from './components/AuthModal';
+import { AdminPanel } from './components/AdminPanel';
 import { Footer } from './components/Footer';
 import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
 
@@ -86,6 +87,7 @@ export function AppContent() {
 
         {activeTab === 'medicines' && <MedicinesPage />}
         {activeTab === 'track' && <OrderTrackingPage />}
+        {activeTab === 'admin' && <AdminPanel />}
         {activeTab === 'about' && <AboutPage />}
         {activeTab === 'contact' && <ContactPage />}
       </main>

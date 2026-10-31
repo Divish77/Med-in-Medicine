@@ -24,12 +24,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.disable('x-powered-by');
 const server = http.createServer(app);
+const allowedOrigins = process.env.CLIENT_ORIGIN
+  ? process.env.CLIENT_ORIGIN.split(',').map((origin) => origin.trim()).filter(Boolean)
+  : '*';
 
 // Initialize Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE']
   }
 });
@@ -38,18 +42,17 @@ app.set('io', io);
 setupSocketIO(io);
 
 // Middlewares
-app.use(cors({
-  origin: '*',
-  credentials: true
-}));
-app.use(express.json());
+app.use(cors({ origin: allowedOrigins, credentials: false }));
+app.use(express.json({ limit: '8mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Static directory for prescription uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Seed persistent store with initial verified data if empty
-dbStore.seedInitialData(seedMedicinesList, seedPharmaciesList);
+// Demo data is opt-in. Production and local accounts start with their own inventory.
+if (process.env.SEED_DEMO_DATA === 'true') {
+  dbStore.seedInitialData(seedMedicinesList, seedPharmaciesList);
+}
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -57,7 +60,7 @@ app.get('/api/health', (req, res) => {
     status: 'healthy',
     service: 'Med in Minutes Backend API',
     timestamp: new Date().toISOString(),
-    express10MinService: 'Active',
+    express10MinService: dbStore.get('pharmacies').some((pharmacy) => pharmacy.isOpen && pharmacy.expressAvailable) ? 'Active' : 'Unavailable',
     medicinesLoaded: dbStore.get('medicines').length,
     pharmaciesLoaded: dbStore.get('pharmacies').length
   });
@@ -74,7 +77,8 @@ app.use('/api/orders', orderRoutes);
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Unhandled Server Error:', err);
-  res.status(500).json({ success: false, message: err.message || 'Internal Server Error' });
+  const status = err.name === 'MulterError' || err.message?.startsWith('Upload a JPEG') ? 400 : 500;
+  res.status(status).json({ success: false, message: status === 400 ? err.message : 'Internal Server Error' });
 });
 
 const PORT = process.env.PORT || 5000;

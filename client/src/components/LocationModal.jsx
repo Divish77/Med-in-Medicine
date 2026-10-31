@@ -47,20 +47,21 @@ export const LocationModal = () => {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords;
-        // In browser demo, reverse geocode or map to closest hub (e.g. Connaught Place 110001)
+        // Use the browser geolocation result when available.
         try {
           const res = await api.checkServiceability('110001');
           if (res.success) {
             const locObj = {
               pincode: '110001',
-              area: res.area || 'Connaught Place',
-              city: res.city || 'New Delhi',
-              fullAddress: `Current Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)}), Connaught Place, New Delhi - 110001`,
+              area: res.area || 'Current location',
+              city: res.city || 'India',
+              fullAddress: `Current location (${latitude.toFixed(4)}, ${longitude.toFixed(4)}) - PIN ${res.pincode}`,
               label: 'Current GPS',
               lat: latitude,
               lng: longitude,
               expressEligible: res.expressEligible,
-              etaMinutes: res.etaMinutes || 10,
+              etaMinutes: res.etaMinutes || null,
+              etaLabel: res.etaLabel || '2â€“5 business days',
               serviceable: res.serviceable,
               pharmacyName: res.pharmacyName
             };
@@ -86,7 +87,7 @@ export const LocationModal = () => {
   // Handle PIN Code Verification
   const handleVerifyPincode = async (e) => {
     if (e) e.preventDefault();
-    if (!pincodeInput || pincodeInput.trim().length !== 6) {
+    if (!/^[1-9]\d{5}$/.test(pincodeInput.trim())) {
       showToast('Please enter a valid 6-digit PIN code', 'error');
       return;
     }
@@ -99,14 +100,15 @@ export const LocationModal = () => {
       if (res.serviceable) {
         const locObj = {
           pincode: res.pincode,
-          area: res.area,
-          city: res.city,
-          fullAddress: `${res.area}, ${res.city} - ${res.pincode}`,
+          area: res.area || `PIN ${res.pincode}`,
+          city: res.city || 'India',
+          fullAddress: `${res.area ? `${res.area}, ` : ''}${res.city ? `${res.city} - ` : ''}${res.pincode}`,
           label: 'Selected Area',
           lat: 28.6315,
           lng: 77.2167,
           expressEligible: res.expressEligible,
-          etaMinutes: res.etaMinutes,
+          etaMinutes: res.etaMinutes || null,
+          etaLabel: res.etaLabel || '2â€“5 business days',
           serviceable: true,
           pharmacyName: res.pharmacyName
         };
@@ -126,8 +128,8 @@ export const LocationModal = () => {
   // Handle Manual Address Save
   const handleSaveManualAddress = async (e) => {
     e.preventDefault();
-    if (!manualForm.street || !manualForm.city || !manualForm.pincode) {
-      showToast('Please fill in Street, City, and PIN code', 'error');
+    if (!manualForm.street || !manualForm.city || !/^[1-9]\d{5}$/.test(manualForm.pincode)) {
+      showToast('Enter a street, city, and valid 6-digit Indian PIN code.', 'error');
       return;
     }
 
@@ -150,9 +152,10 @@ export const LocationModal = () => {
         lat: manualForm.lat,
         lng: manualForm.lng,
         expressEligible: checkRes.expressEligible,
-        etaMinutes: checkRes.etaMinutes || (isServiceable ? 10 : null),
+        etaMinutes: checkRes.etaMinutes || null,
+        etaLabel: checkRes.etaLabel || (isServiceable ? '2â€“5 business days' : ''),
         serviceable: isServiceable,
-        pharmacyName: checkRes.pharmacyName || 'Apollo Pharmacy Express'
+        pharmacyName: checkRes.pharmacyName || 'No pharmacy selected'
       };
 
       updateDeliveryLocation(locObj);
@@ -177,7 +180,8 @@ export const LocationModal = () => {
         lat: addr.lat || 28.6315,
         lng: addr.lng || 77.2167,
         expressEligible: checkRes.expressEligible,
-        etaMinutes: checkRes.etaMinutes || 10,
+        etaMinutes: checkRes.etaMinutes || null,
+        etaLabel: checkRes.etaLabel || '2â€“5 business days',
         serviceable: checkRes.serviceable,
         pharmacyName: checkRes.pharmacyName
       });
@@ -304,7 +308,7 @@ export const LocationModal = () => {
             {/* Quick popular express cities */}
             <div style={{ marginBottom: '16px' }}>
               <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '8px' }}>
-                ⚡ POPULAR 10-MINUTE EXPRESS HUBS:
+                âš¡ POPULAR 10-MINUTE EXPRESS HUBS:
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                 {[
@@ -324,14 +328,15 @@ export const LocationModal = () => {
                       api.checkServiceability(item.pin).then((res) => {
                         updateDeliveryLocation({
                           pincode: res.pincode,
-                          area: res.area,
-                          city: res.city,
-                          fullAddress: `${res.area}, ${res.city} - ${res.pincode}`,
+                          area: res.area || `PIN ${res.pincode}`,
+                          city: res.city || 'India',
+                          fullAddress: `${res.area ? `${res.area}, ` : ''}${res.city ? `${res.city} - ` : ''}${res.pincode}`,
                           label: 'Express Hub',
                           lat: 28.6315,
                           lng: 77.2167,
                           expressEligible: res.expressEligible,
-                          etaMinutes: res.etaMinutes,
+                          etaMinutes: res.etaMinutes || null,
+                          etaLabel: res.etaLabel || '2â€“5 business days',
                           serviceable: true,
                           pharmacyName: res.pharmacyName
                         });
@@ -348,7 +353,7 @@ export const LocationModal = () => {
                       color: 'var(--text-main)'
                     }}
                   >
-                    📍 {item.city} ({item.pin})
+                    ðŸ“ {item.city} ({item.pin})
                   </button>
                 ))}
               </div>
@@ -551,16 +556,16 @@ export const LocationModal = () => {
             <Store size={22} color={deliveryLocation.serviceable ? '#059669' : '#dc2626'} />
             <div>
               <p style={{ fontWeight: 700, fontSize: '0.875rem', color: deliveryLocation.serviceable ? '#064e3b' : '#991b1b' }}>
-                {deliveryLocation.serviceable ? (deliveryLocation.expressEligible ? '⚡ 10-Minute Express Available' : '⏱️ Standard Delivery (18 mins)') : '❌ Delivery Not Available'}
+                {deliveryLocation.serviceable ? (deliveryLocation.expressEligible ? 'Local express delivery' : 'Standard delivery - ' + (deliveryLocation.etaLabel || '2–5 business days')) : 'Delivery Not Available'}
               </p>
               <p style={{ fontSize: '0.775rem', color: deliveryLocation.serviceable ? '#047857' : '#b91c1c' }}>
-                {deliveryLocation.serviceable ? `Partner: ${deliveryLocation.pharmacyName || 'Apollo Pharmacy Express'} • PIN: ${deliveryLocation.pincode}` : `PIN ${deliveryLocation.pincode} is currently outside our delivery zone`}
+                {deliveryLocation.serviceable ? `Fulfillment: ${deliveryLocation.pharmacyName || '10 MN Company nationwide delivery'} • PIN: ${deliveryLocation.pincode}` : 'Enter a valid Indian PIN code to check delivery'}
               </p>
             </div>
           </div>
           {deliveryLocation.serviceable && (
             <span style={{ fontSize: '0.75rem', fontWeight: 700, background: '#059669', color: 'white', padding: '4px 8px', borderRadius: '6px' }}>
-              ETA {deliveryLocation.etaMinutes || 10}m
+              ETA {deliveryLocation.etaLabel || `${deliveryLocation.etaMinutes || 10} mins`}
             </span>
           )}
         </div>

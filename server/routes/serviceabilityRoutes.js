@@ -8,7 +8,7 @@ router.get('/check', (req, res) => {
   try {
     const { pincode } = req.query;
 
-    if (!pincode || !/^\d{6}$/.test(pincode.trim())) {
+    if (!pincode || !/^[1-9]\d{5}$/.test(pincode.trim())) {
       return res.status(400).json({
         success: false,
         serviceable: false,
@@ -18,49 +18,39 @@ router.get('/check', (req, res) => {
 
     const cleanPin = pincode.trim();
 
-    // Check against designated express delivery zones
-    const knownZones = dbStore.get('serviceablePincodes');
-    const matchedZone = knownZones.find((z) => z.pincode === cleanPin);
+    // Use a local pharmacy's faster estimate when one is available.
+    const matchedPharmacy = dbStore.get('pharmacies').find((p) => p.pincode === cleanPin && p.isOpen !== false);
 
-    // Explicitly unserviceable mock PINs for testing
-    if (cleanPin === '999999' || cleanPin.startsWith('0') || cleanPin.startsWith('9')) {
-      return res.json({
-        success: true,
-        serviceable: false,
-        pincode: cleanPin,
-        expressEligible: false,
-        etaMinutes: null,
-        message: `Sorry, Med in Minutes does not currently deliver to PIN code ${cleanPin}. We are actively expanding to your neighborhood soon!`
-      });
-    }
-
-    if (matchedZone) {
+    if (matchedPharmacy) {
       return res.json({
         success: true,
         serviceable: true,
         pincode: cleanPin,
-        area: matchedZone.area,
-        city: matchedZone.city,
-        expressEligible: matchedZone.expressDelivery,
-        etaMinutes: matchedZone.etaMinutes || 10,
-        pharmacyName: matchedZone.pharmacyName,
-        deliveryFee: 0,
-        message: `⚡ 10-Minute Express Delivery Available at ${matchedZone.area}, ${matchedZone.city}!`
+        area: matchedPharmacy.area || matchedPharmacy.address || '',
+        city: matchedPharmacy.city || '',
+        expressEligible: Boolean(matchedPharmacy.expressAvailable),
+        etaMinutes: matchedPharmacy.etaMinutes || 18,
+        etaLabel: `${matchedPharmacy.etaMinutes || 18} minutes`,
+        etaLabel: `${matchedPharmacy.etaMinutes || 18} minutes`,
+        pharmacyName: matchedPharmacy.name,
+        deliveryFee: matchedPharmacy.expressAvailable ? 0 : 25,
+        message: `Delivery is available from ${matchedPharmacy.name}.`
       });
     }
 
-    // Generic serviceable Indian PIN code with realistic standard timeline (15-20 mins, not 10 mins)
     return res.json({
       success: true,
       serviceable: true,
       pincode: cleanPin,
-      area: 'Regional Hub',
-      city: 'Local Area',
+      area: '',
+      city: '',
       expressEligible: false,
-      etaMinutes: 18,
-      pharmacyName: 'Med in Minutes Verified Partner Store',
+      etaMinutes: null,
+      etaLabel: '2–5 business days',
+      pharmacyName: '10 MN Company nationwide delivery',
       deliveryFee: 25,
-      message: `Standard Express Delivery (15-20 mins) available for PIN code ${cleanPin}.`
+      nationwideDemoDelivery: true,
+      message: `Standard delivery is available to PIN code ${cleanPin} in 2–5 business days.`
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -69,16 +59,14 @@ router.get('/check', (req, res) => {
 
 // Get popular serviceable cities
 router.get('/popular', (req, res) => {
-  const popular = [
-    { city: 'New Delhi', pincode: '110001', area: 'Connaught Place', eta: '10 Mins' },
-    { city: 'Bangalore', pincode: '560001', area: 'MG Road / Indiranagar', eta: '10 Mins' },
-    { city: 'Mumbai', pincode: '400050', area: 'Bandra West', eta: '10 Mins' },
-    { city: 'Gurgaon', pincode: '122002', area: 'Cyber City', eta: '10 Mins' },
-    { city: 'Noida', pincode: '201301', area: 'Sector 18', eta: '10 Mins' },
-    { city: 'Chandigarh', pincode: '160017', area: 'Sector 17', eta: '10 Mins' },
-    { city: 'Patiala', pincode: '147001', area: 'Model Town', eta: '10 Mins' },
-    { city: 'Hyderabad', pincode: '500081', area: 'Hitec City', eta: '10 Mins' }
-  ];
+  const popular = dbStore.get('pharmacies')
+    .filter((pharmacy) => pharmacy.isOpen !== false && pharmacy.pincode)
+    .map((pharmacy) => ({
+      city: pharmacy.city || '',
+      pincode: pharmacy.pincode,
+      area: pharmacy.area || pharmacy.address || '',
+      eta: `${pharmacy.etaMinutes || 18} Mins`
+    }));
   res.json({ success: true, popular });
 });
 

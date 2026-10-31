@@ -11,7 +11,8 @@ import {
   Activity,
   ChevronDown,
   Clock,
-  Sparkles
+  Sparkles,
+  Settings
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -35,7 +36,6 @@ export const Navbar = () => {
   const navLinks = [
     { id: 'home', label: 'Home' },
     { id: 'medicines', label: 'Medicines' },
-    { id: 'categories', label: 'Categories' },
     { id: 'upload-rx', label: 'Upload Prescription', isAction: true },
     { id: 'track', label: 'Track Order' },
     { id: 'about', label: 'About Us' },
@@ -45,8 +45,6 @@ export const Navbar = () => {
   const handleNavClick = (link) => {
     if (link.isAction) {
       setIsPrescriptionModalOpen(true);
-    } else if (link.id === 'categories') {
-      setActiveTab('medicines');
     } else {
       setActiveTab(link.id);
     }
@@ -112,7 +110,7 @@ export const Navbar = () => {
           <MapPin size={18} color="var(--primary)" style={{ flexShrink: 0 }} />
           <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             <div style={{ fontSize: '0.7rem', color: 'var(--primary)', fontWeight: 700 }}>
-              {deliveryLocation.serviceable ? `DELIVERING IN ${deliveryLocation.etaMinutes || 10} MINS` : 'UNAVAILABLE ZONE'}
+              {deliveryLocation.serviceable ? `DELIVERY ${deliveryLocation.etaLabel || `IN ${deliveryLocation.etaMinutes || 10} MINS`}` : 'UNAVAILABLE ZONE'}
             </div>
             <div style={{ color: 'var(--text-main)', fontSize: '0.825rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {deliveryLocation.area || 'Set Location'}, {deliveryLocation.pincode}
@@ -154,6 +152,31 @@ export const Navbar = () => {
 
         {/* Right Actions: Auth & Cart */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {user?.role === 'admin' && (
+            <button
+              onClick={() => setActiveTab(activeTab === 'admin' ? 'home' : 'admin')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 12px',
+                borderRadius: 'var(--radius-md)',
+                border: activeTab === 'admin' ? '1.5px solid #0f766e' : '1px solid #99f6e4',
+                background: activeTab === 'admin' ? '#ccfbf1' : '#f0fdfa',
+                fontSize: '0.825rem',
+                fontWeight: 700,
+                color: '#0f766e'
+              }}
+              title="Open website administration"
+            >
+              <Settings size={15} />
+              <span style={{ display: 'none' }} className="admin-toggle-span">
+                <style>{`@media (min-width: 768px) { .admin-toggle-span { display: inline !important; } }`}</style>
+                {activeTab === 'admin' ? 'Customer Store' : 'Admin Panel'}
+              </span>
+            </button>
+          )}
+
           {/* User Profile / Login */}
           <button
             onClick={() => setIsAuthModalOpen(true)}
@@ -163,17 +186,17 @@ export const Navbar = () => {
               gap: '6px',
               padding: '8px 14px',
               borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--border-color)',
-              background: 'white',
+              border: user?.role === 'admin' ? '1.5px solid #0f766e' : '1px solid var(--border-color)',
+              background: user?.role === 'admin' ? '#f0fdfa' : 'white',
               fontSize: '0.85rem',
               fontWeight: 600,
-              color: 'var(--text-main)'
+              color: user?.role === 'admin' ? '#0f766e' : 'var(--text-main)'
             }}
           >
-            <User size={16} color="var(--primary)" />
+            {user?.role === 'admin' ? <Settings size={16} color="#0f766e" /> : <User size={16} color="var(--primary)" />}
             <span style={{ display: 'none' }} className="user-name-span">
               <style>{`@media (min-width: 640px) { .user-name-span { display: inline !important; } }`}</style>
-              {user ? user.name.split(' ')[0] : 'Login'}
+              {user ? (user.role === 'admin' ? `${user.name.split(' ')[0]} (Admin)` : user.name.split(' ')[0]) : 'Login'}
             </span>
           </button>
 

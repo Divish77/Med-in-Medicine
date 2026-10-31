@@ -25,7 +25,8 @@ export const DeliverySuccessModal = () => {
     setInvoiceData,
     addToCart,
     setActiveTab,
-    showToast
+    showToast,
+    user
   } = useApp();
 
   const [rating, setRating] = useState(5);
@@ -98,7 +99,7 @@ export const DeliverySuccessModal = () => {
     deliveredOrder.items.forEach((item) => {
       addToCart(item, item.quantity);
     });
-    showToast('Items added to cart for reorder!');
+    if (user) showToast('Items added to cart for reorder!');
     setIsSuccessModalOpen(false);
     setActiveTab('medicines');
   };

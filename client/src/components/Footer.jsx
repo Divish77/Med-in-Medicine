@@ -52,9 +52,15 @@ export const Footer = () => {
                   Track Active Order
                 </button>
               </li>
+
               <li>
                 <button onClick={() => setIsLocationModalOpen(true)} style={{ background: 'transparent', color: '#cbd5e1', padding: 0 }}>
                   Change Delivery Location
+                </button>
+              </li>
+              <li>
+                <button onClick={() => setActiveTab('admin')} style={{ background: 'transparent', color: '#cbd5e1', padding: 0 }}>
+                  Admin sign in
                 </button>
               </li>
             </ul>
@@ -81,7 +87,7 @@ export const Footer = () => {
               Medical Disclaimer
             </h4>
             <p style={{ fontSize: '0.75rem', lineHeight: 1.6, color: '#94a3b8' }}>
-              Med in Minutes is an on-demand medical logistics and pharmacy aggregator platform. Schedule H and X prescription drugs require a valid doctor’s prescription verified by licensed pharmacists before fulfillment. Do not self-medicate.
+              Med in Minutes is an on-demand medical logistics and pharmacy aggregator platform. Schedule H and X prescription drugs require a valid doctorâ€™s prescription verified by licensed pharmacists before fulfillment. Do not self-medicate.
             </p>
             <div style={{ marginTop: '12px', fontSize: '0.75rem', color: '#fef08a' }}>
               Emergency Helpline: <strong>1800-633-646</strong> (24x7)
@@ -92,7 +98,7 @@ export const Footer = () => {
         {/* Copyright */}
         <div style={{ borderTop: '1px solid #1e293b', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', fontSize: '0.785rem' }}>
           <div>
-            © {new Date().getFullYear()} Med in Minutes Healthcare Technologies Pvt Ltd. All rights reserved.
+            Â© {new Date().getFullYear()} Med in Minutes Healthcare Technologies Pvt Ltd. All rights reserved.
           </div>
           <div style={{ display: 'flex', gap: '16px' }}>
             <span>Privacy Policy</span>

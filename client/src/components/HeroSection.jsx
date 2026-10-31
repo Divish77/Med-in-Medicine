@@ -132,7 +132,7 @@ export const HeroSection = () => {
                   <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 10px #10b981', animation: 'pulse-express 1.5s infinite' }} />
                   <div>
                     <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                      Rahul Sharma • Express Rider
+                      Delivery partner not assigned • Express Rider
                     </div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                       Temperature-Controlled Medical Pouch Sealed

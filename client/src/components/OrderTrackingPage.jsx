@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Package,
   CreditCard,
@@ -13,10 +13,6 @@ import {
   MessageSquare,
   ShieldCheck,
   AlertTriangle,
-  Play,
-  Pause,
-  FastForward,
-  RotateCcw,
   Download,
   Star,
   Check
@@ -40,11 +36,13 @@ export const OrderTrackingPage = () => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
   const [searchInput, setSearchInput] = useState(activeOrderId || '');
-  const [isSimulating, setIsSimulating] = useState(false);
-  const [otpInput, setOtpInput] = useState('4821');
+  const [otpInput, setOtpInput] = useState('');
   const [isConfirmingDelivery, setIsConfirmingDelivery] = useState(false);
   const [supportModalOpen, setSupportModalOpen] = useState(false);
-  const simulationTimerRef = useRef(null);
+
+  useEffect(() => {
+    setOtpInput(order?.deliveryConfirmationOtp || '');
+  }, [order?.orderId, order?.deliveryConfirmationOtp]);
 
   // Fetch order details
   const loadOrder = async (id) => {
@@ -106,43 +104,6 @@ export const OrderTrackingPage = () => {
       socket.off('order_delivered', handleOrderDelivered);
     };
   }, [socket, order ? order.orderId : null]);
-
-  // Advance Order Stage (Manual step in simulation)
-  const handleAdvanceStage = async () => {
-    if (!order) return;
-    const maxStages = 8;
-    if (order.stageIndex >= maxStages - 2) {
-      showToast('Ready for final delivery! Click "Confirm & Deliver" below.', 'info');
-      return;
-    }
-
-    try {
-      const res = await api.advanceOrderStage(order.orderId, order.stageIndex + 1);
-      if (res.success && res.order) {
-        setOrder(res.order);
-      }
-    } catch (err) {
-      showToast('Error advancing stage', 'error');
-    }
-  };
-
-  // Toggle Auto Simulation (Demo Mode)
-  useEffect(() => {
-    if (isSimulating) {
-      simulationTimerRef.current = setInterval(async () => {
-        if (!order || order.stageIndex >= 6) {
-          setIsSimulating(false);
-          clearInterval(simulationTimerRef.current);
-          return;
-        }
-        await handleAdvanceStage();
-      }, 5000);
-    } else {
-      clearInterval(simulationTimerRef.current);
-    }
-
-    return () => clearInterval(simulationTimerRef.current);
-  }, [isSimulating, order ? order.stageIndex : null]);
 
   // Authorized Delivery Confirmation Action (Mandatory Requirement)
   const handleConfirmDelivery = async () => {
@@ -211,7 +172,7 @@ export const OrderTrackingPage = () => {
           >
             <input
               type="text"
-              placeholder="e.g. MIM-892415"
+              placeholder="Enter your Order ID"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value.toUpperCase())}
               style={{ flex: 1, padding: '12px 14px', borderRadius: '10px', border: '1.5px solid var(--border-color)', fontWeight: 700 }}
@@ -226,6 +187,8 @@ export const OrderTrackingPage = () => {
   }
 
   const isDelivered = order.status === 'Successfully Delivered';
+  const hasDeliveryCoordinates = order.deliveryAddress?.lat != null && order.deliveryAddress?.lng != null && Number.isFinite(Number(order.deliveryAddress.lat)) && Number.isFinite(Number(order.deliveryAddress.lng));
+  const hasRiderLocation = order.deliveryPartner?.currentLat != null && order.deliveryPartner?.currentLng != null && Number.isFinite(Number(order.deliveryPartner.currentLat)) && Number.isFinite(Number(order.deliveryPartner.currentLng));
 
   return (
     <div style={{ padding: '40px 0 70px', background: 'var(--bg-main)' }}>
@@ -238,7 +201,7 @@ export const OrderTrackingPage = () => {
                 Order #{order.orderId}
               </h1>
               <span className={`badge ${isDelivered ? 'badge-otc' : 'badge-express'}`}>
-                {isDelivered ? '✅ Delivered' : `⚡ ETA ${order.estimatedDeliveryMinutes || 10} Mins`}
+                {isDelivered ? 'Delivered' : order.estimatedDeliveryLabel ? `ETA ${order.estimatedDeliveryLabel}` : order.estimatedDeliveryMinutes ? `ETA ${order.estimatedDeliveryMinutes} Mins` : 'ETA unavailable'}
               </span>
             </div>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '2px' }}>
@@ -284,11 +247,10 @@ export const OrderTrackingPage = () => {
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontWeight: 800, fontSize: '0.95rem' }}>SIMULATED DELIVERY TRACKING FLOW (DEMO MODE)</span>
-                <span className="badge" style={{ background: '#334155', color: '#94a3b8', fontSize: '0.7rem' }}>Interactive Evaluator</span>
+                <span style={{ fontWeight: 800, fontSize: '0.95rem' }}>ORDER STATUS</span>
               </div>
               <p style={{ fontSize: '0.785rem', color: '#94a3b8' }}>
-                Advance order step-by-step or toggle auto-simulation to watch rider coordinates move on the map.
+                Order progress is updated by the pharmacy as it is fulfilled.
               </p>
             </div>
           </div>
@@ -296,44 +258,6 @@ export const OrderTrackingPage = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             {!isDelivered && (
               <>
-                <button
-                  type="button"
-                  onClick={handleAdvanceStage}
-                  disabled={order.stageIndex >= 6}
-                  style={{
-                    background: '#1e293b',
-                    color: 'white',
-                    border: '1px solid #334155',
-                    padding: '8px 14px',
-                    borderRadius: '8px',
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}
-                >
-                  <FastForward size={15} color="#10b981" /> Advance Next Stage
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setIsSimulating(!isSimulating)}
-                  style={{
-                    background: isSimulating ? '#dc2626' : '#059669',
-                    color: 'white',
-                    padding: '8px 14px',
-                    borderRadius: '8px',
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}
-                >
-                  {isSimulating ? <Pause size={15} /> : <Play size={15} />}
-                  {isSimulating ? 'Pause Auto Flow' : 'Auto-Simulate Journey'}
-                </button>
               </>
             )}
 
@@ -381,24 +305,30 @@ export const OrderTrackingPage = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Navigation size={18} color="var(--primary)" />
                   <span style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)' }}>
-                    Live GPS Delivery Route
+                    {hasRiderLocation ? 'Live GPS Delivery Route' : 'Delivery Location'}
                   </span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 700 }}>
                   <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', animation: 'pulse-express 1.5s infinite' }} />
-                  {isDelivered ? 'Delivery Complete' : 'Live Tracking Active'}
+                  {isDelivered ? 'Delivery Complete' : hasRiderLocation ? 'Live Tracking Active' : 'Live tracking unavailable'}
                 </div>
               </div>
 
               {/* Leaflet Map with Pharmacy, Moving Rider, and Destination pins */}
-              <InteractiveMap
-                center={[order.deliveryPartner?.currentLat || 28.6315, order.deliveryPartner?.currentLng || 77.2167]}
-                zoom={14}
-                pharmacyPos={[28.6315, 77.2167]}
-                deliveryPos={[order.deliveryAddress?.lat || 28.6139, order.deliveryAddress?.lng || 77.2090]}
-                riderPos={isDelivered ? null : [order.deliveryPartner?.currentLat || 28.6250, order.deliveryPartner?.currentLng || 77.2130]}
-                height="340px"
-              />
+              {hasDeliveryCoordinates ? (
+                <InteractiveMap
+                  center={hasRiderLocation ? [Number(order.deliveryPartner.currentLat), Number(order.deliveryPartner.currentLng)] : [Number(order.deliveryAddress.lat), Number(order.deliveryAddress.lng)]}
+                  zoom={14}
+                  pharmacyPos={order.pharmacy?.lat != null && order.pharmacy?.lng != null ? [Number(order.pharmacy.lat), Number(order.pharmacy.lng)] : null}
+                  deliveryPos={[Number(order.deliveryAddress.lat), Number(order.deliveryAddress.lng)]}
+                  riderPos={hasRiderLocation ? [Number(order.deliveryPartner.currentLat), Number(order.deliveryPartner.currentLng)] : null}
+                  height="340px"
+                />
+              ) : (
+                <div style={{ minHeight: '180px', display: 'grid', placeItems: 'center', color: 'var(--text-muted)', background: '#f8fafc', borderRadius: '12px', padding: '20px', textAlign: 'center' }}>
+                  Map tracking will appear when location coordinates are available.
+                </div>
+              )}
 
               {/* Map Footer Route Info */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '14px', padding: '12px', background: '#f8fafc', borderRadius: '12px', fontSize: '0.85rem' }}>
@@ -421,29 +351,25 @@ export const OrderTrackingPage = () => {
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <img
-                    src={order.deliveryPartner?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
-                    alt="Rider"
-                    style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)' }}
-                  />
+                  <div style={{ width: '56px', height: '56px', borderRadius: '50%', display: 'grid', placeItems: 'center', color: 'var(--primary)', background: 'var(--primary-light)' }}><Bike size={24} /></div>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <strong style={{ fontSize: '1.05rem', color: 'var(--text-main)' }}>
-                        {order.deliveryPartner?.name || 'Rahul Sharma'}
+                        {order.deliveryPartner?.name || 'Delivery partner not assigned'}
                       </strong>
                       <span className="badge badge-express" style={{ fontSize: '0.7rem', padding: '2px 8px' }}>
-                        ⭐ {order.deliveryPartner?.rating || 4.95}
+                        ⭐ {order.deliveryPartner?.rating ? `${order.deliveryPartner.rating} / 5` : 'Not rated'}
                       </span>
                     </div>
                     <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                      EV Scooter: <strong>{order.deliveryPartner?.vehicleNumber || 'DL 01 EV 4421'}</strong> • {order.deliveryPartner?.deliveriesCount || 1840}+ express deliveries
+                      EV Scooter: <strong>{order.deliveryPartner?.vehicleNumber || 'Not assigned'}</strong> • {order.deliveryPartner?.deliveriesCount ? `${order.deliveryPartner.deliveriesCount} deliveries` : 'Delivery history unavailable'}
                     </p>
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <a
-                    href={`tel:${order.deliveryPartner?.phone || '+919811234567'}`}
+                    href={`tel:${order.deliveryPartner?.phone || ''}`}
                     className="btn btn-secondary"
                     style={{ padding: '10px 16px', fontSize: '0.85rem' }}
                   >
@@ -468,7 +394,7 @@ export const OrderTrackingPage = () => {
                   </span>
                 </div>
                 <span style={{ fontSize: '1.2rem', fontWeight: 800, letterSpacing: '2px', color: '#059669', background: 'white', padding: '4px 12px', borderRadius: '8px', border: '1px solid #a7f3d0' }}>
-                  {order.deliveryConfirmationOtp || '4821'}
+                  {order.deliveryConfirmationOtp || 'Not available'}
                 </span>
               </div>
             </div>

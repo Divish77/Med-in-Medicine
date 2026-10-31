@@ -63,6 +63,7 @@ export const HomepageAdditionalSections = () => {
       lng: 77.2167,
       expressEligible: res.expressEligible,
       etaMinutes: res.etaMinutes,
+      etaLabel: res.etaLabel || (res.etaMinutes ? `${res.etaMinutes} minutes` : '2–5 business days'),
       serviceable: res.serviceable,
       pharmacyName: res.pharmacyName
     });
@@ -70,8 +71,8 @@ export const HomepageAdditionalSections = () => {
 
   const whyChooseFeatures = [
     {
-      title: 'Fast Medicine Delivery',
-      desc: 'Life-saving medicines delivered at your door in 10 minutes through hyper-optimized dispatch.',
+      title: 'Medicine Delivery Across India',
+      desc: 'Choose a delivery address anywhere in India. Standard delivery estimates are shown at checkout.',
       icon: Zap,
       color: '#059669',
       bg: '#ecfdf5'
@@ -124,7 +125,7 @@ export const HomepageAdditionalSections = () => {
     },
     {
       q: 'How do I track my order?',
-      a: 'Every order receives a unique Order ID (e.g. MIM-892415). You can visit the "Track Order" page in the navigation bar to watch an 8-stage progress timeline and a live interactive GPS map showing the delivery rider moving in real time towards your location.'
+      a: 'Every order receives a unique Order ID (the Order ID shown in your confirmation). You can visit the "Track Order" page in the navigation bar to see fulfillment status updates as the pharmacy processes your order.'
     },
     {
       q: 'What if my location is not serviceable?',
@@ -303,14 +304,12 @@ export const HomepageAdditionalSections = () => {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-main)' }}>
-                    Sample Live Order #MIM-892415
+                    How order tracking works
                   </span>
-                  <span className="badge badge-express" style={{ fontSize: '0.75rem' }}>
-                    ⚡ In Progress
-                  </span>
+
                 </div>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Fulfilling store: Apollo Pharmacy Express • Arriving in 4 Mins
+                  Progress updates appear here after your order is placed. • Arriving in 4 Mins
                 </p>
               </div>
 
@@ -326,28 +325,28 @@ export const HomepageAdditionalSections = () => {
             {/* 8-Stage Preview Pills */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
               {[
-                { label: '1. Placed', done: true, icon: CheckCircle2 },
-                { label: '2. Paid', done: true, icon: CreditCard },
-                { label: '3. Rx Verified', done: true, icon: FileCheck },
-                { label: '4. Pharmacy Accepted', done: true, icon: Store },
-                { label: '5. Packing', done: true, icon: Package },
-                { label: '6. Rider Assigned', done: true, icon: Bike },
-                { label: '7. Out for Delivery', done: true, active: true, icon: Navigation },
-                { label: '8. Delivered', done: false, icon: Home }
+                { label: '1. Placed', icon: CheckCircle2 },
+                { label: '2. Paid', icon: CreditCard },
+                { label: '3. Rx Verified', icon: FileCheck },
+                { label: '4. Pharmacy Accepted', icon: Store },
+                { label: '5. Packing', icon: Package },
+                { label: '6. Rider Assigned', icon: Bike },
+                { label: '7. Out for Delivery', icon: Navigation },
+                { label: '8. Delivered', icon: Home }
               ].map((step, idx) => {
                 const Icon = step.icon;
                 return (
                   <div
                     key={step.label}
                     style={{
-                      background: step.active ? '#059669' : step.done ? '#ecfdf5' : 'white',
+                      background: 'white',
                       border: '1.5px solid',
-                      borderColor: step.active ? '#059669' : step.done ? '#a7f3d0' : '#e2e8f0',
+                      borderColor: '#e2e8f0',
                       borderRadius: '12px',
                       padding: '12px 10px',
                       textAlign: 'center',
-                      color: step.active ? 'white' : step.done ? '#064e3b' : '#94a3b8',
-                      boxShadow: step.active ? '0 4px 12px rgba(5, 150, 105, 0.3)' : 'none'
+                      color: 'var(--text-main)',
+                      boxShadow: 'none'
                     }}
                   >
                     <Icon size={18} style={{ margin: '0 auto 6px' }} />
