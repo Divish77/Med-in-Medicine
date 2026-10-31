@@ -35,7 +35,7 @@ export const Navbar = () => {
     { id: 'home', label: 'Home' },
     { id: 'medicines', label: 'Medicines' },
     { id: 'upload-rx', label: 'Upload Prescription', isAction: true },
-    { id: 'track', label: 'Track Order' },
+    { id: 'track', label: user && user.role !== 'admin' ? 'My Orders' : 'Track Order' },
     { id: 'about', label: 'About Us' },
     { id: 'contact', label: 'Contact Us' }
   ];

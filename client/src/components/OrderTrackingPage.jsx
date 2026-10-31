@@ -12,7 +12,9 @@ import {
   MessageSquare,
   ShieldCheck,
   Download,
-  Check
+  Check,
+  History,
+  ChevronRight
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { api } from '../api';
@@ -33,8 +35,29 @@ export const OrderTrackingPage = () => {
   } = useApp();
 
   const [order, setOrder] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
   const [searchInput, setSearchInput] = useState(activeOrderId || '');
   const [supportModalOpen, setSupportModalOpen] = useState(false);
+
+  const loadOrders = useCallback(async () => {
+    if (!user?.id) {
+      setOrders([]);
+      return;
+    }
+    setOrdersLoading(true);
+    try {
+      const res = await api.getOrders(user.id);
+      if (res.success) setOrders(res.orders || []);
+      else showToast(res.message || 'Could not load your order history.', 'error');
+    } catch {
+      showToast('Could not load your order history.', 'error');
+    } finally {
+      setOrdersLoading(false);
+    }
+  }, [user?.id, showToast]);
+
+  useEffect(() => { loadOrders(); }, [loadOrders]);
 
   // Fetch order details
   const loadOrder = useCallback(async (id) => {
@@ -76,11 +99,13 @@ export const OrderTrackingPage = () => {
 
     const handleOrderUpdated = (updated) => {
       setOrder(updated);
+      setOrders((current) => current.map((item) => item.orderId === updated.orderId ? updated : item));
       showToast(`Order status updated: ${updated.status}`, 'info');
     };
 
     const handleOrderDelivered = (delivered) => {
       setOrder(delivered);
+      setOrders((current) => current.map((item) => item.orderId === delivered.orderId ? delivered : item));
       setDeliveredOrder(delivered);
       setIsSuccessModalOpen(true);
       showToast('Your Medicines Have Been Delivered!');
@@ -124,45 +149,59 @@ export const OrderTrackingPage = () => {
     }
   };
 
-  if (!order) {
-    return (
-      <div className="container" style={{ padding: '60px 0', textAlign: 'center' }}>
-        <div style={{ maxWidth: '480px', margin: '0 auto', background: 'white', padding: '40px', borderRadius: '20px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
-          <Navigation size={48} color="var(--primary)" style={{ margin: '0 auto 16px' }} />
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '10px' }}>Track Your Order</h2>
-          <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '24px' }}>
-            Enter your unique Order ID to view real-time delivery progress and rider location.
-          </p>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              loadOrder(searchInput.trim());
-            }}
-            style={{ display: 'flex', gap: '8px' }}
-          >
-            <input
-              type="text"
-              placeholder="Enter your Order ID"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value.toUpperCase())}
-              style={{ flex: 1, padding: '12px 14px', borderRadius: '10px', border: '1.5px solid var(--border-color)', fontWeight: 700 }}
-            />
-            <button type="submit" className="btn btn-primary">
-              Track
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  const isDelivered = order.status === 'Successfully Delivered';
-  const hasDeliveryCoordinates = order.deliveryAddress?.lat != null && order.deliveryAddress?.lng != null && Number.isFinite(Number(order.deliveryAddress.lat)) && Number.isFinite(Number(order.deliveryAddress.lng));
-  const hasRiderLocation = order.deliveryPartner?.currentLat != null && order.deliveryPartner?.currentLng != null && Number.isFinite(Number(order.deliveryPartner.currentLat)) && Number.isFinite(Number(order.deliveryPartner.currentLng));
+  const isDelivered = order?.status === 'Successfully Delivered';
+  const hasDeliveryCoordinates = order?.deliveryAddress?.lat != null && order?.deliveryAddress?.lng != null && Number.isFinite(Number(order.deliveryAddress.lat)) && Number.isFinite(Number(order.deliveryAddress.lng));
+  const hasRiderLocation = order?.deliveryPartner?.currentLat != null && order?.deliveryPartner?.currentLng != null && Number.isFinite(Number(order.deliveryPartner.currentLat)) && Number.isFinite(Number(order.deliveryPartner.currentLng));
 
   return (
     <div style={{ padding: '40px 0 70px', background: 'var(--bg-main)' }}>
       <div className="container">
+        {user?.role !== 'admin' && (
+          <section aria-labelledby="order-history-title" style={{ marginBottom: '28px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+              <History size={21} color="var(--primary)" />
+              <h2 id="order-history-title" style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>Your order history</h2>
+            </div>
+            {!user ? (
+              <div style={{ padding: '18px', background: 'white', border: '1px solid var(--border-color)', borderRadius: '14px', color: 'var(--text-muted)' }}>Sign in to see all your orders here.</div>
+            ) : ordersLoading && orders.length === 0 ? (
+              <div role="status" style={{ padding: '18px', background: 'white', border: '1px solid var(--border-color)', borderRadius: '14px', color: 'var(--text-muted)' }}>Loading your orders…</div>
+            ) : orders.length === 0 ? (
+              <div style={{ padding: '18px', background: 'white', border: '1px solid var(--border-color)', borderRadius: '14px', color: 'var(--text-muted)' }}>You haven’t placed any orders yet. Your orders will appear here after checkout.</div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '12px' }}>
+                {orders.map((item) => {
+                  const selected = order?.orderId === item.orderId;
+                  return (
+                    <button key={item.orderId} type="button" onClick={() => { setOrder(item); setActiveOrderId(item.orderId); setSearchInput(item.orderId); }} aria-pressed={selected}
+                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', textAlign: 'left', padding: '15px', background: selected ? '#ecfdf5' : 'white', border: `1px solid ${selected ? '#6ee7b7' : 'var(--border-color)'}`, borderRadius: '14px', cursor: 'pointer' }}>
+                      <span style={{ minWidth: 0 }}>
+                        <strong style={{ display: 'block', color: 'var(--text-main)' }}>#{item.orderId}</strong>
+                        <span style={{ display: 'block', marginTop: '5px', color: 'var(--text-muted)', fontSize: '.82rem' }}>{new Date(item.createdAt).toLocaleDateString()} · {item.items?.length || 0} item{item.items?.length === 1 ? '' : 's'} · ₹{Number(item.totalAmount || 0).toFixed(2)}</span>
+                        <span style={{ display: 'inline-block', marginTop: '8px', color: item.status === 'Cancelled' ? '#dc2626' : item.status === 'Successfully Delivered' ? '#047857' : '#0369a1', fontWeight: 750, fontSize: '.82rem' }}>{item.status}</span>
+                      </span>
+                      <ChevronRight size={18} color="var(--primary)" />
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        )}
+
+        {!order && (
+          <div style={{ maxWidth: '520px', margin: '0 auto', background: 'white', padding: '30px', borderRadius: '20px', border: '1px solid var(--border-color)', textAlign: 'center' }}>
+            <Navigation size={42} color="var(--primary)" style={{ margin: '0 auto 12px' }} />
+            <h1 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '8px' }}>Track an order</h1>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '18px' }}>Choose an order from your history above or enter its order ID.</p>
+            <form onSubmit={(event) => { event.preventDefault(); loadOrder(searchInput.trim()); }} style={{ display: 'flex', gap: '8px' }}>
+              <input type="text" placeholder="Enter your Order ID" value={searchInput} onChange={(event) => setSearchInput(event.target.value.toUpperCase())} style={{ flex: 1, minWidth: 0, padding: '12px 14px', borderRadius: '10px', border: '1.5px solid var(--border-color)', fontWeight: 700 }} />
+              <button type="submit" className="btn btn-primary">Track</button>
+            </form>
+          </div>
+        )}
+
+        {order && <>
         {/* Top Header & Search Bar */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
           <div>
@@ -477,7 +516,7 @@ export const OrderTrackingPage = () => {
       </div>
 
       {/* Support Modal */}
-      {supportModalOpen && (
+        {supportModalOpen && (
         <div className="modal-overlay" onClick={() => setSupportModalOpen(false)}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ padding: '24px', maxWidth: '420px' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '8px' }}>24x7 Priority Medical Support</h3>
@@ -502,7 +541,8 @@ export const OrderTrackingPage = () => {
             </div>
           </div>
         </div>
-      )}
-    </div>
+        )}
+        </>}
+      </div>
   );
 };
