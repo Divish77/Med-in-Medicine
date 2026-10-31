@@ -25,23 +25,27 @@ export const AuthModal = () => {
     event.preventDefault();
     setLoading(true);
     try {
-      let response;
-      try { response = await api.login({ email, password }); } catch { response = null; }
-      if (response?.success && response.user) {
-        if (response.user.role === 'admin') {
-          showToast('Admin accounts sign in from the separate Admin Panel.', 'info');
+      // A Vercel-hosted frontend cannot reach the local Express default at
+      // localhost:5000. Use that API only in development or when explicitly configured.
+      if (!import.meta.env.PROD || import.meta.env.VITE_API_URL) {
+        let response;
+        try { response = await api.login({ email, password }); } catch { response = null; }
+        if (response?.success && response.user) {
+          if (response.user.role === 'admin') {
+            showToast('Admin accounts sign in from the separate Admin Panel.', 'info');
+            return;
+          }
+          const signedInUser = { ...response.user, role: 'buyer' };
+          if (response.token) localStorage.setItem('mim_token', response.token);
+          setUser(signedInUser);
+          setIsAuthModalOpen(false);
+          showToast('Signed in successfully.');
           return;
         }
-        const signedInUser = { ...response.user, role: 'buyer' };
-        if (response.token) localStorage.setItem('mim_token', response.token);
-        setUser(signedInUser);
-        setIsAuthModalOpen(false);
-        showToast('Signed in successfully.');
-        return;
       }
 
       const data = await supabaseAuth.signIn({ email, password });
-      if (!data?.user || !data.session) throw new Error('Could not sign in. Check your email and password.');
+      if (!data?.user || !data.session) throw new Error('Sign-in did not return an active session. Check your account and try again.');
       localStorage.setItem('mim_token', data.session.access_token);
       setUser({
         id: data.user.id,
