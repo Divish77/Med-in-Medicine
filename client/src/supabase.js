@@ -1,5 +1,7 @@
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://lsigiqfrfizybpfcywkz.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzaWdpcWZyZml6eWJwZmN5d2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MjY2MjUsImV4cCI6MjEwOTAwMjYyNX0.TKlTXt_j4gHZKAZWdKyiNvBJiq7dZbco17DleJbSF_o';
+// Prefer the current publishable key. Ignore the old anon-key setting here so a
+// stale JWT configured in Vercel cannot override the active key.
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_nSqLvKybBig4tB00qNxx2w_6Vs0Lc5x';
 
 let clientPromise;
 const getClient = () => {
