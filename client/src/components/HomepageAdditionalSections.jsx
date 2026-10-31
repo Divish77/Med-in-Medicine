@@ -7,7 +7,6 @@ import {
   Navigation,
   Home,
   CheckCircle2,
-  ShieldAlert,
   ChevronDown,
   ChevronUp,
   MapPin,
@@ -19,7 +18,7 @@ import { useApp } from '../context/AppContext';
 import { api } from '../api';
 
 export const HomepageAdditionalSections = () => {
-  const { setActiveTab, setIsLocationModalOpen, setIsPrescriptionModalOpen, updateDeliveryLocation, showToast } = useApp();
+  const { setActiveTab, updateDeliveryLocation, showToast } = useApp();
 
   // FAQ Accordion State
   const [openFaq, setOpenFaq] = useState(0);

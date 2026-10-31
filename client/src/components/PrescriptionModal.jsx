@@ -17,7 +17,6 @@ export const PrescriptionModal = () => {
   const [patientName, setPatientName] = useState(user?.name || '');
   const [doctorName, setDoctorName] = useState('');
   const [uploading, setUploading] = useState(false);
-  const [verificationResult, setVerificationResult] = useState(null);
 
   if (!isPrescriptionModalOpen) return null;
 
@@ -44,7 +43,6 @@ export const PrescriptionModal = () => {
 
       const res = await api.uploadPrescription(formData);
       if (res.success) {
-        setVerificationResult(res.prescription);
         setAttachedPrescription(res.prescription);
         showToast('Prescription submitted and is awaiting pharmacist review.', 'info');
       } else {

@@ -7,8 +7,6 @@ import {
   RotateCcw,
   AlertTriangle,
   History,
-  Package,
-  ShieldCheck,
   Send
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -133,7 +131,9 @@ export const DeliverySuccessModal = () => {
             Thank you for choosing Med in Minutes. We hope to serve you again.
           </p>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Delivered at: {new Date(deliveredOrder.deliveredAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • Order #{deliveredOrder.orderId}
+            Delivered at: {deliveredOrder.deliveredAt
+              ? new Date(deliveredOrder.deliveredAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              : 'Pending'} • Order #{deliveredOrder.orderId}
           </div>
         </div>
 

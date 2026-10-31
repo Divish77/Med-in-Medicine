@@ -1,5 +1,5 @@
 import React, { lazy, Suspense, useState } from 'react';
-import { MapPin, Navigation, Compass, Home, Briefcase, Check, X, Store, Trash2 } from 'lucide-react';
+import { MapPin, Navigation, Compass, Home, Briefcase, X, Store, Trash2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { api } from '../api';
 
@@ -20,7 +20,6 @@ export const LocationModal = () => {
   const [activeTab, setActiveTab] = useState('pincode'); // 'current', 'pincode', 'manual', 'saved'
   const [pincodeInput, setPincodeInput] = useState(deliveryLocation.pincode || '');
   const [checkingService, setCheckingService] = useState(false);
-  const [serviceResult, setServiceResult] = useState(null);
 
   // Manual Form
   const [manualForm, setManualForm] = useState({
@@ -67,7 +66,6 @@ export const LocationModal = () => {
               pharmacyName: res.pharmacyName
             };
             updateDeliveryLocation(locObj);
-            setServiceResult(res);
             showToast('GPS Location detected successfully!');
             setTimeout(() => setIsLocationModalOpen(false), 800);
           }
@@ -77,7 +75,7 @@ export const LocationModal = () => {
           setCheckingService(false);
         }
       },
-      (err) => {
+      () => {
         showToast('Location permission denied or unavailable. Please enter PIN code manually.', 'error');
         setCheckingService(false);
       },
@@ -96,7 +94,7 @@ export const LocationModal = () => {
     setCheckingService(true);
     try {
       const res = await api.checkServiceability(pincodeInput.trim());
-      setServiceResult(res);
+
 
       if (res.serviceable) {
         const locObj = {

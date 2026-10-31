@@ -7,7 +7,6 @@ import {
   Menu,
   X,
   PhoneCall,
-  Activity,
   ChevronDown,
   Clock,
   Settings

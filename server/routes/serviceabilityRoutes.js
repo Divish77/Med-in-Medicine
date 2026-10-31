@@ -31,7 +31,6 @@ router.get('/check', (req, res) => {
         expressEligible: Boolean(matchedPharmacy.expressAvailable),
         etaMinutes: matchedPharmacy.etaMinutes || 18,
         etaLabel: `${matchedPharmacy.etaMinutes || 18} minutes`,
-        etaLabel: `${matchedPharmacy.etaMinutes || 18} minutes`,
         pharmacyName: matchedPharmacy.name,
         deliveryFee: matchedPharmacy.expressAvailable ? 0 : 25,
         message: `Delivery is available from ${matchedPharmacy.name}.`

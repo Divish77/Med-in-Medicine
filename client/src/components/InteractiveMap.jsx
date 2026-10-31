@@ -138,7 +138,7 @@ export const InteractiveMap = ({
         mapInstanceRef.current = null;
       }
     };
-  }, [center, zoom, pharmacyPos, deliveryPos, riderPos, isDraggable]);
+  }, [center, zoom, pharmacyPos, deliveryPos, riderPos, isDraggable, onPinDrag]);
 
   return (
     <div style={{ width: '100%', height, position: 'relative', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>

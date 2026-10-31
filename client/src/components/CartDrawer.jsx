@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingBag, X, Plus, Minus, Trash2, ShieldAlert, ArrowRight, Upload, MapPin } from 'lucide-react';
+import { ShoppingBag, X, Plus, Minus, Trash2, ShieldAlert, ArrowRight, MapPin } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { api } from '../api';
 
@@ -10,9 +10,7 @@ export const CartDrawer = () => {
     cart,
     removeFromCart,
     updateCartQty,
-    clearCart,
     cartSubtotal,
-    cartMrpTotal,
     cartDiscount,
     deliveryFee,
     packagingFee,

@@ -23,7 +23,6 @@ const AdminPanel = lazy(() => import('./components/AdminPanel').then((module) =>
 export function AppContent() {
   const {
     activeTab,
-    isLocationModalOpen,
     setIsLocationModalOpen,
     toast
   } = useApp();

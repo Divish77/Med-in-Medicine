@@ -3,7 +3,7 @@ import { MapPin, Search, CreditCard, Bike, ArrowRight, CheckCircle2 } from 'luci
 import { useApp } from '../context/AppContext';
 
 export const HowItWorksSection = () => {
-  const { setIsLocationModalOpen, setActiveTab, setIsPrescriptionModalOpen } = useApp();
+  const { setIsLocationModalOpen, setActiveTab } = useApp();
 
   const steps = [
     {
@@ -66,7 +66,7 @@ export const HowItWorksSection = () => {
 
         {/* 4 Steps Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px' }}>
-          {steps.map((item, idx) => {
+          {steps.map((item) => {
             const Icon = item.icon;
             return (
               <div

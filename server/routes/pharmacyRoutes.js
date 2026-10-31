@@ -22,8 +22,19 @@ router.get('/nearby', (req, res) => {
     let matchedPharmacies = pharmacies.filter((p) => p.isOpen !== false);
 
     if (pincode) {
-      const pinMatch = pharmacies.filter((p) => p.pincode === pincode);
       matchedPharmacies = matchedPharmacies.filter((p) => p.pincode === pincode);
+      if (matchedPharmacies.length === 0) {
+        matchedPharmacies = [{
+          name: '10 MN Company nationwide delivery',
+          pincode,
+          city: '',
+          expressAvailable: false,
+          etaMinutes: null,
+          etaLabel: '2–5 business days',
+          isDemoFulfillment: true,
+          distanceKm: null
+        }];
+      }
     }
 
     if (lat !== undefined && lng !== undefined && Number.isFinite(Number(lat)) && Number.isFinite(Number(lng))) {

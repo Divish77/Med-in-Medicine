@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Search, ShoppingBag, Zap, Info, Plus, X } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Search, Info, Plus, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { api } from '../api';
 
 export const MedicinesPage = () => {
-  const { addToCart, setIsPrescriptionModalOpen, deliveryLocation, showToast, user } = useApp();
+  const { addToCart, deliveryLocation, user } = useApp();
 
   const [medicines, setMedicines] = useState([]);
   const [categories, setCategories] = useState(['All']);
@@ -14,19 +14,7 @@ export const MedicinesPage = () => {
   const [loading, setLoading] = useState(false);
   const [selectedMedicine, setSelectedMedicine] = useState(null);
 
-  useEffect(() => {
-    loadCategories();
-    loadMedicines();
-  }, []);
-
-  useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      loadMedicines();
-    }, 250);
-    return () => clearTimeout(delayDebounce);
-  }, [searchQuery, selectedCategory, rxFilter]);
-
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     try {
       const res = await api.getCategories();
       if (res.success && res.categories) {
@@ -35,9 +23,9 @@ export const MedicinesPage = () => {
     } catch (e) {
       console.error(e);
     }
-  };
+  }, []);
 
-  const loadMedicines = async () => {
+  const loadMedicines = useCallback(async () => {
     setLoading(true);
     try {
       const params = {};
@@ -55,7 +43,17 @@ export const MedicinesPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchQuery, selectedCategory, rxFilter]);
+
+  useEffect(() => {
+    loadCategories();
+    loadMedicines();
+  }, [loadCategories, loadMedicines]);
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(loadMedicines, 250);
+    return () => clearTimeout(delayDebounce);
+  }, [loadMedicines]);
 
   return (
     <div style={{ padding: '40px 0 80px', background: 'var(--bg-main)' }}>

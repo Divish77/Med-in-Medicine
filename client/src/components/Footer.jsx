@@ -1,6 +1,8 @@
 import React from 'react';
-import { ShieldCheck, Phone, MapPin } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+
+const CURRENT_YEAR = new Date().getFullYear();
 
 export const Footer = () => {
   const { setActiveTab, setIsPrescriptionModalOpen, setIsLocationModalOpen } = useApp();
@@ -98,7 +100,7 @@ export const Footer = () => {
         {/* Copyright */}
         <div style={{ borderTop: '1px solid #1e293b', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', fontSize: '0.785rem' }}>
           <div>
-            Â© {new Date().getFullYear()} Med in Minutes Healthcare Technologies Pvt Ltd. All rights reserved.
+            Â            © {CURRENT_YEAR} Med in Minutes Healthcare Technologies Pvt Ltd. All rights reserved.
           </div>
           <div style={{ display: 'flex', gap: '16px' }}>
             <span>Privacy Policy</span>
