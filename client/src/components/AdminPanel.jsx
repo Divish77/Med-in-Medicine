@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Activity, Check, ImagePlus, LoaderCircle, PackagePlus, Pencil, Plus, Search, ShieldCheck, Trash2, X, Truck } from 'lucide-react';
 import { api } from '../api';
 import { useApp } from '../context/AppContext';
@@ -7,7 +7,7 @@ const categories = [
   'Pain Relief & Fever', 'Antibiotics', 'Stomach Care & Antacid', 'Cough & Cold',
   'Diabetes Care', 'Cardiac & BP', 'Vitamins & Supplements', 'First Aid & Wellness', 'Healthcare Devices'
 ];
-const deliveryStages = ['Order Placed', 'Payment Confirmed', 'Prescription Verification', 'Order Accepted by Pharmacy', 'Medicines Being Packed', 'Delivery Partner Assigned', 'Out for Delivery', 'Successfully Delivered'];
+const deliveryStages = ['Order Placed', 'Order Accepted by Pharmacy', 'Prescription Verification', 'Medicines Being Packed', 'Delivery Partner Assigned', 'Out for Delivery', 'Successfully Delivered'];
 
 const blankMedicine = () => ({
   name: '', brand: '', genericName: '', category: categories[0], price: '', mrp: '', stock: '1',
@@ -54,7 +54,7 @@ export const AdminPanel = () => {
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(blankMedicine);
 
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async () => {
     try {
       const response = await api.getOrders();
       if (!response.success) throw new Error(response.message || 'Could not load orders.');
@@ -62,12 +62,12 @@ export const AdminPanel = () => {
     } catch (error) {
       showToast(error.message || 'Could not load orders.', 'error');
     }
-  };
+  }, [showToast]);
 
   const updateOrderStage = async (order) => {
     setUpdatingOrderId(order.orderId);
     try {
-      const response = await api.advanceOrderStage(order.orderId, Number(order.stageIndex || 0) + 1);
+      const response = await api.advanceOrderStage(order.orderId);
       if (!response.success || !response.order) throw new Error(response.message || 'Could not update order status.');
       setOrders((current) => current.map((item) => item.orderId === order.orderId ? response.order : item));
       showToast(`Order ${order.orderId} updated to ${response.order.status}.`);
@@ -132,8 +132,7 @@ export const AdminPanel = () => {
     }
   };
 
-  const loadMedicines = async () => {
-    setLoading(true);
+  const loadMedicines = useCallback(async () => {
     try {
       const response = await api.getMedicines({ limit: 500 });
       if (!response.success) throw new Error(response.message || 'Could not load the medicine catalog.');
@@ -143,9 +142,9 @@ export const AdminPanel = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
 
-  useEffect(() => { if (user?.role === 'admin') { loadMedicines(); loadOrders(); } }, [user?.id, user?.role]);
+  useEffect(() => { if (user?.role === 'admin') { loadMedicines(); loadOrders(); } }, [user?.id, user?.role, loadMedicines, loadOrders]);
 
   const visibleMedicines = useMemo(() => medicines.filter((medicine) =>
     `${medicine.name} ${medicine.genericName || ''} ${medicine.brand || ''}`.toLowerCase().includes(query.trim().toLowerCase())
@@ -309,7 +308,8 @@ export const AdminPanel = () => {
           </div>
           {orders.length === 0 ? <div style={{ padding: '25px', background: 'white', border: '1px solid #e2e8f0', borderRadius: '14px', color: '#64748b' }}>No customer orders yet.</div> : <div style={{ display: 'grid', gap: '12px' }}>
             {orders.map((order) => {
-              const stageIndex = Math.max(0, Number(order.stageIndex || 0));
+              const matchedStageIndex = deliveryStages.indexOf(order.status);
+              const stageIndex = matchedStageIndex >= 0 ? matchedStageIndex : order.status === 'Payment Confirmed' ? 0 : Math.max(0, Number(order.stageIndex || 0));
               const delivered = order.status === 'Successfully Delivered';
               const cancelled = order.status === 'Cancelled';
               const readyToConfirm = stageIndex >= deliveryStages.length - 2 && !delivered && !cancelled;

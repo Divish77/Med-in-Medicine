@@ -1,5 +1,5 @@
 import React from 'react';
-import { Printer, Download, X, Activity, ShieldCheck } from 'lucide-react';
+import { Printer, X, ShieldCheck } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const InvoiceModal = () => {
@@ -139,7 +139,7 @@ export const InvoiceModal = () => {
               <span>₹{invoiceData.subtotal}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
-              <span>10-Minute Express Delivery</span>
+              <span>Delivery fee</span>
               <span style={{ color: '#059669', fontWeight: 700 }}>{invoiceData.deliveryFee === 0 ? 'FREE' : `₹${invoiceData.deliveryFee}`}</span>
             </div>
             {invoiceData.packagingFee > 0 && (

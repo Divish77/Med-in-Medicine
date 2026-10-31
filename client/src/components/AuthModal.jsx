@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Home, LogOut, MapPin, Plus, Trash2, UserRound, X } from 'lucide-react';
+import { Home, LogOut, Plus, Trash2, UserRound, X } from 'lucide-react';
 import { api } from '../api';
 import { supabaseAuth } from '../supabase';
 import { useApp } from '../context/AppContext';
@@ -7,7 +7,7 @@ import { useApp } from '../context/AppContext';
 export const AuthModal = () => {
   const {
     isAuthModalOpen, setIsAuthModalOpen, user, setUser, savedAddresses,
-    deleteAddress, setIsLocationModalOpen, setActiveTab, showToast
+    deleteAddress, setIsLocationModalOpen, setActiveTab, setActiveOrderId, showToast
   } = useApp();
   const [mode, setMode] = useState(user ? 'profile' : 'login');
   const [email, setEmail] = useState('');
@@ -98,6 +98,8 @@ export const AuthModal = () => {
   const handleLogout = async () => {
     try { await supabaseAuth.signOut(); } catch { /* Local accounts do not have a Supabase session. */ }
     localStorage.removeItem('mim_token');
+    localStorage.removeItem('mim_active_order');
+    setActiveOrderId('');
     setUser(null);
     setActiveTab('home');
     setMode('login');

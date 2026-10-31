@@ -7,12 +7,10 @@ import {
   Navigation,
   Home,
   CheckCircle2,
-  Clock,
   ShieldAlert,
   ChevronDown,
   ChevronUp,
   MapPin,
-  Check,
   Bike,
   Package,
   FileCheck
@@ -45,7 +43,7 @@ export const HomepageAdditionalSections = () => {
       if (res.serviceable) {
         showToast(res.message);
       }
-    } catch (err) {
+    } catch  {
       showToast('Error checking serviceability', 'error');
     } finally {
       setChecking(false);
@@ -322,18 +320,17 @@ export const HomepageAdditionalSections = () => {
               </button>
             </div>
 
-            {/* 8-Stage Preview Pills */}
+            {/* Order progress preview */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
               {[
                 { label: '1. Placed', icon: CheckCircle2 },
-                { label: '2. Paid', icon: CreditCard },
-                { label: '3. Rx Verified', icon: FileCheck },
-                { label: '4. Pharmacy Accepted', icon: Store },
-                { label: '5. Packing', icon: Package },
-                { label: '6. Rider Assigned', icon: Bike },
-                { label: '7. Out for Delivery', icon: Navigation },
-                { label: '8. Delivered', icon: Home }
-              ].map((step, idx) => {
+                { label: '2. Pharmacy accepted', icon: Store },
+                { label: '3. Prescription checked', icon: FileCheck },
+                { label: '4. Packing', icon: Package },
+                { label: '5. Rider assigned', icon: Bike },
+                { label: '6. Out for delivery', icon: Navigation },
+                { label: '7. Delivered', icon: Home }
+              ].map((step) => {
                 const Icon = step.icon;
                 return (
                   <div

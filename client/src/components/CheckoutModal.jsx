@@ -5,11 +5,8 @@ import {
   Banknote,
   ShieldCheck,
   MapPin,
-  Clock,
   ArrowRight,
   X,
-  CheckCircle2,
-  Lock,
   Building
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -36,8 +33,7 @@ export const CheckoutModal = () => {
     showToast
   } = useApp();
 
-  const [paymentMethod, setPaymentMethod] = useState('UPI'); // 'UPI', 'CARD', 'NETBANKING', 'COD'
-  const [upiId, setUpiId] = useState('priya@okhdfcbank');
+  const [paymentMethod, setPaymentMethod] = useState('COD');
   const [isPlacing, setIsPlacing] = useState(false);
 
   if (!isCheckoutModalOpen) return null;
@@ -179,14 +175,14 @@ export const CheckoutModal = () => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginBottom: '14px' }}>
             {/* UPI Option */}
             <div
-              onClick={() => setPaymentMethod('UPI')}
+              onClick={() => showToast('Online payments are not available yet. Choose Cash on Delivery.', 'info')}
               style={{
                 padding: '12px',
                 borderRadius: '10px',
                 border: '1.5px solid',
                 borderColor: paymentMethod === 'UPI' ? 'var(--primary)' : 'var(--border-color)',
                 background: paymentMethod === 'UPI' ? 'var(--primary-light)' : 'white',
-                cursor: 'pointer',
+                cursor: 'not-allowed', opacity: 0.55,
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px'
@@ -201,14 +197,14 @@ export const CheckoutModal = () => {
 
             {/* Card Option */}
             <div
-              onClick={() => setPaymentMethod('CARD')}
+              onClick={() => showToast('Online payments are not available yet. Choose Cash on Delivery.', 'info')}
               style={{
                 padding: '12px',
                 borderRadius: '10px',
                 border: '1.5px solid',
                 borderColor: paymentMethod === 'CARD' ? 'var(--primary)' : 'var(--border-color)',
                 background: paymentMethod === 'CARD' ? 'var(--primary-light)' : 'white',
-                cursor: 'pointer',
+                cursor: 'not-allowed', opacity: 0.55,
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px'
@@ -223,14 +219,14 @@ export const CheckoutModal = () => {
 
             {/* NetBanking */}
             <div
-              onClick={() => setPaymentMethod('NETBANKING')}
+              onClick={() => showToast('Online payments are not available yet. Choose Cash on Delivery.', 'info')}
               style={{
                 padding: '12px',
                 borderRadius: '10px',
                 border: '1.5px solid',
                 borderColor: paymentMethod === 'NETBANKING' ? 'var(--primary)' : 'var(--border-color)',
                 background: paymentMethod === 'NETBANKING' ? 'var(--primary-light)' : 'white',
-                cursor: 'pointer',
+                cursor: 'not-allowed', opacity: 0.55,
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px'
@@ -266,25 +262,24 @@ export const CheckoutModal = () => {
             </div>
           </div>
 
-          {paymentMethod === 'UPI' && (
-            <input
-              type="text"
-              placeholder="Enter UPI ID (e.g. yourname@okhdfcbank)"
-              value={upiId}
-              onChange={(e) => setUpiId(e.target.value)}
-              style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}
-            />
-          )}
+          <p style={{ margin: '10px 0 0', color: 'var(--text-muted)', fontSize: '.8rem' }}>Online payment options will be available when payment processing is connected.</p>
         </div>
 
-        {/* Total & Pay Button */}
+        <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '12px', marginBottom: '14px', display: 'grid', gap: '6px', color: 'var(--text-muted)', fontSize: '.84rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Medicines</span><span>₹{cartSubtotal.toFixed(2)}</span></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Delivery</span><span>{deliveryFee === 0 ? 'Free' : `₹${deliveryFee.toFixed(2)}`}</span></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Packaging</span><span>₹{packagingFee.toFixed(2)}</span></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Tax</span><span>₹{cartTax.toFixed(2)}</span></div>
+        </div>
+
+        {/* Total & Place Order Button */}
         <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Amount to Pay</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Order total · pay on delivery</div>
             <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)' }}>₹{cartTotal}</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#059669', fontWeight: 600 }}>
-            <Lock size={14} /> 256-bit Bank Grade Security
+            <Banknote size={14} /> Cash on delivery
           </div>
         </div>
 
@@ -294,7 +289,7 @@ export const CheckoutModal = () => {
           className="btn btn-primary"
           style={{ width: '100%', padding: '14px', borderRadius: '12px', fontSize: '1.05rem' }}
         >
-          {isPlacing ? 'Allocating Rider & Confirming Order...' : `Pay ₹${cartTotal} & Start 10-Min Delivery`}
+          {isPlacing ? "Placing your order..." : `Place order · ₹${cartTotal}`}
           <ArrowRight size={18} />
         </button>
       </div>

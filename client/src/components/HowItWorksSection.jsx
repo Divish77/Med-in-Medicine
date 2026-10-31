@@ -29,7 +29,7 @@ export const HowItWorksSection = () => {
     {
       step: '03',
       title: 'Place Your Order',
-      description: 'Review your items, complete instant pharmacist verification for scheduled medicines, and pay securely via UPI, Card or COD.',
+      description: 'Review your items and place your order with Cash on Delivery. Prescription medicines need pharmacist approval before checkout.',
       icon: CreditCard,
       color: '#8b5cf6',
       bg: '#f5f3ff',
@@ -39,7 +39,7 @@ export const HowItWorksSection = () => {
     {
       step: '04',
       title: 'Get It Delivered',
-      description: 'Track your dedicated delivery partner on the live GPS map and receive your tamper-proof medical package in just 10 minutes.',
+      description: 'Follow order progress as the pharmacy prepares and dispatches your medicines. Confirm handover with your one-time delivery code.',
       icon: Bike,
       color: '#f97316',
       bg: '#fff7ed',

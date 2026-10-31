@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { MapPin, Navigation, Compass, Home, Briefcase, Plus, Check, AlertCircle, X, Store, Trash2 } from 'lucide-react';
+import React, { lazy, Suspense, useState } from 'react';
+import { MapPin, Navigation, Compass, Home, Briefcase, Check, X, Store, Trash2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { api } from '../api';
-import { InteractiveMap } from './InteractiveMap';
+
+const InteractiveMap = lazy(() => import('./InteractiveMap').then((module) => ({ default: module.InteractiveMap })));
 
 export const LocationModal = () => {
   const {
@@ -70,7 +71,7 @@ export const LocationModal = () => {
             showToast('GPS Location detected successfully!');
             setTimeout(() => setIsLocationModalOpen(false), 800);
           }
-        } catch (err) {
+        } catch  {
           showToast('Failed to verify location serviceability', 'error');
         } finally {
           setCheckingService(false);
@@ -118,7 +119,7 @@ export const LocationModal = () => {
       } else {
         showToast(res.message, 'error');
       }
-    } catch (err) {
+    } catch  {
       showToast('Error checking serviceability', 'error');
     } finally {
       setCheckingService(false);
@@ -160,7 +161,7 @@ export const LocationModal = () => {
 
       updateDeliveryLocation(locObj);
       setIsLocationModalOpen(false);
-    } catch (err) {
+    } catch  {
       showToast('Error processing address', 'error');
     } finally {
       setCheckingService(false);
@@ -186,7 +187,7 @@ export const LocationModal = () => {
         pharmacyName: checkRes.pharmacyName
       });
       setIsLocationModalOpen(false);
-    } catch (err) {
+    } catch  {
       showToast('Error applying address', 'error');
     } finally {
       setCheckingService(false);
@@ -364,12 +365,14 @@ export const LocationModal = () => {
               <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '6px' }}>
                 Service Map & Delivery Radius:
               </p>
-              <InteractiveMap
-                center={[deliveryLocation.lat || 28.6315, deliveryLocation.lng || 77.2167]}
-                pharmacyPos={[28.6315, 77.2167]}
-                deliveryPos={[deliveryLocation.lat || 28.6139, deliveryLocation.lng || 77.2090]}
-                height="180px"
-              />
+              <Suspense fallback={<div role="status" style={{ height: '180px', display: 'grid', placeItems: 'center', color: 'var(--text-muted)' }}>Loading map…</div>}>
+                <InteractiveMap
+                  center={[deliveryLocation.lat || 28.6315, deliveryLocation.lng || 77.2167]}
+                  pharmacyPos={[28.6315, 77.2167]}
+                  deliveryPos={[deliveryLocation.lat || 28.6139, deliveryLocation.lng || 77.2090]}
+                  height="180px"
+                />
+              </Suspense>
             </div>
           </div>
         )}

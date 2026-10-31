@@ -7,11 +7,9 @@ import {
   Menu,
   X,
   PhoneCall,
-  Search,
   Activity,
   ChevronDown,
   Clock,
-  Sparkles,
   Settings
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';

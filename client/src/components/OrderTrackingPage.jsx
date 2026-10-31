@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { lazy, Suspense, useCallback, useState, useEffect } from 'react';
 import {
   Package,
   CreditCard,
@@ -7,19 +7,17 @@ import {
   Bike,
   Navigation,
   CheckCircle2,
-  Clock,
   MapPin,
   Phone,
   MessageSquare,
   ShieldCheck,
-  AlertTriangle,
   Download,
-  Star,
   Check
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { api } from '../api';
-import { InteractiveMap } from './InteractiveMap';
+
+const InteractiveMap = lazy(() => import('./InteractiveMap').then((module) => ({ default: module.InteractiveMap })));
 
 export const OrderTrackingPage = () => {
   const {
@@ -30,24 +28,17 @@ export const OrderTrackingPage = () => {
     setDeliveredOrder,
     setIsInvoiceModalOpen,
     setInvoiceData,
-    showToast
+    showToast,
+    user
   } = useApp();
 
   const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [searchInput, setSearchInput] = useState(activeOrderId || '');
-  const [otpInput, setOtpInput] = useState('');
-  const [isConfirmingDelivery, setIsConfirmingDelivery] = useState(false);
   const [supportModalOpen, setSupportModalOpen] = useState(false);
 
-  useEffect(() => {
-    setOtpInput(order?.deliveryConfirmationOtp || '');
-  }, [order?.orderId, order?.deliveryConfirmationOtp]);
-
   // Fetch order details
-  const loadOrder = async (id) => {
+  const loadOrder = useCallback(async (id) => {
     if (!id) return;
-    setLoading(true);
     try {
       const res = await api.getOrder(id);
       if (res.success && res.order) {
@@ -56,33 +47,32 @@ export const OrderTrackingPage = () => {
       } else {
         showToast('Order not found. Please check Order ID.', 'error');
       }
-    } catch (err) {
+    } catch  {
       showToast('Error loading order tracking', 'error');
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [showToast]);
 
   useEffect(() => {
     if (activeOrderId) {
       loadOrder(activeOrderId);
-    } else {
+    } else if (user?.id) {
       // Load most recent order if any
-      api.getOrders().then((res) => {
+      api.getOrders(user.id).then((res) => {
         if (res.success && res.orders && res.orders.length > 0) {
           setOrder(res.orders[0]);
           setActiveOrderId(res.orders[0].orderId);
           setSearchInput(res.orders[0].orderId);
         }
-      });
+      }).catch(() => showToast('Could not load your recent orders.', 'error'));
     }
-  }, [activeOrderId]);
+  }, [activeOrderId, user?.id, loadOrder, setActiveOrderId, showToast]);
 
   // Socket.IO real-time updates listener
+  const trackedOrderId = order?.orderId;
   useEffect(() => {
-    if (!socket || !order) return;
+    if (!socket || !trackedOrderId) return;
 
-    socket.emit('join_order', order.orderId);
+    socket.emit('join_order', trackedOrderId);
 
     const handleOrderUpdated = (updated) => {
       setOrder(updated);
@@ -103,27 +93,7 @@ export const OrderTrackingPage = () => {
       socket.off('order_updated', handleOrderUpdated);
       socket.off('order_delivered', handleOrderDelivered);
     };
-  }, [socket, order ? order.orderId : null]);
-
-  // Authorized Delivery Confirmation Action (Mandatory Requirement)
-  const handleConfirmDelivery = async () => {
-    if (!order) return;
-    setIsConfirmingDelivery(true);
-    try {
-      const res = await api.confirmOrderDelivery(order.orderId, otpInput);
-      if (res.success && res.order) {
-        setOrder(res.order);
-        setDeliveredOrder(res.order);
-        setIsSuccessModalOpen(true);
-      } else {
-        showToast(res.message || 'Delivery confirmation failed', 'error');
-      }
-    } catch (err) {
-      showToast('Error confirming delivery', 'error');
-    } finally {
-      setIsConfirmingDelivery(false);
-    }
-  };
+  }, [socket, trackedOrderId, setDeliveredOrder, setIsSuccessModalOpen, showToast]);
 
   // Open Invoice
   const handleViewInvoice = async () => {
@@ -134,7 +104,7 @@ export const OrderTrackingPage = () => {
         setInvoiceData(res.invoice);
         setIsInvoiceModalOpen(true);
       }
-    } catch (err) {
+    } catch  {
       showToast('Error loading invoice', 'error');
     }
   };
@@ -256,23 +226,8 @@ export const OrderTrackingPage = () => {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            {!isDelivered && (
-              <>
-              </>
-            )}
-
-            {/* AUTHORIZED DELIVERY CONFIRMATION (Mandatory exact requirement) */}
             {!isDelivered ? (
-              <button
-                type="button"
-                onClick={handleConfirmDelivery}
-                disabled={isConfirmingDelivery}
-                className="btn btn-accent"
-                style={{ padding: '8px 16px', fontSize: '0.85rem' }}
-                title="Authorized delivery action: marks order Delivered"
-              >
-                <CheckCircle2 size={16} /> Confirm & Mark Delivered
-              </button>
+              <span style={{ color: '#475569', fontSize: '.82rem' }}>The pharmacy confirms delivery after checking your handover code.</span>
             ) : (
               <button
                 type="button"
@@ -316,14 +271,16 @@ export const OrderTrackingPage = () => {
 
               {/* Leaflet Map with Pharmacy, Moving Rider, and Destination pins */}
               {hasDeliveryCoordinates ? (
-                <InteractiveMap
-                  center={hasRiderLocation ? [Number(order.deliveryPartner.currentLat), Number(order.deliveryPartner.currentLng)] : [Number(order.deliveryAddress.lat), Number(order.deliveryAddress.lng)]}
-                  zoom={14}
-                  pharmacyPos={order.pharmacy?.lat != null && order.pharmacy?.lng != null ? [Number(order.pharmacy.lat), Number(order.pharmacy.lng)] : null}
-                  deliveryPos={[Number(order.deliveryAddress.lat), Number(order.deliveryAddress.lng)]}
-                  riderPos={hasRiderLocation ? [Number(order.deliveryPartner.currentLat), Number(order.deliveryPartner.currentLng)] : null}
-                  height="340px"
-                />
+                <Suspense fallback={<div role="status" style={{ minHeight: '180px', display: 'grid', placeItems: 'center', color: 'var(--text-muted)' }}>Loading map…</div>}>
+                  <InteractiveMap
+                    center={hasRiderLocation ? [Number(order.deliveryPartner.currentLat), Number(order.deliveryPartner.currentLng)] : [Number(order.deliveryAddress.lat), Number(order.deliveryAddress.lng)]}
+                    zoom={14}
+                    pharmacyPos={order.pharmacy?.lat != null && order.pharmacy?.lng != null ? [Number(order.pharmacy.lat), Number(order.pharmacy.lng)] : null}
+                    deliveryPos={[Number(order.deliveryAddress.lat), Number(order.deliveryAddress.lng)]}
+                    riderPos={hasRiderLocation ? [Number(order.deliveryPartner.currentLat), Number(order.deliveryPartner.currentLng)] : null}
+                    height="340px"
+                  />
+                </Suspense>
               ) : (
                 <div style={{ minHeight: '180px', display: 'grid', placeItems: 'center', color: 'var(--text-muted)', background: '#f8fafc', borderRadius: '12px', padding: '20px', textAlign: 'center' }}>
                   Map tracking will appear when location coordinates are available.
@@ -400,9 +357,9 @@ export const OrderTrackingPage = () => {
             </div>
           </div>
 
-          {/* RIGHT: 8-Stage Progress Timeline & Order Details */}
+          {/* RIGHT: Order Progress Timeline & Order Details */}
           <div>
-            {/* 8-Stage Progress Timeline (Mandatory Exact Requirement) */}
+            {/* Order Progress Timeline */}
             <div style={{ background: 'white', borderRadius: '20px', padding: '24px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)', marginBottom: '24px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                 <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-main)' }}>
@@ -488,8 +445,8 @@ export const OrderTrackingPage = () => {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '18px' }}>
-                {order.items.map((item) => (
-                  <div key={item.medicineId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.875rem' }}>
+                {order.items.map((item, index) => (
+                  <div key={item._id || item.medicineId || `${item.name}-${index}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.875rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontWeight: 700, color: 'var(--primary)' }}>{item.quantity}x</span>
                       <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{item.name}</span>
@@ -506,11 +463,11 @@ export const OrderTrackingPage = () => {
                   <span>₹{order.subtotal}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>10-Minute Express Delivery</span>
+                  <span>Delivery fee</span>
                   <span style={{ color: '#059669', fontWeight: 700 }}>{order.deliveryFee === 0 ? 'FREE' : `₹${order.deliveryFee}`}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-main)', fontWeight: 800, fontSize: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '8px', marginTop: '4px' }}>
-                  <span>Total Amount Paid</span>
+                  <span>Order total</span>
                   <span>₹{order.totalAmount}</span>
                 </div>
               </div>

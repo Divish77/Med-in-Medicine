@@ -7,9 +7,7 @@ import {
   RotateCcw,
   AlertTriangle,
   History,
-  X,
   Package,
-  HeartHandshake,
   ShieldCheck,
   Send
 } from 'lucide-react';
@@ -44,7 +42,7 @@ export const DeliverySuccessModal = () => {
           spread: 70,
           origin: { y: 0.6 }
         });
-      } catch (e) {
+      } catch  {
         // Fallback gracefully
       }
     }
@@ -78,7 +76,7 @@ export const DeliverySuccessModal = () => {
       });
       setFeedbackSubmitted(true);
       showToast('Thank you for rating your express delivery experience!');
-    } catch (err) {
+    } catch  {
       showToast('Failed to submit feedback', 'error');
     }
   };
@@ -90,7 +88,7 @@ export const DeliverySuccessModal = () => {
         setInvoiceData(res.invoice);
         setIsInvoiceModalOpen(true);
       }
-    } catch (err) {
+    } catch  {
       showToast('Error opening invoice', 'error');
     }
   };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, ShoppingBag, ShieldCheck, Zap, Info, Plus, Check, X } from 'lucide-react';
+import { Search, ShoppingBag, Zap, Info, Plus, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { api } from '../api';
 

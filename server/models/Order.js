@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { randomInt } from 'crypto';
 
 const orderItemSchema = new mongoose.Schema({
   medicineId: { type: String, required: true },
@@ -38,8 +39,8 @@ const orderSchema = new mongoose.Schema({
   discount: { type: Number, default: 0 },
   tax: { type: Number, default: 0 },
   totalAmount: { type: Number, required: true },
-  paymentMethod: { type: String, default: 'UPI' },
-  paymentStatus: { type: String, default: 'Paid' },
+  paymentMethod: { type: String, default: 'Cash on Delivery' },
+  paymentStatus: { type: String, default: 'Pending' },
   transactionId: { type: String, default: '' },
   prescriptionId: { type: String, default: null },
   prescriptionRequired: { type: Boolean, default: false },
@@ -48,7 +49,6 @@ const orderSchema = new mongoose.Schema({
     type: String,
     enum: [
       'Order Placed',
-      'Payment Confirmed',
       'Prescription Verification',
       'Order Accepted by Pharmacy',
       'Medicines Being Packed',
@@ -79,7 +79,7 @@ const orderSchema = new mongoose.Schema({
   },
   estimatedDeliveryMinutes: { type: Number, default: 10 },
   estimatedArrivalTime: { type: String },
-  deliveryConfirmationOtp: { type: String, default: '4821' },
+  deliveryConfirmationOtp: { type: String, default: () => String(randomInt(1000, 10000)) },
   deliveredAt: { type: String, default: null },
   invoiceNumber: { type: String },
   rating: { type: Number, default: null },

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, ShieldCheck, Heart, Phone, Mail, MapPin } from 'lucide-react';
+import { ShieldCheck, Phone, MapPin } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const Footer = () => {

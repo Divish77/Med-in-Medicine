@@ -50,7 +50,7 @@ export const PrescriptionModal = () => {
       } else {
         showToast(res.message || 'Could not upload prescription.', 'error');
       }
-    } catch (err) {
+    } catch  {
       showToast('Error uploading prescription', 'error');
     } finally {
       setUploading(false);

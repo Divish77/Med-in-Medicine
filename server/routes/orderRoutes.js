@@ -1,5 +1,6 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
+import { randomInt, randomUUID } from 'crypto';
 import { dbStore } from '../services/store.js';
 import { ORDER_STAGES } from '../services/socketService.js';
 
@@ -21,15 +22,21 @@ const requireAdmin = (req, res, next) => {
 
 // Generate unique order ID
 const generateOrderId = () => {
-  const randomNum = Math.floor(100000 + Math.random() * 900000);
-  return `MIM-${randomNum}`;
+  return `MIM-${randomUUID().replaceAll('-', '').slice(0, 12).toUpperCase()}`;
 };
 
 // Generate unique invoice number
-const generateInvoiceNumber = () => {
+const generateInvoiceNumber = (orderId) => {
   const year = new Date().getFullYear();
-  const randomNum = Math.floor(1000 + Math.random() * 9000);
-  return `INV-${year}-${randomNum}`;
+  return `INV-${year}-${orderId.replace('MIM-', '')}`;
+};
+
+const getOrderStageIndex = (order) => {
+  const statusIndex = ORDER_STAGES.findIndex((stage) => stage.status === order.status);
+  if (statusIndex >= 0) return statusIndex;
+  // Legacy orders had a Payment Confirmed step before pharmacy acceptance.
+  if (order.status === 'Payment Confirmed') return 0;
+  return Math.max(0, Math.min(Number(order.stageIndex) || 0, ORDER_STAGES.length - 2));
 };
 
 // Create a new order
@@ -41,7 +48,7 @@ router.post('/', (req, res) => {
       customerPhone = '+91 98765 43210',
       deliveryAddress,
       items = [],
-      paymentMethod = 'UPI',
+      paymentMethod = 'Cash on Delivery',
       prescriptionId = null,
       notes = ''
     } = req.body;
@@ -52,6 +59,9 @@ router.post('/', (req, res) => {
 
     if (!items || items.length === 0) {
       return res.status(400).json({ success: false, message: 'Cart is empty. Please add medicines to order.' });
+    }
+    if (paymentMethod !== 'Cash on Delivery') {
+      return res.status(400).json({ success: false, message: 'Online payment is not available yet. Choose Cash on Delivery.' });
     }
 
     // Check serviceability
@@ -96,10 +106,10 @@ router.post('/', (req, res) => {
     const packagingFee = 15;
     const safeDiscount = 0;
     const safeTax = +(subtotal * 0.05).toFixed(2);
-    const totalAmount = +(subtotal + safeDeliveryFee + packagingFee).toFixed(2);
+    const totalAmount = +(subtotal + safeDeliveryFee + packagingFee + safeTax).toFixed(2);
 
     const orderId = generateOrderId();
-    const invoiceNumber = generateInvoiceNumber();
+    const invoiceNumber = generateInvoiceNumber(orderId);
     const orderTimestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     // Calculate delivery time
@@ -112,32 +122,13 @@ router.post('/', (req, res) => {
       : arrivalDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     // Build timeline
-    const timeline = ORDER_STAGES.map((stage, idx) => {
-      let isCompleted = false;
-      let time = '';
-
-      if (idx === 0) {
-        // Order Placed
-        isCompleted = true;
-        time = orderTimestamp;
-      } else if (idx === 1) {
-        // Payment Confirmed
-        isCompleted = true;
-        time = orderTimestamp;
-      } else if (idx === 2) {
-        // Prescription Verification
-        isCompleted = true;
-        time = orderTimestamp;
-      }
-
-      return {
+    const timeline = ORDER_STAGES.map((stage, idx) => ({
         status: stage.status,
         description: stage.description,
         icon: stage.icon,
-        completed: isCompleted,
-        timestamp: time
-      };
-    });
+        completed: idx === 0,
+        timestamp: idx === 0 ? orderTimestamp : ''
+      }));
 
     // Pharmacy selection
     const newOrder = {
@@ -155,7 +146,7 @@ router.post('/', (req, res) => {
       tax: safeTax,
       totalAmount,
       paymentMethod,
-      paymentStatus: paymentMethod === 'Cash on Delivery' ? 'Pending' : 'Paid',
+      paymentStatus: 'Pending',
       transactionId: 'TXN_' + Math.random().toString(36).substring(2, 10).toUpperCase(),
       prescriptionId,
       prescriptionRequired: hasRxItems,
@@ -175,7 +166,7 @@ router.post('/', (req, res) => {
       estimatedDeliveryMinutes: etaMinutes,
       estimatedDeliveryLabel: matchedPharmacy.isDemoFulfillment ? '2–5 business days' : `${etaMinutes} minutes`,
       estimatedArrivalTime,
-      deliveryConfirmationOtp: String(Math.floor(1000 + Math.random() * 9000)),
+      deliveryConfirmationOtp: String(randomInt(1000, 10000)),
       deliveredAt: null,
       rating: null,
       feedback: null,
@@ -266,10 +257,11 @@ router.post('/:id/advance-stage', requireAdmin, (req, res) => {
       return res.status(400).json({ success: false, message: 'Target stage must be a whole number.' });
     }
 
+    const currentStageIndex = getOrderStageIndex(order);
     const nextIndex = typeof targetStageIndex === 'number'
       ? Math.max(0, Math.min(targetStageIndex, ORDER_STAGES.length - 2))
-      : Math.min(order.stageIndex + 1, ORDER_STAGES.length - 2); // Do not jump to delivered without confirmation
-    if (order.status === 'Successfully Delivered' || order.status === 'Cancelled' || nextIndex < order.stageIndex) {
+      : Math.min(currentStageIndex + 1, ORDER_STAGES.length - 2); // Do not jump to delivered without confirmation
+    if (order.status === 'Successfully Delivered' || order.status === 'Cancelled' || nextIndex < currentStageIndex) {
       const message = order.status === 'Cancelled'
         ? 'A cancelled order cannot be advanced.'
         : order.status === 'Successfully Delivered'
@@ -281,15 +273,21 @@ router.post('/:id/advance-stage', requireAdmin, (req, res) => {
     const stageInfo = ORDER_STAGES[nextIndex];
     const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    const updatedTimeline = order.timeline.map((step, idx) => {
+    const oldTimelineByStatus = new Map((order.timeline || []).map((step) => [step.status, step]));
+    const updatedTimeline = ORDER_STAGES.map((stage, idx) => {
+      const step = oldTimelineByStatus.get(stage.status);
       if (idx <= nextIndex) {
         return {
+          ...stage,
           ...step,
+          status: stage.status,
+          description: stage.description,
+          icon: stage.icon,
           completed: true,
-          timestamp: step.timestamp || currentTime
+          timestamp: step?.timestamp || currentTime
         };
       }
-      return step;
+      return { ...stage, ...step, status: stage.status, completed: false, timestamp: '' };
     });
 
     const updatedOrder = dbStore.updateOne('orders', (o) => o.orderId === order.orderId, {
@@ -336,7 +334,9 @@ router.post('/:id/cancel', requireAdmin, (req, res) => {
       cancelledAt: timestamp,
       cancelledBy: req.adminUser._id,
       cancellationReason,
-      paymentStatus: order.paymentStatus === 'Paid' ? 'Refund Pending' : order.paymentStatus,
+      paymentStatus: order.paymentStatus === 'Paid'
+        ? 'Refund Pending'
+        : order.paymentMethod === 'Cash on Delivery' ? 'Not Charged' : order.paymentStatus,
       timeline: [...(order.timeline || []), {
         status: 'Cancelled',
         description: cancellationReason,
@@ -355,7 +355,7 @@ router.post('/:id/cancel', requireAdmin, (req, res) => {
 });
 
 // Authorized Delivery Confirmation Action
-router.post('/:id/deliver', (req, res) => {
+router.post('/:id/deliver', requireAdmin, (req, res) => {
   try {
     const { id } = req.params;
     const { otp } = req.body;
@@ -371,7 +371,7 @@ router.post('/:id/deliver', (req, res) => {
     if (order.status === 'Cancelled') {
       return res.status(409).json({ success: false, message: 'A cancelled order cannot be delivered.' });
     }
-    if (order.stageIndex < ORDER_STAGES.length - 2) {
+    if (getOrderStageIndex(order) < ORDER_STAGES.length - 2) {
       return res.status(409).json({ success: false, message: 'Advance the order to Out for Delivery before confirming handover.' });
     }
 
@@ -387,10 +387,15 @@ router.post('/:id/deliver', (req, res) => {
     const deliveryTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const fullDeliveredTimestamp = new Date().toISOString();
 
-    const deliveredTimeline = order.timeline.map((step) => ({
-      ...step,
+    const oldTimelineByStatus = new Map((order.timeline || []).map((step) => [step.status, step]));
+    const deliveredTimeline = ORDER_STAGES.map((stage) => ({
+      ...stage,
+      ...oldTimelineByStatus.get(stage.status),
+      status: stage.status,
+      description: stage.description,
+      icon: stage.icon,
       completed: true,
-      timestamp: step.timestamp || deliveryTime
+      timestamp: oldTimelineByStatus.get(stage.status)?.timestamp || deliveryTime
     }));
 
     const finalOrder = dbStore.updateOne('orders', (o) => o.orderId === order.orderId, {
@@ -399,7 +404,7 @@ router.post('/:id/deliver', (req, res) => {
       timeline: deliveredTimeline,
       deliveredAt: fullDeliveredTimestamp,
       deliveryOtpVerified: true,
-      paymentStatus: 'Paid'
+      paymentStatus: order.paymentMethod === 'Cash on Delivery' ? 'Paid' : order.paymentStatus
     });
 
     const io = req.app.get('io');
@@ -485,13 +490,13 @@ router.get('/:id/invoice', (req, res) => {
       deliveryAddress: order.deliveryAddress.fullAddress,
       pharmacyName: order.pharmacy.name,
       pharmacyLicense: order.pharmacy.licenseNumber,
-      pharmacyGstin: '07AABCM9988C1Z2',
+      pharmacyGstin: order.pharmacy?.gstin || 'Not provided',
       items: order.items.map((it, idx) => ({
         sno: idx + 1,
         name: it.name,
         packSize: it.packSize || '1 Strip',
-        batchNumber: 'BT' + Math.floor(10000 + Math.random() * 90000),
-        expiryDate: '12/2027',
+        batchNumber: it.batchNumber || 'Not provided',
+        expiryDate: it.expiryDate || 'See product pack',
         qty: it.quantity,
         rate: it.price,
         amount: +(it.price * it.quantity).toFixed(2),

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingBag, X, Plus, Minus, Trash2, ShieldAlert, ArrowRight, Zap, Upload, MapPin, Check } from 'lucide-react';
+import { ShoppingBag, X, Plus, Minus, Trash2, ShieldAlert, ArrowRight, Upload, MapPin } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { api } from '../api';
 
@@ -255,7 +255,7 @@ export const CartDrawer = () => {
                 </div>
               )}
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
-                <span>10-Minute Express Delivery</span>
+                <span>Delivery fee</span>
                 <span>{deliveryFee === 0 ? <strong style={{ color: '#059669' }}>FREE</strong> : `₹${deliveryFee}`}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>

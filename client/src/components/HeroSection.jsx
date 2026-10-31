@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingBag, Upload, ShieldCheck, Zap, Clock, Store, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Upload, ShieldCheck, Zap, Clock, Store } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const HeroSection = () => {

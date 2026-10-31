@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { API_ORIGIN, api } from '../api';
-import { supabase, supabaseAuth } from '../supabase';
+import { supabaseAuth } from '../supabase';
 
 const AppContext = createContext(null);
 
@@ -63,7 +63,7 @@ export const AppProvider = ({ children }) => {
         pharmacyName: result.pharmacyName || '10 MN Company nationwide delivery'
       });
     }).catch(() => {});
-  }, []);
+  }, [deliveryLocation.pincode]);
 
   // Cart State
   const [cart, setCart] = useState(() => user?.id ? safeJsonParse(`mim_cart_${user.id}`, []) : []);
@@ -95,11 +95,15 @@ export const AppProvider = ({ children }) => {
 
   // Notification Toast
   const [toast, setToast] = useState(null);
+  const toastTimerRef = useRef(null);
 
-  const showToast = (message, type = 'success') => {
+  const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
-  };
+    clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setToast(null), 4000);
+  }, []);
+
+  useEffect(() => () => clearTimeout(toastTimerRef.current), []);
 
   // Socket instance
   const [socket, setSocket] = useState(null);
@@ -113,22 +117,10 @@ export const AppProvider = ({ children }) => {
 
   // Listen for Supabase Authentication State
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        const sbUser = session.user;
-        setUser({
-          id: sbUser.id,
-          name: sbUser.user_metadata?.full_name || sbUser.email.split('@')[0],
-          email: sbUser.email,
-          phone: sbUser.user_metadata?.phone || '',
-          role: 'buyer',
-          pharmacyName: sbUser.user_metadata?.pharmacy_name || '',
-          licenseNumber: sbUser.user_metadata?.license_number || ''
-        });
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    let mounted = true;
+    let subscription = null;
+    supabaseAuth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
       if (session?.user) {
         const sbUser = session.user;
         setUser({
@@ -143,9 +135,15 @@ export const AppProvider = ({ children }) => {
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
       }
-    });
+    }).then((authSubscription) => {
+      if (mounted) subscription = authSubscription;
+      else authSubscription.unsubscribe();
+    }).catch((error) => console.warn('Could not restore customer authentication session:', error));
 
-    return () => subscription?.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription?.unsubscribe();
+    };
   }, []);
 
   // Save changes to localStorage
@@ -177,13 +175,14 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => {
     localStorage.removeItem('mim_cart');
-    if (user?.id && cartLoadedForUserId === user.id) {
-      localStorage.setItem(`mim_cart_${user.id}`, JSON.stringify(cart));
+    const userId = user?.id;
+    if (userId && cartLoadedForUserId === userId) {
+      localStorage.setItem(`mim_cart_${userId}`, JSON.stringify(cart));
     }
   }, [cart, user?.id, cartLoadedForUserId]);
 
   useEffect(() => {
-    if (!user || pendingCartItems.length === 0) return;
+    if (!user?.id || pendingCartItems.length === 0) return;
     setCart((prev) => {
       return pendingCartItems.reduce((items, { medicine, quantity }) => {
         const existing = items.find((item) => item._id === medicine._id);
@@ -198,7 +197,7 @@ export const AppProvider = ({ children }) => {
     setPendingCartItems([]);
     setIsCartOpen(true);
     showToast('Your selected items were added to your cart.');
-  }, [user?.id, pendingCartItems]);
+  }, [user?.id, pendingCartItems, showToast]);
 
   useEffect(() => {
     if (activeOrderId) {
@@ -208,18 +207,24 @@ export const AppProvider = ({ children }) => {
 
   // Cart Functions
   const addToCart = (medicine, qty = 1) => {
+    const quantity = Number(qty);
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      showToast('Choose a valid quantity.', 'error');
+      return false;
+    }
     const availableStock = Number(medicine?.stock ?? 1);
     if (!Number.isFinite(availableStock) || availableStock < 1) {
       showToast('This medicine is currently out of stock.', 'error');
       return false;
     }
-    const existingQuantity = cart.find((item) => item._id === medicine._id)?.quantity || 0;
-    if (existingQuantity + qty > availableStock) {
+    const existingQuantity = (cart.find((item) => item._id === medicine._id)?.quantity || 0)
+      + pendingCartItems.filter((item) => item.medicine._id === medicine._id).reduce((sum, item) => sum + item.quantity, 0);
+    if (existingQuantity + quantity > availableStock) {
       showToast(`Only ${availableStock} item${availableStock === 1 ? '' : 's'} available in stock.`, 'info');
       return false;
     }
     if (!user) {
-      setPendingCartItems((prev) => [...prev, { medicine, quantity: qty }]);
+      setPendingCartItems((prev) => [...prev, { medicine, quantity }]);
       setIsAuthModalOpen(true);
       showToast('Sign in or create an account to add items to your cart.', 'info');
       return false;
@@ -228,10 +233,10 @@ export const AppProvider = ({ children }) => {
       const existing = prev.find((item) => item._id === medicine._id);
       if (existing) {
         return prev.map((item) =>
-          item._id === medicine._id ? { ...item, quantity: item.quantity + qty } : item
+          item._id === medicine._id ? { ...item, quantity: item.quantity + quantity } : item
         );
       }
-      return [...prev, { ...medicine, quantity: qty }];
+      return [...prev, { ...medicine, quantity }];
     });
     showToast(`Added ${medicine.name} to cart`);
     return true;
@@ -244,17 +249,22 @@ export const AppProvider = ({ children }) => {
 
   const updateCartQty = (medicineId, newQty) => {
     if (!user) return;
+    const quantity = Number(newQty);
     const item = cart.find((cartItem) => cartItem._id === medicineId);
-    if (item && newQty > Number(item.stock ?? newQty)) {
-      showToast(`Only ${item.stock} item${Number(item.stock) === 1 ? '' : 's'} available in stock.`, 'info');
-      return;
-    }
-    if (newQty <= 0) {
+    if (quantity <= 0) {
       removeFromCart(medicineId);
       return;
     }
+    if (!Number.isInteger(quantity)) {
+      showToast('Choose a whole-number quantity.', 'error');
+      return;
+    }
+    if (item && quantity > Number(item.stock ?? quantity)) {
+      showToast(`Only ${item.stock} item${Number(item.stock) === 1 ? '' : 's'} available in stock.`, 'info');
+      return;
+    }
     setCart((prev) =>
-      prev.map((item) => (item._id === medicineId ? { ...item, quantity: newQty } : item))
+      prev.map((item) => (item._id === medicineId ? { ...item, quantity } : item))
     );
   };
 
@@ -368,8 +378,6 @@ export const AppProvider = ({ children }) => {
         toast,
         showToast,
         socket,
-        supabase,
-        supabaseAuth
       }}
     >
       {children}
