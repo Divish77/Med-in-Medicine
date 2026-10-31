@@ -371,15 +371,12 @@ router.post('/:id/deliver', requireAdmin, (req, res) => {
     if (order.status === 'Cancelled') {
       return res.status(409).json({ success: false, message: 'A cancelled order cannot be delivered.' });
     }
-    if (getOrderStageIndex(order) < ORDER_STAGES.length - 2) {
-      return res.status(409).json({ success: false, message: 'Advance the order to Out for Delivery before confirming handover.' });
-    }
 
-    // Verify the customer handover code.
-    if (!otp || !order.deliveryConfirmationOtp || otp.toString().trim() !== order.deliveryConfirmationOtp.toString().trim()) {
+    // If an OTP was entered, check that it matches the order's deliveryConfirmationOtp
+    if (otp && order.deliveryConfirmationOtp && otp.toString().trim() !== order.deliveryConfirmationOtp.toString().trim()) {
       return res.status(400).json({
         success: false,
-        message: 'A valid delivery handover OTP is required.'
+        message: 'Invalid delivery handover code. Please check the customer OTP.'
       });
     }
 
@@ -410,11 +407,12 @@ router.post('/:id/deliver', requireAdmin, (req, res) => {
     const io = req.app.get('io');
     if (io) {
       io.to(`order_${order.orderId}`).emit('order_delivered', finalOrder);
+      io.to(`order_${order.orderId}`).emit('order_updated', finalOrder);
     }
 
     res.json({
       success: true,
-      message: 'Your Medicines Have Been Delivered! Thank you for choosing Med in Minutes.',
+      message: 'Order delivery confirmed successfully!',
       order: finalOrder
     });
   } catch (err) {

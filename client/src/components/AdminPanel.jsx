@@ -67,7 +67,10 @@ export const AdminPanel = () => {
   const updateOrderStage = async (order) => {
     setUpdatingOrderId(order.orderId);
     try {
-      const response = await api.advanceOrderStage(order.orderId);
+      const matchedStageIndex = deliveryStages.indexOf(order.status);
+      const currentIndex = matchedStageIndex >= 0 ? matchedStageIndex : Math.max(0, Number(order.stageIndex || 0));
+      const nextIndex = Math.min(currentIndex + 1, deliveryStages.length - 2); // never jump to Delivered this way
+      const response = await api.advanceOrderStage(order.orderId, nextIndex);
       if (!response.success || !response.order) throw new Error(response.message || 'Could not update order status.');
       setOrders((current) => current.map((item) => item.orderId === order.orderId ? response.order : item));
       showToast(`Order ${order.orderId} updated to ${response.order.status}.`);
@@ -95,15 +98,14 @@ export const AdminPanel = () => {
   };
 
   const confirmOrderDelivery = async (order) => {
-    const otp = orderOtps[order.orderId] || '';
-    if (!/^\d{4}$/.test(otp)) return showToast('Enter the 4-digit handover code provided by the customer.', 'error');
     setUpdatingOrderId(order.orderId);
     try {
-      const response = await api.confirmOrderDelivery(order.orderId, otp);
+      const otpValue = orderOtps[order.orderId]?.trim() || '';
+      const response = await api.confirmOrderDelivery(order.orderId, otpValue);
       if (!response.success || !response.order) throw new Error(response.message || 'Could not confirm delivery.');
       setOrders((current) => current.map((item) => item.orderId === order.orderId ? response.order : item));
       setOrderOtps((current) => ({ ...current, [order.orderId]: '' }));
-      showToast(`Delivery confirmed for order ${order.orderId}.`);
+      showToast(`✅ Delivery confirmed for order ${order.orderId}.`);
     } catch (error) {
       showToast(error.message || 'Could not confirm delivery.', 'error');
     } finally {
@@ -316,7 +318,15 @@ export const AdminPanel = () => {
               const readyToConfirm = stageIndex >= deliveryStages.length - 2 && !delivered && !cancelled;
               return <article key={order.orderId} style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', gap: '16px', alignItems: 'center', background: 'white', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '17px', boxShadow: '0 5px 18px rgba(15,23,42,.03)' }}>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '9px', flexWrap: 'wrap' }}><strong style={{ color: '#0f172a' }}>#{order.orderId}</strong><span style={{ padding: '4px 8px', borderRadius: '999px', background: cancelled ? '#fee2e2' : delivered ? '#dcfce7' : '#ecfdf5', color: cancelled ? '#b91c1c' : '#047857', fontSize: '.76rem', fontWeight: 750 }}>{order.status}</span></div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '9px', flexWrap: 'wrap' }}>
+                    <strong style={{ color: '#0f172a' }}>#{order.orderId}</strong>
+                    <span style={{ padding: '4px 8px', borderRadius: '999px', background: cancelled ? '#fee2e2' : delivered ? '#dcfce7' : '#ecfdf5', color: cancelled ? '#b91c1c' : '#047857', fontSize: '.76rem', fontWeight: 750 }}>{order.status}</span>
+                    {order.deliveryConfirmationOtp && !delivered && !cancelled && (
+                      <span style={{ padding: '3px 8px', borderRadius: '6px', background: '#fef3c7', color: '#b45309', fontSize: '.76rem', fontWeight: 800 }}>
+                        OTP: {order.deliveryConfirmationOtp}
+                      </span>
+                    )}
+                  </div>
                   <div style={{ marginTop: '6px', color: '#475569', fontSize: '.87rem' }}>{order.customerName} · {order.customerPhone} · ₹{Number(order.totalAmount || 0).toFixed(2)}</div>
                   <div style={{ marginTop: '4px', color: '#64748b', fontSize: '.82rem' }}>{(order.items || []).map((item) => `${item.name} × ${item.quantity}`).join(', ')}</div>
                   <div style={{ marginTop: '5px', color: '#64748b', fontSize: '.8rem' }}>{order.deliveryAddress?.fullAddress || order.deliveryAddress?.street || order.deliveryAddress?.pincode || 'Address unavailable'}</div>
@@ -324,11 +334,18 @@ export const AdminPanel = () => {
                   {order.paymentStatus && <div style={{ marginTop: '4px', color: order.paymentStatus === 'Refund Pending' ? '#b45309' : '#64748b', fontSize: '.8rem' }}>Payment: {order.paymentStatus}</div>}
                 </div>
                 {delivered ? <strong style={{ color: '#047857', display: 'inline-flex', alignItems: 'center', gap: '7px' }}><Check size={17} /> Delivered</strong> : cancelled ? <strong style={{ color: '#b91c1c' }}>Cancelled</strong> : <div style={{ display: 'flex', gap: '7px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                  {readyToConfirm ? <>
-                  <input aria-label={`Handover code for ${order.orderId}`} inputMode="numeric" maxLength={4} placeholder="4-digit code" value={orderOtps[order.orderId] || ''} onChange={(event) => setOrderOtps((current) => ({ ...current, [order.orderId]: event.target.value.replace(/\D/g, '').slice(0, 4) }))} style={{ ...inputStyle, width: '115px' }} />
-                  <button disabled={updatingOrderId === order.orderId} onClick={() => confirmOrderDelivery(order)} style={{ border: 0, borderRadius: '9px', background: '#059669', color: 'white', padding: '10px 12px', fontWeight: 750, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><Check size={16} /> Confirm delivery</button>
-                  </> : <button disabled={updatingOrderId === order.orderId} onClick={() => updateOrderStage(order)} style={{ border: 0, borderRadius: '9px', background: '#0f766e', color: 'white', padding: '10px 12px', fontWeight: 750, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '7px' }}>{updatingOrderId === order.orderId ? <LoaderCircle className="spin" size={16} /> : <Truck size={16} />} Advance order</button>}
-                  <button disabled={updatingOrderId === order.orderId} onClick={() => cancelOrder(order)} style={{ border: '1px solid #fecaca', borderRadius: '9px', background: '#fff7f7', color: '#b91c1c', padding: '10px 12px', fontWeight: 750, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><X size={16} /> Cancel order</button>
+                  {stageIndex < deliveryStages.length - 2 && (
+                    <button disabled={updatingOrderId === order.orderId} onClick={() => updateOrderStage(order)} style={{ border: 0, borderRadius: '9px', background: '#0f766e', color: 'white', padding: '10px 12px', fontWeight: 750, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
+                      {updatingOrderId === order.orderId ? <LoaderCircle className="spin" size={16} /> : <Truck size={16} />} Advance
+                    </button>
+                  )}
+                  <input aria-label={`Handover code for ${order.orderId}`} inputMode="numeric" maxLength={4} placeholder={order.deliveryConfirmationOtp ? `OTP: ${order.deliveryConfirmationOtp}` : '4-digit code'} value={orderOtps[order.orderId] || ''} onChange={(event) => setOrderOtps((current) => ({ ...current, [order.orderId]: event.target.value.replace(/\D/g, '').slice(0, 4) }))} style={{ ...inputStyle, width: '110px', padding: '9px 10px', fontSize: '.84rem' }} />
+                  <button disabled={updatingOrderId === order.orderId} onClick={() => confirmOrderDelivery(order)} style={{ border: 0, borderRadius: '9px', background: '#059669', color: 'white', padding: '10px 12px', fontWeight: 750, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <Check size={16} /> Confirm delivery
+                  </button>
+                  <button disabled={updatingOrderId === order.orderId} onClick={() => cancelOrder(order)} style={{ border: '1px solid #fecaca', borderRadius: '9px', background: '#fff7f7', color: '#b91c1c', padding: '10px 12px', fontWeight: 750, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <X size={16} /> Cancel
+                  </button>
                 </div>}
               </article>;
             })}

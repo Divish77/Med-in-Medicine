@@ -54,7 +54,6 @@ export const Footer = () => {
                   Track Active Order
                 </button>
               </li>
-
               <li>
                 <button onClick={() => setIsLocationModalOpen(true)} style={{ background: 'transparent', color: '#cbd5e1', padding: 0 }}>
                   Change Delivery Location
@@ -74,12 +73,12 @@ export const Footer = () => {
               Medicine Categories
             </h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.85rem' }}>
-              <li>Pain Relief & Fever (Dolo, Crocin)</li>
+              <li>Pain Relief &amp; Fever (Dolo, Crocin)</li>
               <li>Antibiotics (Azithral, Augmentin)</li>
-              <li>Stomach Care & Antacids (Pan 40)</li>
-              <li>Diabetes & Cardiac Care</li>
-              <li>Vitamins & Calcium Supplements</li>
-              <li>First Aid & Emergency Devices</li>
+              <li>Stomach Care &amp; Antacids (Pan 40)</li>
+              <li>Diabetes &amp; Cardiac Care</li>
+              <li>Vitamins &amp; Calcium Supplements</li>
+              <li>First Aid &amp; Emergency Devices</li>
             </ul>
           </div>
 
@@ -89,7 +88,7 @@ export const Footer = () => {
               Medical Disclaimer
             </h4>
             <p style={{ fontSize: '0.75rem', lineHeight: 1.6, color: '#94a3b8' }}>
-              Med in Minutes is an on-demand medical logistics and pharmacy aggregator platform. Schedule H and X prescription drugs require a valid doctorâ€™s prescription verified by licensed pharmacists before fulfillment. Do not self-medicate.
+              Med in Minutes is an on-demand medical logistics and pharmacy aggregator platform. Schedule H and X prescription drugs require a valid doctor&apos;s prescription verified by licensed pharmacists before fulfillment. Do not self-medicate.
             </p>
             <div style={{ marginTop: '12px', fontSize: '0.75rem', color: '#fef08a' }}>
               Emergency Helpline: <strong>1800-633-646</strong> (24x7)
@@ -100,7 +99,7 @@ export const Footer = () => {
         {/* Copyright */}
         <div style={{ borderTop: '1px solid #1e293b', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', fontSize: '0.785rem' }}>
           <div>
-            Â            © {CURRENT_YEAR} Med in Minutes Healthcare Technologies Pvt Ltd. All rights reserved.
+            &copy; {CURRENT_YEAR} Med in Minutes Healthcare Technologies Pvt Ltd. All rights reserved.
           </div>
           <div style={{ display: 'flex', gap: '16px' }}>
             <span>Privacy Policy</span>

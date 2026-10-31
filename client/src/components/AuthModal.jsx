@@ -57,7 +57,11 @@ export const AuthModal = () => {
       close();
       showToast('Signed in successfully.');
     } catch (error) {
-      showToast(error.message || 'Sign in failed.', 'error');
+      if (error.message?.toLowerCase().includes('email not confirmed')) {
+        showToast('Please confirm your email address before logging in. Check your inbox — or use the resend button below.', 'info');
+      } else {
+        showToast(error.message || 'Sign in failed.', 'error');
+      }
     } finally {
       setLoading(false);
     }
@@ -96,6 +100,16 @@ export const AuthModal = () => {
       showToast(error.message || 'Registration failed.', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!email) { showToast('Enter your email address first.', 'info'); return; }
+    try {
+      await supabaseAuth.resendConfirmation(email);
+      showToast('Confirmation email resent! Check your inbox.', 'info');
+    } catch {
+      showToast('Could not resend confirmation email.', 'error');
     }
   };
 
@@ -146,7 +160,12 @@ export const AuthModal = () => {
             <label style={{ display: 'grid', gap: '5px', marginBottom: '12px', color: '#334155', fontWeight: 700, fontSize: '.83rem' }}>Email address<input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" style={fieldStyle} /></label>
             {mode === 'register' && <label style={{ display: 'grid', gap: '5px', marginBottom: '12px', color: '#334155', fontWeight: 700, fontSize: '.83rem' }}>Phone number <span style={{ fontWeight: 400, color: '#64748b' }}>(optional)</span><input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} autoComplete="tel" style={fieldStyle} /></label>}
             <label style={{ display: 'grid', gap: '5px', marginBottom: '18px', color: '#334155', fontWeight: 700, fontSize: '.83rem' }}>Password<input required type="password" minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} style={fieldStyle} /></label>
-            <button type="submit" disabled={loading} className="btn btn-primary" style={{ width: '100%', padding: '11px', marginBottom: '13px' }}>{loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create customer account'}</button>
+            <button type="submit" disabled={loading} className="btn btn-primary" style={{ width: '100%', padding: '11px', marginBottom: '10px' }}>{loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create customer account'}</button>
+            {mode === 'login' && (
+              <button type="button" onClick={handleResendConfirmation} style={{ width: '100%', marginBottom: '12px', padding: '9px', border: '1px dashed #94a3b8', borderRadius: '9px', background: 'transparent', color: '#64748b', fontSize: '.83rem', cursor: 'pointer' }}>
+                Resend confirmation email
+              </button>
+            )}
             <div style={{ textAlign: 'center', fontSize: '.84rem', color: '#64748b' }}>{mode === 'login' ? 'New to Med in Minutes?' : 'Already have an account?'}{' '}<button type="button" onClick={() => setMode(mode === 'login' ? 'register' : 'login')} style={{ border: 0, padding: 0, background: 'transparent', color: 'var(--primary)', fontWeight: 750, cursor: 'pointer' }}>{mode === 'login' ? 'Create account' : 'Sign in'}</button></div>
           </form>
         )}

@@ -92,14 +92,14 @@ export const api = {
   async getOrders(userId) {
     const query = userId ? `?${new URLSearchParams({ userId })}` : '';
     const url = `${API_BASE}/orders${query}`;
-    const res = await fetch(url, userId ? {} : { headers: { Authorization: `Bearer ${localStorage.getItem('mim_token') || ''}` } });
+    const res = await fetch(url, userId ? {} : { headers: adminHeaders() });
     return safeRes(res);
   },
 
   async advanceOrderStage(orderId, targetStageIndex) {
     const res = await fetch(`${API_BASE}/orders/${encodeURIComponent(orderId)}/advance-stage`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('mim_token') || ''}` },
+      headers: { 'Content-Type': 'application/json', ...adminHeaders() },
       body: JSON.stringify({ targetStageIndex })
     });
     return safeRes(res);
@@ -108,7 +108,7 @@ export const api = {
   async cancelOrder(orderId, reason) {
     const res = await fetch(`${API_BASE}/orders/${encodeURIComponent(orderId)}/cancel`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('mim_token') || ''}` },
+      headers: { 'Content-Type': 'application/json', ...adminHeaders() },
       body: JSON.stringify({ reason })
     });
     return safeRes(res);
@@ -117,7 +117,7 @@ export const api = {
   async confirmOrderDelivery(orderId, otp) {
     const res = await fetch(`${API_BASE}/orders/${encodeURIComponent(orderId)}/deliver`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('mim_token') || ''}` },
+      headers: { 'Content-Type': 'application/json', ...adminHeaders() },
       body: JSON.stringify({ otp })
     });
     return safeRes(res);

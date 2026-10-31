@@ -25,6 +25,17 @@ export const InteractiveMap = ({
   const markersRef = useRef([]);
   const polylineRef = useRef(null);
 
+  // Unmount-only cleanup — removes the map exactly once when the component leaves the DOM
+  useEffect(() => {
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
+
+  // Update effect — initialises the map on first render, then updates markers/view on prop changes
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
@@ -46,11 +57,12 @@ export const InteractiveMap = ({
     const map = mapInstanceRef.current;
     map.setView(center, zoom);
 
-    // Clear previous markers
+    // Clear previous markers and polyline
     markersRef.current.forEach((m) => map.removeLayer(m));
     markersRef.current = [];
     if (polylineRef.current) {
       map.removeLayer(polylineRef.current);
+      polylineRef.current = null;
     }
 
     // Custom Pharmacy Marker
@@ -64,7 +76,7 @@ export const InteractiveMap = ({
 
       const pharmMarker = L.marker(pharmacyPos, { icon: pharmacyIcon })
         .addTo(map)
-        .bindPopup(`<b>Nearby Partner Pharmacy</b><br>Stock allocated & verified.`);
+        .bindPopup('<b>Nearby Partner Pharmacy</b><br>Stock allocated &amp; verified.');
       markersRef.current.push(pharmMarker);
     }
 
@@ -80,7 +92,7 @@ export const InteractiveMap = ({
       const delMarker = L.marker(deliveryPos, {
         icon: homeIcon,
         draggable: isDraggable
-      }).addTo(map).bindPopup(`<b>Your Delivery Location</b>`);
+      }).addTo(map).bindPopup('<b>Your Delivery Location</b>');
 
       if (isDraggable && onPinDrag) {
         delMarker.on('dragend', (e) => {
@@ -103,7 +115,7 @@ export const InteractiveMap = ({
 
       const riderMarker = L.marker(riderPos, { icon: riderIcon })
         .addTo(map)
-        .bindPopup(`<b>Delivery Partner: Delivery partner not assigned</b><br>Speed: 28 km/h • On the way!`);
+        .bindPopup('<b>Delivery Partner</b><br>Speed: 28 km/h • On the way!');
       markersRef.current.push(riderMarker);
     }
 
@@ -130,14 +142,6 @@ export const InteractiveMap = ({
       const bounds = L.latLngBounds(points);
       map.fitBounds(bounds, { padding: [40, 40] });
     }
-
-    // Cleanup on unmount
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-    };
   }, [center, zoom, pharmacyPos, deliveryPos, riderPos, isDraggable, onPinDrag]);
 
   return (
