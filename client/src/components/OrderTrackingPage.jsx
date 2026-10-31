@@ -513,10 +513,11 @@ export const OrderTrackingPage = () => {
             </div>
           </div>
         </div>
+        </>}
       </div>
 
       {/* Support Modal */}
-        {supportModalOpen && (
+        {order && supportModalOpen && (
         <div className="modal-overlay" onClick={() => setSupportModalOpen(false)}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ padding: '24px', maxWidth: '420px' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '8px' }}>24x7 Priority Medical Support</h3>
@@ -542,7 +543,6 @@ export const OrderTrackingPage = () => {
           </div>
         </div>
         )}
-        </>}
       </div>
   );
 };
