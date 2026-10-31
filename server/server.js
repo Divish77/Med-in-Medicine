@@ -2,6 +2,7 @@ import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
+import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -52,6 +53,26 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Demo data is opt-in. Production and local accounts start with their own inventory.
 if (process.env.SEED_DEMO_DATA === 'true') {
   dbStore.seedInitialData(seedMedicinesList, seedPharmaciesList);
+}
+
+if (process.env.VERCEL === '1') {
+  dbStore.seedInitialData(seedMedicinesList, seedPharmaciesList);
+}
+
+const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+const adminPassword = process.env.ADMIN_PASSWORD;
+if (adminEmail && adminPassword) {
+  const existingAdmin = dbStore.findOne('users', (user) => user.email?.toLowerCase() === adminEmail);
+  if (!existingAdmin) {
+    dbStore.insert('users', {
+      name: process.env.ADMIN_NAME?.trim() || 'Website Administrator',
+      email: adminEmail,
+      password: bcrypt.hashSync(adminPassword, 12),
+      phone: '',
+      role: 'admin',
+      addresses: []
+    });
+  }
 }
 
 // Health check
