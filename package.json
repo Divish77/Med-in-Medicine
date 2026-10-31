@@ -4,6 +4,7 @@
   "type": "module",
   "main": "server/server.js",
   "scripts": {
+    "postinstall": "npm --prefix client install",
     "start": "node server/server.js",
     "server": "node server/server.js",
     "client": "npm --prefix client run dev",
