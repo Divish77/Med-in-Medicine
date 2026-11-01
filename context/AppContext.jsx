@@ -190,6 +190,15 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => {
     if (!isHydratedRef.current || typeof window === 'undefined') return;
+    if (activeOrderId) {
+      localStorage.setItem('mim_active_order', activeOrderId);
+    } else {
+      localStorage.removeItem('mim_active_order');
+    }
+  }, [activeOrderId]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current || typeof window === 'undefined') return;
     localStorage.removeItem('mim_cart');
     const userId = user?.id;
     if (userId && cartLoadedForUserId === userId) {

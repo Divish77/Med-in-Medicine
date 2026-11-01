@@ -70,28 +70,53 @@ export const OrderTrackingPage = () => {
       if (res.success && res.order) {
         setOrder(res.order);
         setSearchInput(res.order.orderId);
+        if (res.order.status === 'Successfully Delivered' || res.order.status === 'Delivered' || res.order.status === 'Cancelled') {
+          setActiveOrderId('');
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('mim_active_order');
+          }
+        }
       } else {
-        showToast('Order not found. Please check Order ID.', 'error');
+        setOrder(null);
+        setActiveOrderId('');
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('mim_active_order');
+        }
       }
-    } catch  {
-      showToast('Error loading order tracking', 'error');
+    } catch {
+      setOrder(null);
     }
-  }, [showToast]);
+  }, [setActiveOrderId]);
 
   useEffect(() => {
     if (activeOrderId) {
       loadOrder(activeOrderId);
     } else if (user?.id) {
-      // Load most recent order if any
       api.getOrders(user.id).then((res) => {
         if (res.success && res.orders && res.orders.length > 0) {
-          setOrder(res.orders[0]);
-          setActiveOrderId(res.orders[0].orderId);
-          setSearchInput(res.orders[0].orderId);
+          const inProgress = res.orders.find(o => 
+            o.status !== 'Successfully Delivered' && 
+            o.status !== 'Delivered' && 
+            o.status !== 'Cancelled'
+          );
+          if (inProgress) {
+            setOrder(inProgress);
+            setActiveOrderId(inProgress.orderId);
+            setSearchInput(inProgress.orderId);
+          } else {
+            setOrder(null);
+            setSearchInput('');
+          }
+        } else {
+          setOrder(null);
+          setSearchInput('');
         }
-      }).catch(() => showToast('Could not load your recent orders.', 'error'));
+      }).catch(() => {});
+    } else {
+      setOrder(null);
+      setSearchInput('');
     }
-  }, [activeOrderId, user?.id, loadOrder, setActiveOrderId, showToast]);
+  }, [activeOrderId, user?.id, loadOrder, setActiveOrderId]);
 
   // Socket.IO real-time updates listener
   const trackedOrderId = order?.orderId;
@@ -407,17 +432,32 @@ export const OrderTrackingPage = () => {
               </div>
 
               {/* Delivery OTP verification info */}
-              <div style={{ marginTop: '18px', padding: '12px 16px', background: '#ecfdf5', borderRadius: '12px', border: '1px solid #a7f3d0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <ShieldCheck size={20} color="#059669" />
-                  <span style={{ fontSize: '0.85rem', color: '#064e3b', fontWeight: 600 }}>
-                    Share OTP upon medicine package handover:
+              {order.status !== 'Successfully Delivered' && order.status !== 'Delivered' && order.status !== 'Cancelled' ? (
+                <div style={{ marginTop: '18px', padding: '12px 16px', background: '#ecfdf5', borderRadius: '12px', border: '1px solid #a7f3d0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <ShieldCheck size={20} color="#059669" />
+                    <span style={{ fontSize: '0.85rem', color: '#064e3b', fontWeight: 600 }}>
+                      Share OTP upon medicine package handover:
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '1.2rem', fontWeight: 800, letterSpacing: '2px', color: '#059669', background: 'white', padding: '4px 12px', borderRadius: '8px', border: '1px solid #a7f3d0' }}>
+                    {order.deliveryConfirmationOtp || 'Not available'}
                   </span>
                 </div>
-                <span style={{ fontSize: '1.2rem', fontWeight: 800, letterSpacing: '2px', color: '#059669', background: 'white', padding: '4px 12px', borderRadius: '8px', border: '1px solid #a7f3d0' }}>
-                  {order.deliveryConfirmationOtp || 'Not available'}
-                </span>
-              </div>
+              ) : (order.status === 'Successfully Delivered' || order.status === 'Delivered') ? (
+                <div style={{ marginTop: '18px', padding: '12px 16px', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #86efac', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <CheckCircle2 size={20} color="#16a34a" />
+                  <span style={{ fontSize: '0.85rem', color: '#166534', fontWeight: 700 }}>
+                    Package Delivered &amp; Handover Completed Successfully.
+                  </span>
+                </div>
+              ) : (
+                <div style={{ marginTop: '18px', padding: '12px 16px', background: '#fef2f2', borderRadius: '12px', border: '1px solid #fecaca', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '0.85rem', color: '#991b1b', fontWeight: 700 }}>
+                    Order Cancelled.
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
