@@ -1,0 +1,15 @@
+import { NextResponse } from 'next/server';
+import { dbStore } from '@/lib/db';
+
+export async function GET(request, { params }) {
+  try {
+    const { id } = await params;
+    const order = dbStore.findOne('orders', (o) => o.orderId === id || o._id === id);
+    if (!order) {
+      return NextResponse.json({ success: false, message: 'Order not found.' }, { status: 404 });
+    }
+    return NextResponse.json({ success: true, order });
+  } catch (err) {
+    return NextResponse.json({ success: false, message: err.message }, { status: 500 });
+  }
+}
