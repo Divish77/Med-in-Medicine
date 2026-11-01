@@ -12,6 +12,7 @@ import { CheckoutModal } from '@/components/CheckoutModal';
 import { DeliverySuccessModal } from '@/components/DeliverySuccessModal';
 import { InvoiceModal } from '@/components/InvoiceModal';
 import { AuthModal } from '@/components/AuthModal';
+import { AiChatbot } from '@/components/AiChatbot';
 import { Footer } from '@/components/Footer';
 import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
 
@@ -105,6 +106,7 @@ export default function HomePage() {
       <DeliverySuccessModal />
       <InvoiceModal />
       <AuthModal />
+      <AiChatbot />
 
       {/* Footer */}
       <Footer />
