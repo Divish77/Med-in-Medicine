@@ -105,13 +105,14 @@ export const Navbar = () => {
             textAlign: 'left'
           }}
           title="Click to change delivery location"
+          suppressHydrationWarning
         >
           <MapPin size={18} color="var(--primary)" style={{ flexShrink: 0 }} />
-          <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            <div style={{ fontSize: '0.7rem', color: 'var(--primary)', fontWeight: 700 }}>
+          <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} suppressHydrationWarning>
+            <div style={{ fontSize: '0.7rem', color: 'var(--primary)', fontWeight: 700 }} suppressHydrationWarning>
               {deliveryLocation.serviceable ? `DELIVERY ${deliveryLocation.etaLabel || `IN ${deliveryLocation.etaMinutes || 10} MINS`}` : 'UNAVAILABLE ZONE'}
             </div>
-            <div style={{ color: 'var(--text-main)', fontSize: '0.825rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div style={{ color: 'var(--text-main)', fontSize: '0.825rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} suppressHydrationWarning>
               {deliveryLocation.area || 'Set Location'}, {deliveryLocation.pincode}
             </div>
           </div>

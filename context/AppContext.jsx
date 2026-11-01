@@ -23,37 +23,68 @@ export const AppProvider = ({ children }) => {
   const [activeTab, setActiveTab] = useState('home');
 
   // User State
-  const [user, setUser] = useState(() => {
-    const savedUser = safeJsonParse('mim_user', null);
-    if (savedUser && !['buyer', 'admin'].includes(savedUser.role)) {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('mim_user');
-        localStorage.removeItem('mim_token');
-      }
-      return null;
-    }
-    const legacyAdminToken = typeof window !== 'undefined' && savedUser?.role === 'admin' ? localStorage.getItem('mim_token') : null;
-    if (typeof window !== 'undefined' && legacyAdminToken && !localStorage.getItem('mim_admin_token')) {
-      localStorage.setItem('mim_admin_token', legacyAdminToken);
-    }
-    const hasLocalAdminToken = typeof window !== 'undefined' && Boolean(localStorage.getItem('mim_admin_token') || legacyAdminToken);
-    return savedUser ? { ...savedUser, role: savedUser.role === 'admin' && hasLocalAdminToken ? 'admin' : 'buyer' } : null;
-  });
+  const [user, setUser] = useState(null);
 
   const [pendingCartItems, setPendingCartItems] = useState([]);
-  const [cartLoadedForUserId, setCartLoadedForUserId] = useState(user?.id || null);
+  const [cartLoadedForUserId, setCartLoadedForUserId] = useState(null);
 
   // Saved Delivery Addresses (Home, Work, Other)
-  const [savedAddresses, setSavedAddresses] = useState(() => safeJsonParse('mim_addresses', []));
+  const [savedAddresses, setSavedAddresses] = useState([]);
 
   // Current Selected Delivery Location
-  const [deliveryLocation, setDeliveryLocation] = useState(() => {
-    return safeJsonParse('mim_location', {
-      pincode: '', area: '', city: '', street: '', landmark: '', fullAddress: '',
-      label: '', lat: null, lng: null, expressEligible: false, etaMinutes: null,
-      serviceable: false, pharmacyName: ''
-    });
+  const [deliveryLocation, setDeliveryLocation] = useState({
+    pincode: '', area: '', city: '', street: '', landmark: '', fullAddress: '',
+    label: '', lat: null, lng: null, expressEligible: false, etaMinutes: null,
+    serviceable: false, pharmacyName: ''
   });
+
+  const isHydratedRef = useRef(false);
+
+  // Cart State
+  const [cart, setCart] = useState([]);
+
+  // Active Prescription State
+  const [attachedPrescription, setAttachedPrescription] = useState(null);
+
+  // Active Order for Tracking
+  const [activeOrderId, setActiveOrderId] = useState('');
+
+  // Initial client hydration from localStorage to prevent SSR mismatch
+  useEffect(() => {
+    try {
+      const savedUser = safeJsonParse('mim_user', null);
+      if (savedUser && ['buyer', 'admin'].includes(savedUser.role)) {
+        const legacyAdminToken = savedUser?.role === 'admin' ? localStorage.getItem('mim_token') : null;
+        if (legacyAdminToken && !localStorage.getItem('mim_admin_token')) {
+          localStorage.setItem('mim_admin_token', legacyAdminToken);
+        }
+        const hasLocalAdminToken = Boolean(localStorage.getItem('mim_admin_token') || legacyAdminToken);
+        setUser({ ...savedUser, role: savedUser.role === 'admin' && hasLocalAdminToken ? 'admin' : 'buyer' });
+        const userCart = safeJsonParse(`mim_cart_${savedUser.id}`, []);
+        setCart(userCart);
+        setCartLoadedForUserId(savedUser.id);
+      }
+
+      const savedAddr = safeJsonParse('mim_addresses', null);
+      if (savedAddr && Array.isArray(savedAddr) && savedAddr.length > 0) {
+        setSavedAddresses(savedAddr);
+      }
+
+      const savedLoc = safeJsonParse('mim_location', null);
+      if (savedLoc && savedLoc.pincode) {
+        setDeliveryLocation(savedLoc);
+      }
+
+      const savedOrder = localStorage.getItem('mim_active_order');
+      if (savedOrder && savedOrder !== 'undefined') {
+        setActiveOrderId(savedOrder);
+      }
+    } catch (err) {
+      console.warn('Client hydration error:', err);
+    } finally {
+      isHydratedRef.current = true;
+    }
+  }, []);
 
   useEffect(() => {
     const savedPin = deliveryLocation.pincode;
@@ -72,23 +103,6 @@ export const AppProvider = ({ children }) => {
       });
     }).catch(() => {});
   }, [deliveryLocation.pincode]);
-
-  // Cart State
-  const [cart, setCart] = useState(() => user?.id ? safeJsonParse(`mim_cart_${user.id}`, []) : []);
-
-  // Active Prescription State
-  const [attachedPrescription, setAttachedPrescription] = useState(null);
-
-  // Active Order for Tracking
-  const [activeOrderId, setActiveOrderId] = useState(() => {
-    if (typeof window === 'undefined') return '';
-    try {
-      const saved = localStorage.getItem('mim_active_order');
-      return saved && saved !== 'undefined' ? saved : '';
-    } catch {
-      return '';
-    }
-  });
 
   // Modals & Panels State
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
@@ -144,9 +158,9 @@ export const AppProvider = ({ children }) => {
     };
   }, []);
 
-  // Save changes to localStorage
+  // Save changes to localStorage only after client hydration
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (!isHydratedRef.current || typeof window === 'undefined') return;
     if (user) {
       localStorage.setItem('mim_user', JSON.stringify(user));
     } else {
@@ -165,17 +179,17 @@ export const AppProvider = ({ children }) => {
   }, [user?.id, cartLoadedForUserId]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (!isHydratedRef.current || typeof window === 'undefined') return;
     localStorage.setItem('mim_addresses', JSON.stringify(savedAddresses));
   }, [savedAddresses]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (!isHydratedRef.current || typeof window === 'undefined') return;
     localStorage.setItem('mim_location', JSON.stringify(deliveryLocation));
   }, [deliveryLocation]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (!isHydratedRef.current || typeof window === 'undefined') return;
     localStorage.removeItem('mim_cart');
     const userId = user?.id;
     if (userId && cartLoadedForUserId === userId) {
