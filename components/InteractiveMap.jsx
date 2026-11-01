@@ -167,7 +167,14 @@ export const InteractiveMap = ({
   }, []);
 
   return (
-    <div style={{ width: '100%', height, position: 'relative', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+    <div className="interactive-map-container" style={{ width: '100%', height, position: 'relative', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+      <style>{`
+        @media (max-width: 767px) {
+          .interactive-map-container {
+            height: 230px !important;
+          }
+        }
+      `}</style>
       <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
     </div>
   );

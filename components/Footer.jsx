@@ -27,9 +27,28 @@ export const Footer = () => {
   ];
 
   return (
-    <footer style={{ background: '#0f172a', color: '#94a3b8', padding: '60px 0 30px', borderTop: '1px solid #1e293b' }}>
+    <footer className="site-footer" style={{ background: '#0f172a', color: '#94a3b8', padding: '60px 0 30px', borderTop: '1px solid #1e293b' }}>
+      <style>{`
+        @media (max-width: 767px) {
+          .site-footer {
+            padding: 40px 0 96px !important;
+          }
+          .footer-grid {
+            grid-template-columns: 1fr !important;
+            gap: 28px !important;
+          }
+          .footer-bottom {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 16px !important;
+          }
+          .footer-legal-links {
+            gap: 14px 20px !important;
+          }
+        }
+      `}</style>
       <div className="container">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '36px', marginBottom: '40px' }}>
+        <div className="footer-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '36px', marginBottom: '40px' }}>
           {/* Brand Info */}
           <div>
             <div style={{ marginBottom: '14px' }}>
@@ -122,11 +141,11 @@ export const Footer = () => {
         </div>
 
         {/* Bottom Legal Navigation Bar */}
-        <div style={{ borderTop: '1px solid #1e293b', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', fontSize: '0.785rem' }}>
+        <div className="footer-bottom" style={{ borderTop: '1px solid #1e293b', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', fontSize: '0.785rem' }}>
           <div>
             &copy; {CURRENT_YEAR} Med-in-Minutes Healthcare Technologies Pvt Ltd. All rights reserved.
           </div>
-          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div className="footer-legal-links" style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
             {legalLinks.map((link) => {
               const isActive = pathname === link.href;
               return (

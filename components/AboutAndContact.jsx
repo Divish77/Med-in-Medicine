@@ -6,21 +6,40 @@ import { useApp } from '@/context/AppContext';
 
 export const AboutPage = () => {
   return (
-    <div style={{ padding: '60px 0 80px', background: 'var(--bg-main)' }}>
+    <div className="about-page" style={{ padding: '48px 0 70px', background: 'var(--bg-main)' }}>
+      <style>{`
+        @media (max-width: 767px) {
+          .about-page {
+            padding: 24px 0 50px !important;
+          }
+          .about-card {
+            padding: 20px 16px !important;
+            border-radius: 16px !important;
+          }
+          .contact-grid {
+            grid-template-columns: 1fr !important;
+            gap: 20px !important;
+          }
+          .contact-form-card {
+            padding: 20px 16px !important;
+            border-radius: 16px !important;
+          }
+        }
+      `}</style>
       <div className="container" style={{ maxWidth: '900px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <span className="badge badge-express" style={{ marginBottom: '12px' }}>
             ABOUT MED-IN-MINUTES
           </span>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '16px' }}>
+          <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontWeight: 800, color: 'var(--text-main)', marginBottom: '14px' }}>
             Making Healthcare Accessible in 10 Minutes
           </h1>
-          <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+          <p style={{ fontSize: '1rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
             Med-in-Minutes was founded on a simple medical premise: healthcare emergencies and critical prescriptions should never have to wait days for courier delivery.
           </p>
         </div>
 
-        <div style={{ background: 'white', borderRadius: '20px', padding: '36px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)', marginBottom: '32px' }}>
+        <div className="about-card" style={{ background: 'white', borderRadius: '20px', padding: '36px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)', marginBottom: '28px' }}>
           <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '14px', color: 'var(--text-main)' }}>
             The 10-Minute Hyperlocal Network
           </h2>
@@ -87,9 +106,9 @@ export const ContactPage = () => {
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '30px' }}>
+        <div className="contact-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '24px' }}>
           {/* Contact Details */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ background: 'white', padding: '24px', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
                 <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--primary-light)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -136,7 +155,7 @@ export const ContactPage = () => {
           </div>
 
           {/* Contact Form */}
-          <div style={{ background: 'white', padding: '28px', borderRadius: '20px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
+          <div className="contact-form-card" style={{ background: 'white', padding: '28px', borderRadius: '20px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '16px' }}>Send Us a Message</h3>
             {submitted ? (
               <div style={{ padding: '20px', background: '#ecfdf5', borderRadius: '12px', border: '1px solid #a7f3d0', textAlign: 'center' }}>

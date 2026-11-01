@@ -197,6 +197,14 @@ export const LocationModal = () => {
 
   return (
     <div className="modal-overlay" onClick={() => setIsLocationModalOpen(false)}>
+      <style>{`
+        @media (max-width: 480px) {
+          .location-tabs-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 6px !important;
+          }
+        }
+      `}</style>
       <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ padding: '24px' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
@@ -217,7 +225,7 @@ export const LocationModal = () => {
         </div>
 
         {/* Tab Selection */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '20px', background: '#f1f5f9', padding: '4px', borderRadius: '12px' }}>
+        <div className="location-tabs-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '20px', background: '#f1f5f9', padding: '4px', borderRadius: '12px' }}>
           <button
             onClick={() => setActiveTab('pincode')}
             style={{

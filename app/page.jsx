@@ -15,6 +15,7 @@ import { InvoiceModal } from '@/components/InvoiceModal';
 import { AuthModal } from '@/components/AuthModal';
 import { AiChatbot } from '@/components/AiChatbot';
 import { Footer } from '@/components/Footer';
+import { BottomNav } from '@/components/BottomNav';
 import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
 
 const HomepageAdditionalSections = dynamic(() => import('@/components/HomepageAdditionalSections').then((m) => m.HomepageAdditionalSections), { ssr: false });
@@ -111,6 +112,9 @@ export default function HomePage() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Mobile Fixed Bottom Navigation Bar */}
+      <BottomNav />
     </div>
   );
 }

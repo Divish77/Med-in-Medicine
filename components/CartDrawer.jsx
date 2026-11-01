@@ -181,21 +181,23 @@ export const CartDrawer = () => {
                       </div>
 
                       {/* Stepper */}
-                      <div style={{ display: 'flex', alignItems: 'center', background: '#f1f5f9', borderRadius: '8px', padding: '2px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', background: '#f1f5f9', borderRadius: '8px', padding: '3px' }}>
                         <button
                           onClick={() => updateCartQty(item._id, item.quantity - 1)}
-                          style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          aria-label="Decrease quantity"
+                          style={{ width: '32px', height: '32px', borderRadius: '6px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '1px solid #e2e8f0' }}
                         >
-                          <Minus size={13} />
+                          <Minus size={14} color="#334155" />
                         </button>
-                        <span style={{ width: '28px', textAlign: 'center', fontSize: '0.85rem', fontWeight: 700 }}>
+                        <span style={{ width: '32px', textAlign: 'center', fontSize: '0.9rem', fontWeight: 800 }}>
                           {item.quantity}
                         </span>
                         <button
                           onClick={() => updateCartQty(item._id, item.quantity + 1)}
-                          style={{ width: '26px', height: '26px', borderRadius: '6px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          aria-label="Increase quantity"
+                          style={{ width: '32px', height: '32px', borderRadius: '6px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '1px solid #e2e8f0' }}
                         >
-                          <Plus size={13} />
+                          <Plus size={14} color="#059669" />
                         </button>
                       </div>
                     </div>

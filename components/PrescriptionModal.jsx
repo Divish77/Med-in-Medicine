@@ -317,8 +317,37 @@ export const PrescriptionModal = () => {
 
   return (
     <div className="modal-overlay" onClick={() => setIsPrescriptionModalOpen(false)}>
+      <style>{`
+        @media (max-width: 640px) {
+          .rx-modal-card {
+            border-radius: 20px 20px 0 0 !important;
+            max-height: 94vh !important;
+          }
+          .rx-modal-header {
+            padding: 14px 16px !important;
+          }
+          .rx-modal-title {
+            font-size: 1.15rem !important;
+          }
+          .extracted-row-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 6px !important;
+          }
+          .extracted-row-grid input:first-child {
+            grid-column: 1 / -1 !important;
+          }
+          .results-bottom-bar {
+            flex-direction: column !important;
+            gap: 10px !important;
+          }
+          .results-bottom-btn {
+            width: 100% !important;
+            justify-content: center !important;
+          }
+        }
+      `}</style>
       <div
-        className="modal-card"
+        className="modal-card rx-modal-card"
         onClick={(e) => e.stopPropagation()}
         style={{
           padding: '0',
@@ -334,6 +363,7 @@ export const PrescriptionModal = () => {
       >
         {/* Top Header Bar */}
         <div
+          className="rx-modal-header"
           style={{
             background: 'linear-gradient(135deg, #064e3b 0%, #059669 60%, #0284c7 100%)',
             color: 'white',
@@ -378,7 +408,7 @@ export const PrescriptionModal = () => {
                   <ShieldCheck size={14} style={{ display: 'inline', verticalAlign: '-2px' }} /> 100% Medical Confidentiality
                 </span>
               </div>
-              <h2 style={{ fontSize: '1.45rem', fontWeight: 800, margin: '4px 0 0', letterSpacing: '-0.3px' }}>
+              <h2 className="rx-modal-title" style={{ fontSize: '1.45rem', fontWeight: 800, margin: '4px 0 0', letterSpacing: '-0.3px' }}>
                 Upload Doctor’s Prescription
               </h2>
             </div>
@@ -1120,6 +1150,7 @@ export const PrescriptionModal = () => {
                       {extractedMedicines.map((med) => (
                         <div
                           key={med.id}
+                          className="extracted-row-grid"
                           style={{
                             display: 'grid',
                             gridTemplateColumns: '2fr 1fr 1fr 1fr',
@@ -1188,6 +1219,7 @@ export const PrescriptionModal = () => {
 
                   {/* BOTTOM ACTION BAR */}
                   <div
+                    className="results-bottom-bar"
                     style={{
                       borderTop: '1px solid var(--border-color)',
                       paddingTop: '20px',
@@ -1201,6 +1233,7 @@ export const PrescriptionModal = () => {
                     <button
                       type="button"
                       onClick={() => setStep('idle')}
+                      className="results-bottom-btn"
                       style={{
                         background: 'transparent',
                         border: '1px solid #cbd5e1',

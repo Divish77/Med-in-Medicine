@@ -121,7 +121,16 @@ export const CheckoutModal = () => {
 
   return (
     <div className="modal-overlay" onClick={() => setIsCheckoutModalOpen(false)}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ padding: '28px', maxWidth: '540px' }}>
+      <style>{`
+        @media (max-width: 640px) {
+          .checkout-modal-card {
+            padding: 20px 16px !important;
+            border-radius: 20px 20px 0 0 !important;
+            max-height: 94vh !important;
+          }
+        }
+      `}</style>
+      <div className="modal-card checkout-modal-card" onClick={(e) => e.stopPropagation()} style={{ padding: '28px', maxWidth: '540px' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
           <div>

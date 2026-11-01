@@ -51,10 +51,30 @@ export const HowItWorksSection = () => {
   ];
 
   return (
-    <section style={{ padding: '70px 0', background: 'white', borderBottom: '1px solid var(--border-color)' }}>
+    <section className="how-it-works-section" style={{ padding: '60px 0', background: 'white', borderBottom: '1px solid var(--border-color)' }}>
+      <style>{`
+        @media (max-width: 767px) {
+          .how-it-works-section {
+            padding: 36px 0 !important;
+          }
+          .how-it-works-header {
+            margin-bottom: 28px !important;
+          }
+          .how-it-works-header h2 {
+            font-size: 1.6rem !important;
+          }
+          .how-it-works-grid {
+            grid-template-columns: 1fr !important;
+            gap: 16px !important;
+          }
+          .step-card {
+            padding: 20px 18px !important;
+          }
+        }
+      `}</style>
       <div className="container">
         {/* Section Header */}
-        <div style={{ textAlign: 'center', maxWidth: '680px', margin: '0 auto 50px' }}>
+        <div className="how-it-works-header" style={{ textAlign: 'center', maxWidth: '680px', margin: '0 auto 44px' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', background: 'var(--primary-light)', color: 'var(--primary-dark)', borderRadius: 'var(--radius-full)', fontSize: '0.8rem', fontWeight: 700, marginBottom: '12px' }}>
             <CheckCircle2 size={14} /> SIMPLE 4-STEP PROCESS
           </div>
@@ -67,12 +87,13 @@ export const HowItWorksSection = () => {
         </div>
 
         {/* 4 Steps Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px' }}>
+        <div className="how-it-works-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px' }}>
           {steps.map((item) => {
             const Icon = item.icon;
             return (
               <div
                 key={item.step}
+                className="step-card"
                 style={{
                   background: 'white',
                   borderRadius: 'var(--radius-lg)',

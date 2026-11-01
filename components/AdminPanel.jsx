@@ -352,6 +352,14 @@ export const AdminPanel = () => {
           </div>
         </div>
 
+        <style>{`
+          @media (max-width: 767px) {
+            .admin-order-article {
+              grid-template-columns: 1fr !important;
+              gap: 14px !important;
+            }
+          }
+        `}</style>
         <section style={{ margin: '6px 0 30px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '14px', flexWrap: 'wrap' }}>
             <div><h2 style={{ margin: 0, color: '#10251e', fontSize: '1.35rem' }}>Order delivery control</h2><p style={{ margin: '5px 0 0', color: '#64748b', fontSize: '.88rem' }}>Update each order as it is prepared and delivered. Delivery confirmation requires the customer handover code.</p></div>
@@ -364,7 +372,7 @@ export const AdminPanel = () => {
               const delivered = order.status === 'Successfully Delivered';
               const cancelled = order.status === 'Cancelled';
               const readyToConfirm = stageIndex >= deliveryStages.length - 2 && !delivered && !cancelled;
-              return <article key={order.orderId} style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', gap: '16px', alignItems: 'center', background: 'white', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '17px', boxShadow: '0 5px 18px rgba(15,23,42,.03)' }}>
+              return <article key={order.orderId} className="admin-order-article" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', gap: '16px', alignItems: 'center', background: 'white', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '17px', boxShadow: '0 5px 18px rgba(15,23,42,.03)' }}>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '9px', flexWrap: 'wrap' }}>
                     <strong style={{ color: '#0f172a' }}>#{order.orderId}</strong>

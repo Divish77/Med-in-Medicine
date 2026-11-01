@@ -230,10 +230,110 @@ input, select, textarea {
   z-index: 10;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
+/* Hide scrollbar for clean horizontal swipe */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Touch friendly minimum tap target */
+.tap-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Mobile responsive breakpoints & layout optimizations */
+
+/* Tablet & Smaller (<= 1023px) */
+@media (max-width: 1023px) {
+  .desktop-only {
+    display: none !important;
+  }
+}
+
+/* Mobile & Tablet (< 768px) */
+@media (max-width: 767px) {
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* Prevent automatic iOS Safari zoom by enforcing 16px font on inputs */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+
   .container {
-    padding: 0 16px;
+    padding: 0 14px;
+  }
+
+  /* Modal cards convert to bottom sheets on mobile */
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-card {
+    border-radius: 20px 20px 0 0;
+    max-height: 92vh;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    animation: slideUpMobile 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes slideUpMobile {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  /* Buttons & touch spacing */
+  .btn {
+    padding: 12px 18px;
+    font-size: 0.95rem;
+  }
+
+  /* Leave padding at the bottom of the page for fixed mobile bottom navigation */
+  body {
+    padding-bottom: 72px;
+  }
+}
+
+/* Standard Mobile (<= 480px) */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 12px;
+  }
+
+  h1 {
+    font-size: 1.85rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+
+  .modal-card {
+    max-height: 94vh;
+  }
+}
+
+/* Small Mobile (<= 374px) */
+@media (max-width: 374px) {
+  .container {
+    padding: 0 10px;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  .btn {
+    padding: 10px 14px;
+    font-size: 0.875rem;
   }
 }
 

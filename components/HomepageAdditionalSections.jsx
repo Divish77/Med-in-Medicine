@@ -142,22 +142,49 @@ export const HomepageAdditionalSections = () => {
 
   return (
     <>
+      <style>{`
+        @media (max-width: 767px) {
+          .home-section-pad {
+            padding: 36px 0 !important;
+          }
+          .why-choose-grid {
+            grid-template-columns: 1fr !important;
+            gap: 14px !important;
+          }
+          .pincode-checker-card {
+            padding: 24px 16px !important;
+            border-radius: 18px !important;
+          }
+          .pincode-form {
+            flex-direction: column !important;
+          }
+          .pincode-input {
+            width: 100% !important;
+            min-width: 100% !important;
+          }
+          .pincode-btn {
+            width: 100% !important;
+            justify-content: center !important;
+          }
+        }
+      `}</style>
+
       {/* SECTION A: WHY CHOOSE MED-IN-MINUTES? */}
-      <section style={{ padding: '70px 0', background: 'var(--bg-main)' }}>
+      <section className="home-section-pad" style={{ padding: '70px 0', background: 'var(--bg-main)' }}>
         <div className="container">
-          <div style={{ textAlign: 'center', maxWidth: '640px', margin: '0 auto 48px' }}>
+          <div style={{ textAlign: 'center', maxWidth: '640px', margin: '0 auto 40px' }}>
             <span className="badge badge-express" style={{ marginBottom: '12px' }}>
               🌟 WHY CHOOSE US
             </span>
-            <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.4rem)', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.5px', marginBottom: '12px' }}>
+            <h2 style={{ fontSize: 'clamp(1.7rem, 3vw, 2.4rem)', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.5px', marginBottom: '10px' }}>
               Why Choose Med-in-Minutes?
             </h2>
-            <p style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>
+            <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)' }}>
               Built specifically for health emergencies, elderly care, and urgent family wellness needs.
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+          <div className="why-choose-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '20px' }}>
             {whyChooseFeatures.map((feat) => {
               const Icon = feat.icon;
               return (
@@ -358,9 +385,9 @@ export const HomepageAdditionalSections = () => {
       </section>
 
       {/* SECTION D: SERVICE AVAILABILITY (PIN CODE CHECKER) */}
-      <section style={{ padding: '70px 0', background: 'linear-gradient(180deg, #f8fafc 0%, #ecfdf5 100%)' }}>
+      <section className="home-section-pad" style={{ padding: '70px 0', background: 'linear-gradient(180deg, #f8fafc 0%, #ecfdf5 100%)' }}>
         <div className="container">
-          <div style={{ maxWidth: '680px', margin: '0 auto', background: 'white', borderRadius: '24px', padding: '40px 32px', boxShadow: 'var(--shadow-lg)', border: '1.5px solid var(--border-color)', textAlign: 'center' }}>
+          <div className="pincode-checker-card" style={{ maxWidth: '680px', margin: '0 auto', background: 'white', borderRadius: '24px', padding: '40px 32px', boxShadow: 'var(--shadow-lg)', border: '1.5px solid var(--border-color)', textAlign: 'center' }}>
             <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--primary-light)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <MapPin size={28} />
             </div>
@@ -375,16 +402,18 @@ export const HomepageAdditionalSections = () => {
               Check whether Med-in-Minutes delivers to your area.
             </p>
 
-            <form onSubmit={handleCheckArea} style={{ display: 'flex', gap: '10px', maxWidth: '460px', margin: '0 auto 20px', flexWrap: 'wrap' }}>
+            <form onSubmit={handleCheckArea} className="pincode-form" style={{ display: 'flex', gap: '10px', maxWidth: '460px', margin: '0 auto 20px', flexWrap: 'wrap' }}>
               <input
                 type="text"
                 maxLength={6}
+                inputMode="numeric"
+                className="pincode-input"
                 placeholder="Enter 6-digit PIN code (e.g. 110001)"
                 value={checkerPincode}
                 onChange={(e) => setCheckerPincode(e.target.value.replace(/\D/g, ''))}
                 style={{
                   flex: 1,
-                  minWidth: '220px',
+                  minWidth: '200px',
                   padding: '12px 16px',
                   borderRadius: '12px',
                   border: '1.5px solid var(--border-color)',
@@ -395,7 +424,7 @@ export const HomepageAdditionalSections = () => {
               <button
                 type="submit"
                 disabled={checking}
-                className="btn btn-primary"
+                className="btn btn-primary pincode-btn"
                 style={{ padding: '12px 24px', borderRadius: '12px' }}
               >
                 {checking ? 'Checking...' : 'Check Availability'}

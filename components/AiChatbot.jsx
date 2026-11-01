@@ -276,10 +276,30 @@ export const AiChatbot = () => {
 
   return (
     <>
+      <style>{`
+        @media (max-width: 767px) {
+          .medai-floating-btn {
+            bottom: 76px !important;
+            right: 14px !important;
+            padding: 10px 16px !important;
+            font-size: 0.85rem !important;
+          }
+          .medai-chat-window {
+            bottom: 74px !important;
+            right: 12px !important;
+            max-width: calc(100vw - 24px) !important;
+            width: calc(100vw - 24px) !important;
+            height: calc(100vh - 96px) !important;
+            max-height: calc(100vh - 96px) !important;
+            border-radius: 16px !important;
+          }
+        }
+      `}</style>
       {/* Floating Chat Trigger Button */}
       {!isOpen && (
         <button
           ref={btnRef}
+          className="medai-floating-btn"
           onPointerDown={handleBtnPointerDown}
           onPointerMove={handleBtnPointerMove}
           onPointerUp={handleBtnPointerUp}
@@ -339,6 +359,7 @@ export const AiChatbot = () => {
       {isOpen && (
         <div
           ref={chatWindowRef}
+          className="medai-chat-window"
           role="dialog"
           aria-label="MedAI Customer Support"
           style={{

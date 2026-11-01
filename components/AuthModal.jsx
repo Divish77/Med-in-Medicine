@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Home, LogOut, Plus, Trash2, UserRound, X } from 'lucide-react';
+import { Home, LogOut, Plus, Trash2, UserRound, X, Eye, EyeOff } from 'lucide-react';
 import { api } from '@/lib/api';
 import { supabaseAuth } from '@/lib/supabase';
 import { useApp } from '@/context/AppContext';
@@ -16,6 +16,7 @@ export const AuthModal = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => setMode(user ? 'profile' : 'login'), [user, isAuthModalOpen]);
@@ -159,17 +160,108 @@ export const AuthModal = () => {
           </>
         ) : (
           <form onSubmit={mode === 'login' ? handleLogin : handleRegister}>
-            {mode === 'register' && <label style={{ display: 'grid', gap: '5px', marginBottom: '12px', color: '#334155', fontWeight: 700, fontSize: '.83rem' }}>Full name<input required value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" style={fieldStyle} /></label>}
-            <label style={{ display: 'grid', gap: '5px', marginBottom: '12px', color: '#334155', fontWeight: 700, fontSize: '.83rem' }}>Email address<input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" style={fieldStyle} /></label>
-            {mode === 'register' && <label style={{ display: 'grid', gap: '5px', marginBottom: '12px', color: '#334155', fontWeight: 700, fontSize: '.83rem' }}>Phone number <span style={{ fontWeight: 400, color: '#64748b' }}>(optional)</span><input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} autoComplete="tel" style={fieldStyle} /></label>}
-            <label style={{ display: 'grid', gap: '5px', marginBottom: '18px', color: '#334155', fontWeight: 700, fontSize: '.83rem' }}>Password<input required type="password" minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} style={fieldStyle} /></label>
-            <button type="submit" disabled={loading} className="btn btn-primary" style={{ width: '100%', padding: '11px', marginBottom: '10px' }}>{loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create customer account'}</button>
+            {mode === 'register' && (
+              <label style={{ display: 'grid', gap: '6px', marginBottom: '14px', color: '#334155', fontWeight: 700, fontSize: '.85rem' }}>
+                Full name
+                <input
+                  required
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  autoComplete="name"
+                  placeholder="e.g. Rahul Sharma"
+                  style={fieldStyle}
+                />
+              </label>
+            )}
+            <label style={{ display: 'grid', gap: '6px', marginBottom: '14px', color: '#334155', fontWeight: 700, fontSize: '.85rem' }}>
+              Email address
+              <input
+                required
+                type="email"
+                inputMode="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                autoComplete="email"
+                placeholder="you@example.com"
+                style={fieldStyle}
+              />
+            </label>
+            {mode === 'register' && (
+              <label style={{ display: 'grid', gap: '6px', marginBottom: '14px', color: '#334155', fontWeight: 700, fontSize: '.85rem' }}>
+                Phone number <span style={{ fontWeight: 400, color: '#64748b' }}>(optional)</span>
+                <input
+                  type="tel"
+                  inputMode="tel"
+                  value={phone}
+                  onChange={(event) => setPhone(event.target.value)}
+                  autoComplete="tel"
+                  placeholder="+91 98765 43210"
+                  style={fieldStyle}
+                />
+              </label>
+            )}
+            <label style={{ display: 'grid', gap: '6px', marginBottom: '18px', color: '#334155', fontWeight: 700, fontSize: '.85rem' }}>
+              Password
+              <div style={{ position: 'relative' }}>
+                <input
+                  required
+                  type={showPassword ? 'text' : 'password'}
+                  minLength={6}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                  placeholder="At least 6 characters"
+                  style={{ ...fieldStyle, paddingRight: '40px' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  style={{
+                    position: 'absolute',
+                    right: '10px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#64748b',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </label>
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn btn-primary"
+              style={{ width: '100%', minHeight: '44px', padding: '12px', marginBottom: '12px', fontSize: '0.95rem' }}
+            >
+              {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create customer account'}
+            </button>
             {mode === 'login' && (
-              <button type="button" onClick={handleResendConfirmation} style={{ width: '100%', marginBottom: '12px', padding: '9px', border: '1px dashed #94a3b8', borderRadius: '9px', background: 'transparent', color: '#64748b', fontSize: '.83rem', cursor: 'pointer' }}>
+              <button
+                type="button"
+                onClick={handleResendConfirmation}
+                style={{ width: '100%', marginBottom: '14px', minHeight: '40px', padding: '10px', border: '1px dashed #94a3b8', borderRadius: '9px', background: 'transparent', color: '#64748b', fontSize: '.83rem', cursor: 'pointer' }}
+              >
                 Resend confirmation email
               </button>
             )}
-            <div style={{ textAlign: 'center', fontSize: '.84rem', color: '#64748b' }}>{mode === 'login' ? 'New to Med-in-Minutes?' : 'Already have an account?'}{' '}<button type="button" onClick={() => setMode(mode === 'login' ? 'register' : 'login')} style={{ border: 0, padding: 0, background: 'transparent', color: 'var(--primary)', fontWeight: 750, cursor: 'pointer' }}>{mode === 'login' ? 'Create account' : 'Sign in'}</button></div>
+            <div style={{ textAlign: 'center', fontSize: '.86rem', color: '#64748b' }}>
+              {mode === 'login' ? 'New to Med-in-Minutes?' : 'Already have an account?'}{' '}
+              <button
+                type="button"
+                onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+                style={{ border: 0, padding: 0, background: 'transparent', color: 'var(--primary)', fontWeight: 750, cursor: 'pointer', textDecoration: 'underline' }}
+              >
+                {mode === 'login' ? 'Create account' : 'Sign in'}
+              </button>
+            </div>
           </form>
         )}
       </section>
@@ -177,4 +269,11 @@ export const AuthModal = () => {
   );
 };
 
-const fieldStyle = { width: '100%', padding: '10px 12px', borderRadius: '9px', border: '1px solid var(--border-color)', fontSize: '.9rem' };
+const fieldStyle = {
+  width: '100%',
+  minHeight: '44px',
+  padding: '11px 14px',
+  borderRadius: '10px',
+  border: '1.5px solid var(--border-color)',
+  fontSize: '16px'
+};

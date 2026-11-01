@@ -104,7 +104,15 @@ export const DeliverySuccessModal = () => {
 
   return (
     <div className="modal-overlay" onClick={() => setIsSuccessModalOpen(false)}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ padding: '32px', maxWidth: '580px' }}>
+      <style>{`
+        @media (max-width: 640px) {
+          .success-modal-card {
+            padding: 24px 16px !important;
+            border-radius: 20px 20px 0 0 !important;
+          }
+        }
+      `}</style>
+      <div className="modal-card success-modal-card" onClick={(e) => e.stopPropagation()} style={{ padding: '32px', maxWidth: '580px' }}>
         {/* Celebration Icon Header */}
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <div

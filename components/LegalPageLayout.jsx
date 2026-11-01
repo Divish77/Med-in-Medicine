@@ -19,6 +19,7 @@ import {
 import { useApp } from '@/context/AppContext';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { BottomNav } from '@/components/BottomNav';
 
 const LocationModal = dynamic(() => import('@/components/LocationModal').then(m => m.LocationModal), { ssr: false });
 const PrescriptionModal = dynamic(() => import('@/components/PrescriptionModal').then(m => m.PrescriptionModal), { ssr: false });
@@ -231,6 +232,12 @@ export const LegalPageLayout = ({
                   grid-template-columns: 280px minmax(0, 1fr) !important;
                 }
               }
+              @media (max-width: 767px) {
+                .legal-article {
+                  padding: 22px 16px !important;
+                  border-radius: 16px !important;
+                }
+              }
             `}</style>
 
             {/* Left Sticky Table of Contents & Sidebar */}
@@ -340,6 +347,7 @@ export const LegalPageLayout = ({
 
             {/* Right Main Content Body */}
             <article
+              className="legal-article"
               style={{
                 background: 'white',
                 borderRadius: 'var(--radius-lg)',
@@ -368,6 +376,9 @@ export const LegalPageLayout = ({
 
       {/* Footer */}
       <Footer />
+
+      {/* Mobile Fixed Bottom Navigation Bar */}
+      <BottomNav />
     </div>
   );
 };
