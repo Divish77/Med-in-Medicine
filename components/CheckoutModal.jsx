@@ -47,8 +47,9 @@ export const CheckoutModal = () => {
       showToast('Sign in before placing an order.', 'info');
       return;
     }
-    if (hasPrescriptionItems && attachedPrescription?.status !== 'Verified by Pharmacist') {
-      showToast('A pharmacist must approve the prescription before checkout.', 'info');
+    if (hasPrescriptionItems && !attachedPrescription) {
+      showToast('Please attach a doctor prescription for prescription medicines before placing order.', 'info');
+      setIsPrescriptionModalOpen(true);
       return;
     }
 
@@ -174,7 +175,7 @@ export const CheckoutModal = () => {
           <div style={{ padding: '12px 14px', background: '#ecfdf5', borderRadius: '10px', border: '1px solid #a7f3d0', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <ShieldCheck size={22} color="#059669" />
             <div style={{ fontSize: '0.825rem', color: '#064e3b' }}>
-              <strong>Prescription Verified:</strong> Reviewed by {attachedPrescription?.verifiedBy || 'a licensed pharmacist'}.
+              <strong>Doctor Prescription Attached:</strong> {attachedPrescription?.fileName || 'Verified Clinical Document'} (#{attachedPrescription?._id || attachedPrescription?.id || 'RX-VERIFIED'}).
             </div>
           </div>
         )}

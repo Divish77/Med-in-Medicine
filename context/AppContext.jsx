@@ -90,6 +90,11 @@ export const AppProvider = ({ children }) => {
       if (savedOrder && savedOrder !== 'undefined') {
         setActiveOrderId(savedOrder);
       }
+
+      const savedRx = safeJsonParse('mim_attached_prescription', null);
+      if (savedRx) {
+        setAttachedPrescription(savedRx);
+      }
     } catch (err) {
       console.warn('Client hydration error:', err);
     } finally {
@@ -188,6 +193,15 @@ export const AppProvider = ({ children }) => {
       setIsCheckoutModalOpen(false);
     }
   }, [user?.id, cartLoadedForUserId]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current || typeof window === 'undefined') return;
+    if (attachedPrescription) {
+      localStorage.setItem('mim_attached_prescription', JSON.stringify(attachedPrescription));
+    } else {
+      localStorage.removeItem('mim_attached_prescription');
+    }
+  }, [attachedPrescription]);
 
   useEffect(() => {
     if (!isHydratedRef.current || typeof window === 'undefined') return;

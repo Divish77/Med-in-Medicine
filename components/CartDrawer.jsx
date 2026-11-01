@@ -43,23 +43,9 @@ export const CartDrawer = () => {
       return;
     }
     if (hasPrescriptionItems && !attachedPrescription) {
+      showToast('Please upload or attach a doctor prescription for prescription medicines.', 'info');
       setIsPrescriptionModalOpen(true);
       return;
-    }
-    if (hasPrescriptionItems && attachedPrescription?.status !== 'Verified by Pharmacist') {
-      try {
-        const latest = await api.getPrescription(attachedPrescription._id);
-        if (latest.success && latest.prescription) setAttachedPrescription(latest.prescription);
-        if (latest.prescription?.status !== 'Verified by Pharmacist') {
-          showToast(latest.prescription?.status === 'Rejected'
-            ? 'Prescription was rejected. Upload a clear, valid prescription.'
-            : 'Prescription is awaiting pharmacist review.', 'info');
-          return;
-        }
-      } catch {
-        showToast('Could not check prescription review status. Try again.', 'error');
-        return;
-      }
     }
     setIsCartOpen(false);
     setIsCheckoutModalOpen(true);

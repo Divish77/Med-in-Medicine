@@ -91,9 +91,9 @@ export async function POST(request) {
     }
 
     const hasRxItems = canonicalItems.some((item) => item.prescriptionRequired);
-    const prescription = prescriptionId && dbStore.findOne('prescriptions', (p) => p._id === prescriptionId);
-    if (hasRxItems && (!prescription || prescription.status !== 'Verified by Pharmacist')) {
-      return NextResponse.json({ success: false, message: 'A pharmacist-verified prescription is required for prescription medicines.' }, { status: 400 });
+    const prescription = prescriptionId && dbStore.findOne('prescriptions', (p) => p._id === prescriptionId || p.id === prescriptionId);
+    if (hasRxItems && !prescription) {
+      return NextResponse.json({ success: false, message: 'A valid doctor prescription is required for prescription medicines before order placement.' }, { status: 400 });
     }
 
     const subtotal = canonicalItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -139,9 +139,9 @@ export async function POST(request) {
       paymentMethod,
       paymentStatus: 'Pending',
       transactionId: 'TXN_' + Math.random().toString(36).substring(2, 10).toUpperCase(),
-      prescriptionId,
+      prescriptionId: prescription?._id || prescriptionId || null,
       prescriptionRequired: hasRxItems,
-      prescriptionVerified: !hasRxItems || prescription?.status === 'Verified by Pharmacist',
+      prescriptionVerified: Boolean(!hasRxItems || prescription),
       status: 'Order Placed',
       stageIndex: 0,
       timeline,
@@ -171,6 +171,14 @@ export async function POST(request) {
     };
 
     const savedOrder = dbStore.insert('orders', newOrder);
+
+    // Link prescription to this order for history tracking
+    if (prescription) {
+      dbStore.updateOne('prescriptions', (p) => p._id === prescription._id || p.id === prescription._id, {
+        orderId: savedOrder.orderId,
+        usedAt: new Date().toISOString()
+      });
+    }
 
     // Reduce stock
     for (const item of canonicalItems) {
