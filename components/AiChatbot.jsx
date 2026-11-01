@@ -12,7 +12,8 @@ import {
   Check, 
   Clock, 
   ShieldCheck,
-  RefreshCw
+  RefreshCw,
+  GripHorizontal
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
@@ -41,6 +42,136 @@ export const AiChatbot = () => {
   ]);
 
   const messagesEndRef = useRef(null);
+
+  // Draggable Window State
+  const [windowPos, setWindowPos] = useState({ x: 0, y: 0 });
+  const [isDraggingWindow, setIsDraggingWindow] = useState(false);
+  const windowDragRef = useRef({ startX: 0, startY: 0, initialX: 0, initialY: 0 });
+  const chatWindowRef = useRef(null);
+
+  // Draggable Floating Button State
+  const [btnPos, setBtnPos] = useState({ x: 0, y: 0 });
+  const [isDraggingBtn, setIsDraggingBtn] = useState(false);
+  const btnDragRef = useRef({ startX: 0, startY: 0, initialX: 0, initialY: 0, moved: false });
+  const btnRef = useRef(null);
+
+  // Keep elements within screen boundaries on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowPos((prev) => {
+        const winW = chatWindowRef.current?.offsetWidth || 380;
+        const winH = chatWindowRef.current?.offsetHeight || 560;
+        const minX = -(window.innerWidth - 24 - winW);
+        const maxX = 24;
+        const minY = -(window.innerHeight - 24 - winH);
+        const maxY = 24;
+        return {
+          x: Math.min(Math.max(prev.x, minX), maxX),
+          y: Math.min(Math.max(prev.y, minY), maxY)
+        };
+      });
+      setBtnPos((prev) => {
+        const btnW = btnRef.current?.offsetWidth || 150;
+        const btnH = btnRef.current?.offsetHeight || 48;
+        const minX = -(window.innerWidth - 24 - btnW);
+        const maxX = 24;
+        const minY = -(window.innerHeight - 24 - btnH);
+        const maxY = 24;
+        return {
+          x: Math.min(Math.max(prev.x, minX), maxX),
+          y: Math.min(Math.max(prev.y, minY), maxY)
+        };
+      });
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Window drag handlers
+  const handleWindowPointerDown = (e) => {
+    if (e.target.closest('button')) return;
+    setIsDraggingWindow(true);
+    windowDragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      initialX: windowPos.x,
+      initialY: windowPos.y
+    };
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
+  };
+
+  const handleWindowPointerMove = (e) => {
+    if (!isDraggingWindow) return;
+    const dx = e.clientX - windowDragRef.current.startX;
+    const dy = e.clientY - windowDragRef.current.startY;
+    const winW = chatWindowRef.current?.offsetWidth || 380;
+    const winH = chatWindowRef.current?.offsetHeight || 560;
+    const minX = -(window.innerWidth - 24 - winW);
+    const maxX = 24;
+    const minY = -(window.innerHeight - 24 - winH);
+    const maxY = 24;
+    setWindowPos({
+      x: Math.min(Math.max(windowDragRef.current.initialX + dx, minX), maxX),
+      y: Math.min(Math.max(windowDragRef.current.initialY + dy, minY), maxY)
+    });
+  };
+
+  const handleWindowPointerUp = (e) => {
+    if (isDraggingWindow) {
+      setIsDraggingWindow(false);
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {}
+    }
+  };
+
+  // Button drag handlers
+  const handleBtnPointerDown = (e) => {
+    setIsDraggingBtn(true);
+    btnDragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      initialX: btnPos.x,
+      initialY: btnPos.y,
+      moved: false
+    };
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
+  };
+
+  const handleBtnPointerMove = (e) => {
+    if (!isDraggingBtn) return;
+    const dx = e.clientX - btnDragRef.current.startX;
+    const dy = e.clientY - btnDragRef.current.startY;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+      btnDragRef.current.moved = true;
+    }
+    const btnW = btnRef.current?.offsetWidth || 150;
+    const btnH = btnRef.current?.offsetHeight || 48;
+    const minX = -(window.innerWidth - 24 - btnW);
+    const maxX = 24;
+    const minY = -(window.innerHeight - 24 - btnH);
+    const maxY = 24;
+    setBtnPos({
+      x: Math.min(Math.max(btnDragRef.current.initialX + dx, minX), maxX),
+      y: Math.min(Math.max(btnDragRef.current.initialY + dy, minY), maxY)
+    });
+  };
+
+  const handleBtnPointerUp = (e) => {
+    if (isDraggingBtn) {
+      setIsDraggingBtn(false);
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {}
+      if (!btnDragRef.current.moved) {
+        setIsOpen(true);
+      }
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -148,12 +279,17 @@ export const AiChatbot = () => {
       {/* Floating Chat Trigger Button */}
       {!isOpen && (
         <button
-          onClick={() => setIsOpen(true)}
+          ref={btnRef}
+          onPointerDown={handleBtnPointerDown}
+          onPointerMove={handleBtnPointerMove}
+          onPointerUp={handleBtnPointerUp}
           aria-label="Open MedAI Chatbot"
+          title="Click to open or drag to move anywhere"
           style={{
             position: 'fixed',
             bottom: '24px',
             right: '24px',
+            transform: `translate3d(${btnPos.x}px, ${btnPos.y}px, 0)`,
             zIndex: 9990,
             background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
             color: 'white',
@@ -163,20 +299,14 @@ export const AiChatbot = () => {
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
-            boxShadow: '0 8px 24px rgba(5, 150, 105, 0.4)',
-            cursor: 'pointer',
-            transition: 'all 0.25s ease',
+            boxShadow: isDraggingBtn ? '0 16px 36px rgba(5, 150, 105, 0.6)' : '0 8px 24px rgba(5, 150, 105, 0.4)',
+            cursor: isDraggingBtn ? 'grabbing' : 'grab',
+            userSelect: 'none',
+            touchAction: 'none',
+            transition: isDraggingBtn ? 'none' : 'box-shadow 0.25s ease',
             fontFamily: 'inherit',
             fontWeight: 700,
             fontSize: '0.92rem'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-3px)';
-            e.currentTarget.style.boxShadow = '0 12px 28px rgba(5, 150, 105, 0.5)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 8px 24px rgba(5, 150, 105, 0.4)';
           }}
         >
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
@@ -208,45 +338,55 @@ export const AiChatbot = () => {
       {/* Chat Window Modal */}
       {isOpen && (
         <div
+          ref={chatWindowRef}
           role="dialog"
           aria-label="MedAI Customer Support"
           style={{
             position: 'fixed',
             bottom: '24px',
             right: '24px',
+            transform: `translate3d(${windowPos.x}px, ${windowPos.y}px, 0)`,
             width: '380px',
             maxWidth: 'calc(100vw - 32px)',
             height: '560px',
             maxHeight: 'calc(100vh - 48px)',
             background: '#ffffff',
             borderRadius: '20px',
-            boxShadow: '0 16px 40px rgba(0, 0, 0, 0.2)',
+            boxShadow: isDraggingWindow ? '0 24px 50px rgba(0, 0, 0, 0.3)' : '0 16px 40px rgba(0, 0, 0, 0.2)',
             border: '1px solid #e2e8f0',
             display: 'flex',
             flexDirection: 'column',
             zIndex: 9999,
             overflow: 'hidden',
+            transition: isDraggingWindow ? 'none' : 'box-shadow 0.2s ease',
             animation: 'fadeIn 0.2s ease-out'
           }}
         >
-          {/* Header */}
+          {/* Header (Draggable Handle) */}
           <div
+            onPointerDown={handleWindowPointerDown}
+            onPointerMove={handleWindowPointerMove}
+            onPointerUp={handleWindowPointerUp}
+            title="Click & drag header to move window"
             style={{
               background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
               color: 'white',
-              padding: '16px 20px',
+              padding: '14px 18px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              cursor: isDraggingWindow ? 'grabbing' : 'grab',
+              userSelect: 'none',
+              touchAction: 'none'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div
                 style={{
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '12px',
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '11px',
                   background: 'rgba(255, 255, 255, 0.2)',
                   display: 'flex',
                   alignItems: 'center',
@@ -254,21 +394,40 @@ export const AiChatbot = () => {
                   backdropFilter: 'blur(4px)'
                 }}
               >
-                <Bot size={22} color="white" />
+                <Bot size={20} color="white" />
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800 }}>MedAI Assistant</h3>
-                  <Sparkles size={14} color="#fef08a" />
+                  <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>MedAI Assistant</h3>
+                  <Sparkles size={13} color="#fef08a" />
                 </div>
-                <div style={{ fontSize: '0.75rem', opacity: 0.9, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <div style={{ fontSize: '0.72rem', opacity: 0.9, display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <span style={{ width: '6px', height: '6px', background: '#34d399', borderRadius: '50%' }} />
                   Online | Instant 10-min Support
                 </div>
               </div>
             </div>
 
+            {/* Drag Pill indicator & Action Buttons */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  padding: '3px 8px',
+                  background: isDraggingWindow ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.15)',
+                  borderRadius: '12px',
+                  fontSize: '0.68rem',
+                  fontWeight: 600,
+                  letterSpacing: '0.02em',
+                  color: '#ecfdf5',
+                  pointerEvents: 'none'
+                }}
+              >
+                <GripHorizontal size={14} />
+                <span>Move</span>
+              </div>
               <button
                 onClick={() => {
                   setMessages([
