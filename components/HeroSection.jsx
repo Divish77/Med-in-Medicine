@@ -42,7 +42,7 @@ export const HeroSection = () => {
 
             {/* Subheading (Mandatory exact requirement) */}
             <p style={{ fontSize: '1.125rem', fontWeight: 600, color: '#334155', lineHeight: 1.5, marginBottom: '14px' }}>
-              Med in Minutes makes healthcare more accessible by connecting customers with nearby pharmacies and delivering essential medicines and healthcare products quickly and conveniently.
+              Med-in-Minutes makes healthcare more accessible by connecting customers with nearby pharmacies and delivering essential medicines and healthcare products quickly and conveniently.
             </p>
 
             {/* Supporting Text (Mandatory exact requirement) */}
@@ -108,7 +108,7 @@ export const HeroSection = () => {
             <div style={{ position: 'relative', maxWidth: '480px', width: '100%', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 40px -10px rgba(5, 150, 105, 0.25)', border: '4px solid white', background: 'white' }}>
               <img
                 src="/delivery_hero.jpg"
-                alt="Med in Minutes Delivery Partner carrying emergency medicine package"
+                alt="Med-in-Minutes Delivery Partner carrying emergency medicine package"
                 style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }}
               />
 

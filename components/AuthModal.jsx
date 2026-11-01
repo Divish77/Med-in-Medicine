@@ -134,7 +134,7 @@ export const AuthModal = () => {
       <section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="auth-title" onClick={(event) => event.stopPropagation()} style={{ padding: '26px', maxWidth: '470px', width: 'calc(100% - 28px)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
           <div>
-            <div style={{ color: 'var(--primary)', fontSize: '.72rem', fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase' }}>Med in Minutes</div>
+            <div style={{ color: 'var(--primary)', fontSize: '.72rem', fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase' }}>Med-in-Minutes</div>
             <h2 id="auth-title" style={{ margin: '4px 0 0', fontSize: '1.35rem', color: 'var(--text-main)' }}>{mode === 'profile' ? 'Your account' : mode === 'register' ? 'Create customer account' : 'Customer sign in'}</h2>
           </div>
           <button onClick={close} aria-label="Close" style={{ border: 0, background: '#f1f5f9', borderRadius: '9px', padding: '8px', cursor: 'pointer' }}><X size={18} /></button>
@@ -169,7 +169,7 @@ export const AuthModal = () => {
                 Resend confirmation email
               </button>
             )}
-            <div style={{ textAlign: 'center', fontSize: '.84rem', color: '#64748b' }}>{mode === 'login' ? 'New to Med in Minutes?' : 'Already have an account?'}{' '}<button type="button" onClick={() => setMode(mode === 'login' ? 'register' : 'login')} style={{ border: 0, padding: 0, background: 'transparent', color: 'var(--primary)', fontWeight: 750, cursor: 'pointer' }}>{mode === 'login' ? 'Create account' : 'Sign in'}</button></div>
+            <div style={{ textAlign: 'center', fontSize: '.84rem', color: '#64748b' }}>{mode === 'login' ? 'New to Med-in-Minutes?' : 'Already have an account?'}{' '}<button type="button" onClick={() => setMode(mode === 'login' ? 'register' : 'login')} style={{ border: 0, padding: 0, background: 'transparent', color: 'var(--primary)', fontWeight: 750, cursor: 'pointer' }}>{mode === 'login' ? 'Create account' : 'Sign in'}</button></div>
           </form>
         )}
       </section>

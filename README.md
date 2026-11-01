@@ -1,7 +1,7 @@
-# Med in Minutes ⚡
+# Med-in-Minutes ⚡
 ### Ultra-Fast 10-Minute Medicine & Healthcare Delivery Platform
 
-**Med in Minutes** connects customers with nearby licensed pharmacies to deliver essential medicines, emergency care kits, and prescription drugs straight to your doorstep in just 10 minutes.
+**Med-in-Minutes** connects customers with nearby licensed pharmacies to deliver essential medicines, emergency care kits, and prescription drugs straight to your doorstep in just 10 minutes.
 
 ---
 
@@ -10,12 +10,12 @@
 ### 1. Informative Homepage – Purpose of the Website
 - **Dedicated Hero Section** featuring:
   - **Main Heading:** *"Medicines at Your Doorstep in Just 10 Minutes!"*
-  - **Subheading:** *"Med in Minutes makes healthcare more accessible by connecting customers with nearby pharmacies and delivering essential medicines and healthcare products quickly and conveniently."*
+  - **Subheading:** *"Med-in-Minutes makes healthcare more accessible by connecting customers with nearby pharmacies and delivering essential medicines and healthcare products quickly and conveniently."*
   - **Supporting Text:** *"Forgot to refill your medicines? Need essential healthcare products urgently? Simply search for your medicines, upload your prescription when required, place your order, and get it delivered to your doorstep."*
   - Two prominent action buttons: **Order Medicines** and **Upload Prescription**.
   - Custom visual 3D illustration showing an express delivery partner with an emergency medicine package.
 
-### 2. How Med in Minutes Works (4-Step Visual Journey)
+### 2. How Med-in-Minutes Works (4-Step Visual Journey)
 1. **Enter Your Location:** Share GPS coordinates or enter a 6-digit PIN code.
 2. **Choose Medicines:** Search authentic catalog or upload doctor's prescription.
 3. **Place Your Order:** Review cart, complete pharmacist verification for Rx items, and pay securely.
@@ -52,7 +52,7 @@
 - **Authorized Delivery Confirmation Action:** Order is only marked delivered through deliberate confirmation action (OTP handover verification), not merely countdown expiration.
 - **Celebration Success Screen:** With confetti animation and exact mandatory messages:
   - *"Your Medicines Have Been Delivered!"*
-  - *"Thank you for choosing Med in Minutes. We hope to serve you again."*
+  - *"Thank you for choosing Med-in-Minutes. We hope to serve you again."*
 - **Order Summary & Total Paid:** Breakdown of items, fees, and taxes.
 - **Download Tax Invoice:** Official printable medical tax invoice with Pharmacy Drug License, GSTIN, batch numbers, and expiry dates.
 - **5-Star Rating & Feedback:** Customer experience tags (*Super Fast ⚡*, *Polite Rider 😊*, *Tamper-Proof Pouch 🔒*) and feedback submission.
@@ -60,7 +60,7 @@
 - **Report an Issue & Order History:** Direct dispute escalation and order archive.
 
 ### 6. Additional Homepage Sections
-- **Why Choose Med in Minutes?:** Fast Medicine Delivery, Nearby Pharmacy Network, Easy Prescription Upload, Secure Online Payments, Real-Time Order Tracking, Convenient Doorstep Delivery.
+- **Why Choose Med-in-Minutes?:** Fast Medicine Delivery, Nearby Pharmacy Network, Easy Prescription Upload, Secure Online Payments, Real-Time Order Tracking, Convenient Doorstep Delivery.
 - **Our Delivery Promise:** *"Healthcare Should Never Have to Wait."*
 - **Order Tracking Preview:** Illustrative animated 8-stage preview.
 - **Service Availability:** Live PIN code availability lookup.

@@ -59,7 +59,7 @@ export const HowItWorksSection = () => {
             <CheckCircle2 size={14} /> SIMPLE 4-STEP PROCESS
           </div>
           <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.5px', marginBottom: '12px' }}>
-            How Med in Minutes Works
+            How Med-in-Minutes Works
           </h2>
           <p style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>
             We redesigned medicine procurement from the ground up to get urgent health supplies to your doorstep in minutes, not days.

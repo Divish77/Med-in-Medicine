@@ -130,7 +130,7 @@ export const DeliverySuccessModal = () => {
             Your Medicines Have Been Delivered!
           </h2>
           <p style={{ fontSize: '1rem', color: '#047857', fontWeight: 600 }}>
-            Thank you for choosing Med in Minutes. We hope to serve you again.
+            Thank you for choosing Med-in-Minutes. We hope to serve you again.
           </p>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
             Delivered at: {deliveredOrder.deliveredAt

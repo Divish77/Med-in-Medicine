@@ -82,7 +82,7 @@ export default function HomePage() {
 
       {/* Dynamic Main Body Content */}
       <main style={{ flex: 1 }}>
-        <Suspense fallback={<div className="container" role="status" style={{ padding: '48px 16px', color: 'var(--text-muted)' }}>Loading Med in Minutes…</div>}>
+        <Suspense fallback={<div className="container" role="status" style={{ padding: '48px 16px', color: 'var(--text-muted)' }}>Loading Med-in-Minutes…</div>}>
           {activeTab === 'home' && (
             <>
               <HeroSection />

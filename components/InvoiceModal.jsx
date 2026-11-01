@@ -54,7 +54,7 @@ export const InvoiceModal = () => {
             <div style={{ marginBottom: '8px' }}>
               <img
                 src="/logo.png"
-                alt="Med-in-Medicine"
+                alt="Med-in-Minutes"
                 style={{ height: '48px', objectFit: 'contain' }}
               />
             </div>

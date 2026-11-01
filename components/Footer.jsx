@@ -18,7 +18,7 @@ export const Footer = () => {
             <div style={{ marginBottom: '14px' }}>
               <img
                 src="/logo.png"
-                alt="Med-in-Medicine"
+                alt="Med-in-Minutes"
                 style={{ height: '52px', objectFit: 'contain', background: 'white', padding: '4px 10px', borderRadius: '10px' }}
               />
             </div>
@@ -90,7 +90,7 @@ export const Footer = () => {
               Medical Disclaimer
             </h4>
             <p style={{ fontSize: '0.75rem', lineHeight: 1.6, color: '#94a3b8' }}>
-              Med in Minutes is an on-demand medical logistics and pharmacy aggregator platform. Schedule H and X prescription drugs require a valid doctor&apos;s prescription verified by licensed pharmacists before fulfillment. Do not self-medicate.
+              Med-in-Minutes is an on-demand medical logistics and pharmacy aggregator platform. Schedule H and X prescription drugs require a valid doctor&apos;s prescription verified by licensed pharmacists before fulfillment. Do not self-medicate.
             </p>
             <div style={{ marginTop: '12px', fontSize: '0.75rem', color: '#fef08a' }}>
               Emergency Helpline: <strong>1800-633-646</strong> (24x7)
@@ -101,7 +101,7 @@ export const Footer = () => {
         {/* Copyright */}
         <div style={{ borderTop: '1px solid #1e293b', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', fontSize: '0.785rem' }}>
           <div>
-            &copy; {CURRENT_YEAR} Med in Minutes Healthcare Technologies Pvt Ltd. All rights reserved.
+            &copy; {CURRENT_YEAR} Med-in-Minutes Healthcare Technologies Pvt Ltd. All rights reserved.
           </div>
           <div style={{ display: 'flex', gap: '16px' }}>
             <span>Privacy Policy</span>

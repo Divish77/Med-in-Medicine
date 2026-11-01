@@ -81,7 +81,7 @@ export const Navbar = () => {
         >
           <img
             src="/logo.png"
-            alt="Med-in-Medicine"
+            alt="Med-in-Minutes"
             style={{ height: '52px', objectFit: 'contain', display: 'block' }}
           />
         </div>

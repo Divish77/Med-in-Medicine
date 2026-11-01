@@ -10,13 +10,13 @@ export const AboutPage = () => {
       <div className="container" style={{ maxWidth: '900px' }}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <span className="badge badge-express" style={{ marginBottom: '12px' }}>
-            ABOUT MED IN MINUTES
+            ABOUT MED-IN-MINUTES
           </span>
           <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '16px' }}>
             Making Healthcare Accessible in 10 Minutes
           </h1>
           <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
-            Med in Minutes was founded on a simple medical premise: healthcare emergencies and critical prescriptions should never have to wait days for courier delivery.
+            Med-in-Minutes was founded on a simple medical premise: healthcare emergencies and critical prescriptions should never have to wait days for courier delivery.
           </p>
         </div>
 
@@ -25,7 +25,7 @@ export const AboutPage = () => {
             The 10-Minute Hyperlocal Network
           </h2>
           <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: 1.7, marginBottom: '20px' }}>
-            Traditional medicine delivery platforms rely on central warehouses situated far outside city limits, resulting in delivery timelines ranging from 24 to 72 hours. Med in Minutes completely re-engineers this model by digitally connecting local licensed retail pharmacies located within 1.5 to 2 kilometers of your home.
+            Traditional medicine delivery platforms rely on central warehouses situated far outside city limits, resulting in delivery timelines ranging from 24 to 72 hours. Med-in-Minutes completely re-engineers this model by digitally connecting local licensed retail pharmacies located within 1.5 to 2 kilometers of your home.
           </p>
           <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: 1.7 }}>
             By maintaining live real-time API integrations with pharmacy inventories and dispatching dedicated electric scooter delivery partners, we ensure that medicines reach patients within an average of 9.8 minutes.
@@ -128,7 +128,7 @@ export const ContactPage = () => {
                 <div>
                   <h4 style={{ fontWeight: 800, fontSize: '1rem' }}>Headquarters</h4>
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                    Med in Minutes Healthcare Pvt Ltd, Inner Circle, Connaught Place, New Delhi - 110001
+                    Med-in-Minutes Healthcare Pvt Ltd, Inner Circle, Connaught Place, New Delhi - 110001
                   </p>
                 </div>
               </div>

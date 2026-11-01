@@ -35,7 +35,7 @@ export const AiChatbot = () => {
     {
       id: 'welcome_1',
       sender: 'bot',
-      text: "Hello! 👋 I'm **MedAI**, your 24x7 instant pharmacy assistant for **Med in Minutes** ⚡.\n\nAsk me about medicine availability, 10-minute delivery coverage, prescription verification, or tracking your order!",
+      text: "Hello! 👋 I'm **MedAI**, your 24x7 instant pharmacy assistant for **Med-in-Minutes** ⚡.\n\nAsk me about medicine availability, 10-minute delivery coverage, prescription verification, or tracking your order!",
       time: 'Just now'
     }
   ]);

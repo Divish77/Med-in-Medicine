@@ -116,7 +116,7 @@ export const HomepageAdditionalSections = () => {
   const faqs = [
     {
       q: 'How does 10-minute medicine delivery work?',
-      a: 'Med in Minutes utilizes a proprietary hyperlocal fulfillment network. When you enter your PIN code, we connect your order to the nearest licensed pharmacy within 1.5 km of your location. A dedicated delivery partner is assigned in under 60 seconds, picks up the sealed medical pouch, and delivers it via electric scooter in 10 minutes.'
+      a: 'Med-in-Minutes utilizes a proprietary hyperlocal fulfillment network. When you enter your PIN code, we connect your order to the nearest licensed pharmacy within 1.5 km of your location. A dedicated delivery partner is assigned in under 60 seconds, picks up the sealed medical pouch, and delivers it via electric scooter in 10 minutes.'
     },
     {
       q: 'Can I upload a prescription?',
@@ -142,7 +142,7 @@ export const HomepageAdditionalSections = () => {
 
   return (
     <>
-      {/* SECTION A: WHY CHOOSE MED IN MINUTES? */}
+      {/* SECTION A: WHY CHOOSE MED-IN-MINUTES? */}
       <section style={{ padding: '70px 0', background: 'var(--bg-main)' }}>
         <div className="container">
           <div style={{ textAlign: 'center', maxWidth: '640px', margin: '0 auto 48px' }}>
@@ -150,7 +150,7 @@ export const HomepageAdditionalSections = () => {
               🌟 WHY CHOOSE US
             </span>
             <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.4rem)', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.5px', marginBottom: '12px' }}>
-              Why Choose Med in Minutes?
+              Why Choose Med-in-Minutes?
             </h2>
             <p style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>
               Built specifically for health emergencies, elderly care, and urgent family wellness needs.
@@ -234,7 +234,7 @@ export const HomepageAdditionalSections = () => {
                 When a child has a sudden 103°F fever at midnight or an elderly parent runs out of critical blood pressure medicine, a 2-day delivery window simply isn’t good enough.
               </p>
               <p style={{ fontSize: '0.95rem', color: '#ecfdf5', lineHeight: 1.6, marginBottom: '28px' }}>
-                Med in Minutes directly connects customers to neighborhood licensed pharmacies and rapid-response electric scooter riders within a 2-kilometer micro-radius. By keeping travel distances ultra-short and automating pharmacist inventory checks, we reduce critical waiting time from hours to just 10 minutes.
+                Med-in-Minutes directly connects customers to neighborhood licensed pharmacies and rapid-response electric scooter riders within a 2-kilometer micro-radius. By keeping travel distances ultra-short and automating pharmacist inventory checks, we reduce critical waiting time from hours to just 10 minutes.
               </p>
 
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
@@ -372,7 +372,7 @@ export const HomepageAdditionalSections = () => {
 
             {/* Mandatory exact text */}
             <p style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '24px' }}>
-              Check whether Med in Minutes delivers to your area.
+              Check whether Med-in-Minutes delivers to your area.
             </p>
 
             <form onSubmit={handleCheckArea} style={{ display: 'flex', gap: '10px', maxWidth: '460px', margin: '0 auto 20px', flexWrap: 'wrap' }}>

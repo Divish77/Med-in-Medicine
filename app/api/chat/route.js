@@ -4,7 +4,7 @@ import { dbStore } from '@/lib/db';
 const KNOWLEDGE_BASE = [
   {
     keywords: ['delivery', 'time', 'how long', 'fast', '10 min', '10 minutes', 'speed'],
-    reply: "⚡ **Med in Minutes Delivery Promise:**\nWe deliver genuine medicines in **10 minutes**! We partner with licensed local retail pharmacies within 2 km of your location. Our electric scooter delivery partners dispatch immediately once orders are packaged."
+    reply: "⚡ **Med-in-Minutes Delivery Promise:**\nWe deliver genuine medicines in **10 minutes**! We partner with licensed local retail pharmacies within 2 km of your location. Our electric scooter delivery partners dispatch immediately once orders are packaged."
   },
   {
     keywords: ['prescription', 'rx', 'schedule h', 'doctor', 'upload prescription'],
@@ -137,7 +137,7 @@ export async function POST(request) {
 
     // 5. Default friendly response with quick suggestion prompts
     return NextResponse.json({
-      reply: `I am your **MedAI Pharmacist Assistant** for Med in Minutes ⚡.\n\n` +
+      reply: `I am your **MedAI Pharmacist Assistant** for Med-in-Minutes ⚡.\n\n` +
              `Here are some things I can help you with:\n` +
              `• **Check Delivery Speed:** "How fast is delivery?"\n` +
              `• **Check PIN Code:** "Is 110001 serviceable?"\n` +
