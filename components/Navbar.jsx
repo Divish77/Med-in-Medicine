@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   MapPin,
   ShoppingBag,
@@ -16,6 +17,8 @@ import {
 import { useApp } from '@/context/AppContext';
 
 export const Navbar = () => {
+  const pathname = usePathname();
+  const router = useRouter();
   const {
     activeTab,
     setActiveTab,
@@ -46,8 +49,18 @@ export const Navbar = () => {
       setIsPrescriptionModalOpen(true);
     } else {
       setActiveTab(link.id);
+      if (pathname !== '/') {
+        router.push('/');
+      }
     }
     setMobileMenuOpen(false);
+  };
+
+  const handleLogoClick = () => {
+    setActiveTab('home');
+    if (pathname !== '/') {
+      router.push('/');
+    }
   };
 
   return (
@@ -76,7 +89,7 @@ export const Navbar = () => {
       <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '72px', gap: '16px' }}>
         {/* Brand Logo */}
         <div
-          onClick={() => setActiveTab('home')}
+          onClick={handleLogoClick}
           style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', textDecoration: 'none' }}
         >
           <img
@@ -154,7 +167,10 @@ export const Navbar = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {user?.role === 'admin' && (
             <button
-              onClick={() => setActiveTab(activeTab === 'admin' ? 'home' : 'admin')}
+              onClick={() => {
+                setActiveTab(activeTab === 'admin' ? 'home' : 'admin');
+                if (pathname !== '/') router.push('/');
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
