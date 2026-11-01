@@ -77,10 +77,19 @@ export const OrderTrackingPage = () => {
           }
         }
       } else {
-        setOrder(null);
-        setActiveOrderId('');
+        // Fallback to local cached order before clearing
+        let localFallback = null;
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('mim_active_order');
+          try {
+            const raw = localStorage.getItem(`mim_order_${id}`);
+            if (raw) localFallback = JSON.parse(raw);
+          } catch {}
+        }
+        if (localFallback) {
+          setOrder(localFallback);
+          setSearchInput(localFallback.orderId);
+        } else {
+          setOrder(null);
         }
       }
     } catch {

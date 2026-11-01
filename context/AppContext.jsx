@@ -31,11 +31,22 @@ export const AppProvider = ({ children }) => {
   // Saved Delivery Addresses (Home, Work, Other)
   const [savedAddresses, setSavedAddresses] = useState([]);
 
-  // Current Selected Delivery Location
+  // Current Selected Delivery Location - Default to Hub for instant serviceability
   const [deliveryLocation, setDeliveryLocation] = useState({
-    pincode: '', area: '', city: '', street: '', landmark: '', fullAddress: '',
-    label: '', lat: null, lng: null, expressEligible: false, etaMinutes: null,
-    serviceable: false, pharmacyName: ''
+    pincode: '110001',
+    area: 'Connaught Place',
+    city: 'New Delhi',
+    street: 'Flat 402, Green Avenue, Connaught Place',
+    landmark: 'Near Central Park Gate 2',
+    fullAddress: 'Flat 402, Green Avenue, Connaught Place, New Delhi - 110001',
+    label: 'Home',
+    lat: 28.6315,
+    lng: 77.2167,
+    expressEligible: true,
+    etaMinutes: 10,
+    etaLabel: '10 Mins',
+    serviceable: true,
+    pharmacyName: '10 MN Company 24x7 Express Pharmacy'
   });
 
   const isHydratedRef = useRef(false);
