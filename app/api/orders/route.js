@@ -65,7 +65,8 @@ export async function POST(request) {
     const canonicalItems = [];
     for (const [medicineId, quantity] of quantities) {
       const medicine = inventory.find((m) => m._id === medicineId);
-      if (!medicine || !medicine.inStock || Number(medicine.stock) < quantity) {
+      // Bug fix: allow ordering even if inStock flag not set (trust stock count)
+      if (!medicine || Number(medicine.stock) < quantity) {
         return NextResponse.json({ success: false, message: `${medicine?.name || 'A selected medicine'} is unavailable in the requested quantity.` }, { status: 400 });
       }
       canonicalItems.push({

@@ -53,7 +53,7 @@ export async function POST(request) {
         );
 
         if (order) {
-          const itemsList = order.items.map(i => `${i.name} (x${i.qty})`).join(', ');
+          const itemsList = order.items.map(i => `${i.name} (x${i.quantity || i.qty || 1})`).join(', ');
           return NextResponse.json({
             reply: `📦 **Order Status for ${order.orderId}:**\n` +
                    `• **Status:** ${order.status}\n` +
@@ -61,7 +61,7 @@ export async function POST(request) {
                    `• **ETA:** ~${order.etaMinutes || 10} minutes\n` +
                    `• **Delivery Partner:** ${order.deliveryPartner?.name || 'Rahul Sharma'} (${order.deliveryPartner?.phone || '+91 98765 43210'})\n` +
                    `• **Items:** ${itemsList}\n` +
-                   `• **Total:** ₹${order.total}\n\n` +
+                   `• **Total:** ₹${order.totalAmount || order.total || 0}\n\n` +
                    `You can view the live GPS scooter map by clicking **'Track Order'** in the navigation bar!`,
             action: { type: 'TRACK_ORDER', orderId: order.orderId }
           });

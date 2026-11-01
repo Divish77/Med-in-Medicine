@@ -115,6 +115,8 @@ export const AdminPanel = () => {
       setUpdatingOrderId(null);
     }
   };
+
+  // Admin login state
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);

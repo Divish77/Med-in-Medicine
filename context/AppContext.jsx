@@ -224,13 +224,6 @@ export const AppProvider = ({ children }) => {
     showToast('Your selected items were added to your cart.');
   }, [user?.id, pendingCartItems, showToast]);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (activeOrderId) {
-      localStorage.setItem('mim_active_order', activeOrderId);
-    }
-  }, [activeOrderId]);
-
   // Cart Functions
   const addToCart = (medicine, qty = 1) => {
     const quantity = Number(qty);
@@ -402,7 +395,6 @@ export const AppProvider = ({ children }) => {
         setInvoiceData,
         toast,
         showToast,
-        socket: null,
       }}
     >
       {children}
