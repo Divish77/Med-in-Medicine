@@ -1,6 +1,7 @@
 'use client';
 
-import React, { lazy, Suspense, useCallback, useState, useEffect } from 'react';
+import React, { Suspense, useCallback, useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import {
   Package,
   CreditCard,
@@ -21,7 +22,7 @@ import {
 import { useApp } from '@/context/AppContext';
 import { api } from '@/lib/api';
 
-const InteractiveMap = lazy(() => import('./InteractiveMap').then((module) => ({ default: module.InteractiveMap })));
+const InteractiveMap = dynamic(() => import('./InteractiveMap').then((module) => module.InteractiveMap), { ssr: false });
 
 export const OrderTrackingPage = () => {
   const {

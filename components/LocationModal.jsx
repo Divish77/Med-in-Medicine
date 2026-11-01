@@ -1,11 +1,12 @@
 'use client';
 
-import React, { lazy, Suspense, useState } from 'react';
+import React, { Suspense, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { MapPin, Navigation, Compass, Home, Briefcase, X, Store, Trash2 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { api } from '@/lib/api';
 
-const InteractiveMap = lazy(() => import('./InteractiveMap').then((module) => ({ default: module.InteractiveMap })));
+const InteractiveMap = dynamic(() => import('./InteractiveMap').then((module) => module.InteractiveMap), { ssr: false });
 
 export const LocationModal = () => {
   const {

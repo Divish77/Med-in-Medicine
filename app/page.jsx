@@ -1,6 +1,7 @@
 'use client';
 
-import React, { lazy, Suspense, useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { useApp } from '@/context/AppContext';
 import { Navbar } from '@/components/Navbar';
 import { HeroSection } from '@/components/HeroSection';
@@ -16,12 +17,12 @@ import { AiChatbot } from '@/components/AiChatbot';
 import { Footer } from '@/components/Footer';
 import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
 
-const HomepageAdditionalSections = lazy(() => import('@/components/HomepageAdditionalSections').then((m) => ({ default: m.HomepageAdditionalSections })));
-const MedicinesPage = lazy(() => import('@/components/MedicinesPage').then((m) => ({ default: m.MedicinesPage })));
-const OrderTrackingPage = lazy(() => import('@/components/OrderTrackingPage').then((m) => ({ default: m.OrderTrackingPage })));
-const AboutPage = lazy(() => import('@/components/AboutAndContact').then((m) => ({ default: m.AboutPage })));
-const ContactPage = lazy(() => import('@/components/AboutAndContact').then((m) => ({ default: m.ContactPage })));
-const AdminPanel = lazy(() => import('@/components/AdminPanel').then((m) => ({ default: m.AdminPanel })));
+const HomepageAdditionalSections = dynamic(() => import('@/components/HomepageAdditionalSections').then((m) => m.HomepageAdditionalSections), { ssr: false });
+const MedicinesPage = dynamic(() => import('@/components/MedicinesPage').then((m) => m.MedicinesPage), { ssr: false });
+const OrderTrackingPage = dynamic(() => import('@/components/OrderTrackingPage').then((m) => m.OrderTrackingPage), { ssr: false });
+const AboutPage = dynamic(() => import('@/components/AboutAndContact').then((m) => m.AboutPage), { ssr: false });
+const ContactPage = dynamic(() => import('@/components/AboutAndContact').then((m) => m.ContactPage), { ssr: false });
+const AdminPanel = dynamic(() => import('@/components/AdminPanel').then((m) => m.AdminPanel), { ssr: false });
 
 export default function HomePage() {
   const {

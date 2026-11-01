@@ -19,18 +19,9 @@ export const InteractiveMap = ({
   const polylineRef = useRef(null);
 
   useEffect(() => {
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!mapContainerRef.current || typeof window === 'undefined') return;
-
     let isMounted = true;
+    const container = mapContainerRef.current;
+    if (!container || typeof window === 'undefined') return;
 
     import('leaflet').then((L) => {
       if (!isMounted || !mapContainerRef.current) return;
@@ -42,28 +33,46 @@ export const InteractiveMap = ({
         shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
       });
 
+      // Reset leaflet_id if it was stale
+      if (container._leaflet_id && !mapInstanceRef.current) {
+        container._leaflet_id = null;
+      }
+
       if (!mapInstanceRef.current) {
-        const map = L.map(mapContainerRef.current, {
-          center: center,
-          zoom: zoom,
-          zoomControl: true,
-          attributionControl: false
-        });
+        try {
+          const map = L.map(container, {
+            center: center,
+            zoom: zoom,
+            zoomControl: true,
+            attributionControl: false
+          });
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19
-        }).addTo(map);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19
+          }).addTo(map);
 
-        mapInstanceRef.current = map;
+          mapInstanceRef.current = map;
+        } catch (e) {
+          console.warn('Leaflet map init warning:', e);
+          if (container._leaflet_id) {
+            container._leaflet_id = null;
+          }
+          return;
+        }
       }
 
       const map = mapInstanceRef.current;
-      map.setView(center, zoom);
+      if (!map) return;
+      try {
+        map.setView(center, zoom);
+      } catch {}
 
-      markersRef.current.forEach((m) => map.removeLayer(m));
+      markersRef.current.forEach((m) => {
+        try { map.removeLayer(m); } catch {}
+      });
       markersRef.current = [];
       if (polylineRef.current) {
-        map.removeLayer(polylineRef.current);
+        try { map.removeLayer(polylineRef.current); } catch {}
         polylineRef.current = null;
       }
 
@@ -77,7 +86,7 @@ export const InteractiveMap = ({
 
         const pharmMarker = L.marker(pharmacyPos, { icon: pharmacyIcon })
           .addTo(map)
-          .bindPopup('<b>Nearby Partner Pharmacy</b><br>Stock allocated &amp; verified.');
+          .bindPopup('<b>Nearby Partner Pharmacy</b><br>Stock allocated & verified.');
         markersRef.current.push(pharmMarker);
       }
 
@@ -136,15 +145,26 @@ export const InteractiveMap = ({
         }).addTo(map);
         polylineRef.current = polyline;
 
-        const bounds = L.latLngBounds(points);
-        map.fitBounds(bounds, { padding: [40, 40] });
+        try {
+          const bounds = L.latLngBounds(points);
+          map.fitBounds(bounds, { padding: [40, 40] });
+        } catch {}
       }
-    });
+    }).catch((e) => console.warn('Leaflet load failed:', e));
 
     return () => {
       isMounted = false;
     };
   }, [center, zoom, pharmacyPos, deliveryPos, riderPos, isDraggable, onPinDrag]);
+
+  useEffect(() => {
+    return () => {
+      if (mapInstanceRef.current) {
+        try { mapInstanceRef.current.remove(); } catch {}
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div style={{ width: '100%', height, position: 'relative', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
