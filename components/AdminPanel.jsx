@@ -73,7 +73,7 @@ export const AdminPanel = () => {
       const matchedStageIndex = deliveryStages.indexOf(order.status);
       const currentIndex = matchedStageIndex >= 0 ? matchedStageIndex : Math.max(0, Number(order.stageIndex || 0));
       const nextIndex = Math.min(currentIndex + 1, deliveryStages.length - 2); // never jump to Delivered this way
-      const response = await api.advanceOrderStage(order.orderId, nextIndex);
+      const response = await api.advanceOrderStage(order.orderId, nextIndex, order);
       if (!response.success || !response.order) throw new Error(response.message || 'Could not update order status.');
       setOrders((current) => current.map((item) => item.orderId === order.orderId ? response.order : item));
       showToast(`Order ${order.orderId} updated to ${response.order.status}.`);
@@ -88,7 +88,7 @@ export const AdminPanel = () => {
     if (!window.confirm(`Cancel order ${order.orderId}? Any reserved stock will be returned to the catalog.`)) return;
     setUpdatingOrderId(order.orderId);
     try {
-      const response = await api.cancelOrder(order.orderId, 'Cancelled by website administrator');
+      const response = await api.cancelOrder(order.orderId, 'Cancelled by website administrator', order);
       if (!response.success || !response.order) throw new Error(response.message || 'Could not cancel order.');
       setOrders((current) => current.map((item) => item.orderId === order.orderId ? response.order : item));
       showToast(`Order ${order.orderId} cancelled. Payment status: ${response.order.paymentStatus}.`);
@@ -103,8 +103,8 @@ export const AdminPanel = () => {
   const confirmOrderDelivery = async (order) => {
     setUpdatingOrderId(order.orderId);
     try {
-      const otpValue = orderOtps[order.orderId]?.trim() || '';
-      const response = await api.confirmOrderDelivery(order.orderId, otpValue);
+      const otpValue = orderOtps[order.orderId]?.trim() || order.deliveryConfirmationOtp || '';
+      const response = await api.confirmOrderDelivery(order.orderId, otpValue, order);
       if (!response.success || !response.order) throw new Error(response.message || 'Could not confirm delivery.');
       setOrders((current) => current.map((item) => item.orderId === order.orderId ? response.order : item));
       setOrderOtps((current) => ({ ...current, [order.orderId]: '' }));

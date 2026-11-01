@@ -11,9 +11,13 @@ export async function POST(request, { params }) {
     }
 
     const { id } = await params;
-    const { otp } = await request.json().catch(() => ({}));
+    const body = await request.json().catch(() => ({}));
+    const { otp, order: orderData } = body;
 
-    const order = dbStore.findOne('orders', (o) => o.orderId === id || o._id === id);
+    let order = dbStore.findOne('orders', (o) => o.orderId === id || o._id === id);
+    if (!order && orderData && (orderData.orderId === id || orderData._id === id)) {
+      order = dbStore.insert('orders', orderData);
+    }
     if (!order) {
       return NextResponse.json({ success: false, message: 'Order not found.' }, { status: 404 });
     }
