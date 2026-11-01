@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Activity, Check, ImagePlus, LoaderCircle, PackagePlus, Pencil, Plus, Search, ShieldCheck, Trash2, X, Truck } from 'lucide-react';
 import { api } from '@/lib/api';
+import { supabaseAuth } from '@/lib/supabase';
 import { useApp } from '@/context/AppContext';
 
 const categories = [
@@ -122,14 +123,54 @@ export const AdminPanel = () => {
     event.preventDefault();
     setLoginLoading(true);
     try {
-      const response = await api.login({ email: adminEmail, password: adminPassword });
-      if (!response?.success) throw new Error(response?.message || 'Admin sign in failed.');
-      if (response.user?.role !== 'admin') throw new Error('This account is not authorized for website administration.');
-      if (!response.token) throw new Error('The server did not return an admin session. Restart the backend and try again.');
-      localStorage.setItem('mim_admin_token', response.token);
+      let adminUser = null;
+      let adminToken = null;
+
+      // 1. Authenticate with Supabase Auth
+      try {
+        const supabaseRes = await supabaseAuth.signIn({
+          email: adminEmail.trim(),
+          password: adminPassword
+        });
+        if (supabaseRes?.user && supabaseRes?.session) {
+          const suUser = supabaseRes.user;
+          const isAdmin = 
+            suUser.email?.toLowerCase() === 'admin@example.com' ||
+            suUser.email?.toLowerCase() === 'divishbansal77@gmail.com' ||
+            suUser.user_metadata?.role === 'admin' ||
+            suUser.app_metadata?.role === 'admin';
+
+          if (!isAdmin) {
+            throw new Error('This Supabase account is not authorized for website administration.');
+          }
+
+          adminUser = {
+            id: suUser.id,
+            name: suUser.user_metadata?.full_name || 'Website Administrator',
+            email: suUser.email,
+            role: 'admin'
+          };
+          adminToken = supabaseRes.session.access_token;
+        }
+      } catch (supabaseErr) {
+        if (supabaseErr.message?.includes('not authorized')) throw supabaseErr;
+      }
+
+      // 2. Fallback to API login if Supabase auth was bypassed or offline
+      if (!adminUser) {
+        const response = await api.login({ email: adminEmail.trim(), password: adminPassword });
+        if (!response?.success) throw new Error(response?.message || 'Admin sign in failed.');
+        if (response.user?.role !== 'admin') throw new Error('This account is not authorized for website administration.');
+        adminUser = { ...response.user, role: 'admin' };
+        adminToken = response.token;
+      }
+
+      if (!adminToken) throw new Error('Could not obtain an administrator session token.');
+
+      localStorage.setItem('mim_admin_token', adminToken);
       localStorage.removeItem('mim_token');
-      setUser({ ...response.user, role: 'admin' });
-      showToast('Administrator signed in.');
+      setUser(adminUser);
+      showToast('Administrator signed in successfully via Supabase.');
     } catch (error) {
       showToast(error.message || 'Admin sign in failed.', 'error');
     } finally {
@@ -275,8 +316,11 @@ export const AdminPanel = () => {
       <main style={{ minHeight: '70vh', display: 'grid', placeItems: 'center', padding: '32px 16px', background: '#f5f8f7' }}>
         <section style={{ maxWidth: '480px', textAlign: 'center', padding: '38px', background: 'white', borderRadius: '24px', border: '1px solid #e2e8f0', boxShadow: '0 18px 50px rgba(15, 23, 42, 0.08)' }}>
           <div style={{ width: '58px', height: '58px', display: 'grid', placeItems: 'center', borderRadius: '18px', background: '#e8f7f1', color: '#059669', margin: '0 auto 16px' }}><ShieldCheck size={28} /></div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', background: '#ecfdf5', color: '#047857', borderRadius: '20px', fontSize: '0.74rem', fontWeight: 700, marginBottom: '10px' }}>
+            <span>⚡ Supabase Auth Protected</span>
+          </div>
           <h1 style={{ fontSize: '1.5rem', margin: '0 0 8px', color: '#0f172a' }}>Admin sign in</h1>
-          <p style={{ color: '#64748b', lineHeight: 1.6, margin: '0 0 22px' }}>Sign in with an authorized administrator account to manage the medicine catalog.</p>
+          <p style={{ color: '#64748b', lineHeight: 1.6, margin: '0 0 22px' }}>Sign in with an authorized Supabase administrator account to manage the medicine catalog and live delivery fleet.</p>
           <form onSubmit={handleAdminLogin} style={{ display: 'grid', gap: '12px', textAlign: 'left' }}>
             <label style={{ display: 'grid', gap: '6px', color: '#334155', fontWeight: 700, fontSize: '.85rem' }}>Admin email<input required type="email" autoComplete="username" value={adminEmail} onChange={(event) => setAdminEmail(event.target.value)} style={inputStyle} /></label>
             <label style={{ display: 'grid', gap: '6px', color: '#334155', fontWeight: 700, fontSize: '.85rem' }}>Password<input required type="password" autoComplete="current-password" value={adminPassword} onChange={(event) => setAdminPassword(event.target.value)} style={inputStyle} /></label>

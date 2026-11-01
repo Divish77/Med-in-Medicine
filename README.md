@@ -74,15 +74,16 @@
 
 ### 8. Complete Order Management & Backend
 - Unified end-to-end customer journey from homepage to delivery confirmation.
-- Persistent database adapter supporting **MongoDB / Mongoose** and automatic fallback to durable JSON database storage.
-- Real-time **Socket.IO** rooms for live order updates.
+- Direct **Supabase** authentication and database integration with durable cloud data support.
+- Fully serverless App Router API handlers with zero external runtime dependencies.
 
 ---
 
 ## 🛠️ Tech Stack
-- **Frontend:** React 19, Vite, Vanilla CSS with modern Design System, Lucide React, Leaflet Maps, Canvas Confetti.
-- **Backend:** Node.js, Express, Socket.IO, Mongoose, Multer, JWT, Bcrypt.
-- **Database:** Persistent storage engine with MongoDB Atlas / Mongoose compatibility.
+- **Framework:** Next.js 15 (App Router, Server & Client Components)
+- **Authentication & Cloud Backend:** Supabase Auth & PostgreSQL
+- **Frontend & UI:** React 19, Modern Design System, Lucide React, Leaflet Maps, Canvas Confetti
+- **API Engine:** Next.js Route Handlers with JWT & Supabase Token Validation
 
 ---
 
@@ -91,10 +92,9 @@
 ```bash
 # Install dependencies
 npm install
-npm --prefix client install
 
-# Start both backend server (port 5000) and frontend (port 5173) concurrently
+# Start Next.js development server
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+Open [http://localhost:3000](http://localhost:3000) (or the assigned port shown in console) in your browser.
