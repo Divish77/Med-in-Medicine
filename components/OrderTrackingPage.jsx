@@ -233,13 +233,13 @@ export const OrderTrackingPage = () => {
                   const selected = order?.orderId === item.orderId;
                   return (
                     <button key={item.orderId} type="button" onClick={() => { setOrder(item); setActiveOrderId(item.orderId); setSearchInput(item.orderId); }} aria-pressed={selected}
-                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', textAlign: 'left', padding: '15px', background: selected ? '#ecfdf5' : 'white', border: `1px solid ${selected ? '#6ee7b7' : 'var(--border-color)'}`, borderRadius: '14px', cursor: 'pointer' }}>
+                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', textAlign: 'left', padding: '16px', background: selected ? 'var(--medical-blue-light)' : 'white', border: `1.5px solid ${selected ? 'var(--medical-blue)' : 'var(--border-color)'}`, borderRadius: '14px', cursor: 'pointer' }}>
                       <span style={{ minWidth: 0 }}>
-                        <strong style={{ display: 'block', color: 'var(--text-main)' }}>#{item.orderId}</strong>
+                        <strong style={{ display: 'block', color: 'var(--dark-navy)' }}>#{item.orderId}</strong>
                         <span style={{ display: 'block', marginTop: '5px', color: 'var(--text-muted)', fontSize: '.82rem' }}>{new Date(item.createdAt).toLocaleDateString()} · {item.items?.length || 0} item{item.items?.length === 1 ? '' : 's'} · ₹{Number(item.totalAmount || 0).toFixed(2)}</span>
-                        <span style={{ display: 'inline-block', marginTop: '8px', color: item.status === 'Cancelled' ? '#dc2626' : item.status === 'Successfully Delivered' ? '#047857' : '#0369a1', fontWeight: 750, fontSize: '.82rem' }}>{item.status}</span>
+                        <span style={{ display: 'inline-block', marginTop: '8px', color: item.status === 'Cancelled' ? '#dc2626' : item.status === 'Successfully Delivered' ? 'var(--health-green)' : 'var(--medical-blue)', fontWeight: 750, fontSize: '.82rem' }}>{item.status}</span>
                       </span>
-                      <ChevronRight size={18} color="var(--primary)" />
+                      <ChevronRight size={18} color="var(--medical-blue)" />
                     </button>
                   );
                 })}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Zap,
   Store,
@@ -14,13 +14,28 @@ import {
   MapPin,
   Bike,
   Package,
-  FileCheck
+  FileCheck,
+  ShieldCheck,
+  Clock,
+  Plus,
+  ShoppingBag,
+  ArrowRight,
+  Heart,
+  Pill,
+  Star,
+  Activity,
+  Award,
+  Sparkles
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { api } from '@/lib/api';
 
 export const HomepageAdditionalSections = () => {
-  const { setActiveTab, updateDeliveryLocation, showToast } = useApp();
+  const { setActiveTab, setIsPrescriptionModalOpen, addToCart, updateDeliveryLocation, showToast } = useApp();
+
+  // Featured Medicines State (Loaded directly from database API)
+  const [featuredMeds, setFeaturedMeds] = useState([]);
+  const [loadingMeds, setLoadingMeds] = useState(true);
 
   // FAQ Accordion State
   const [openFaq, setOpenFaq] = useState(0);
@@ -29,6 +44,26 @@ export const HomepageAdditionalSections = () => {
   const [checkerPincode, setCheckerPincode] = useState('');
   const [checking, setChecking] = useState(false);
   const [checkerResult, setCheckerResult] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadFeatured() {
+      try {
+        const res = await api.getMedicines({ limit: 8 });
+        if (isMounted && res.success && res.medicines) {
+          setFeaturedMeds(res.medicines.slice(0, 8));
+        }
+      } catch (err) {
+        console.error('Error loading featured medicines', err);
+      } finally {
+        if (isMounted) setLoadingMeds(false);
+      }
+    }
+    loadFeatured();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleCheckArea = async (e) => {
     e.preventDefault();
@@ -44,7 +79,7 @@ export const HomepageAdditionalSections = () => {
       if (res.serviceable) {
         showToast(res.message);
       }
-    } catch  {
+    } catch {
       showToast('Error checking serviceability', 'error');
     } finally {
       setChecking(false);
@@ -66,69 +101,149 @@ export const HomepageAdditionalSections = () => {
       serviceable: res.serviceable,
       pharmacyName: res.pharmacyName
     });
+    showToast(`Delivery location set to ${res.area || res.pincode}`);
   };
 
+  // Healthcare Services / Categories (Newbay Medical Inspired)
+  const healthcareCategories = [
+    {
+      title: 'Fever & Pain Relief',
+      desc: 'Paracetamol, ibuprofen, analgesic balms and temperature care essentials for sudden discomfort.',
+      icon: Pill,
+      badge: 'Essential',
+      color: 'var(--medical-blue)',
+      bg: 'var(--medical-blue-light)'
+    },
+    {
+      title: 'Antibiotics & Prescription Care',
+      desc: 'Certified Schedule H formulations dispensed strictly against verified doctor prescriptions.',
+      icon: ShieldCheck,
+      badge: 'Rx Verified',
+      color: 'var(--health-green)',
+      bg: 'var(--health-green-light)'
+    },
+    {
+      title: 'Heart & Blood Pressure',
+      desc: 'Vital chronic cardiac and hypertension management medications for regular uninterrupted therapy.',
+      icon: Heart,
+      badge: 'Daily Care',
+      color: '#e11d48',
+      bg: '#ffe4e6'
+    },
+    {
+      title: 'Digestion & Gastric Wellness',
+      desc: 'Antacids, PPIs, digestive enzymes, and probiotics for swift relief from acidity and reflux.',
+      icon: Activity,
+      badge: 'Fast Acting',
+      color: '#0284c7',
+      bg: '#e0f2fe'
+    },
+    {
+      title: 'First Aid & Surgical Care',
+      desc: 'Sterile bandages, antiseptic solutions, cotton gauze, and emergency wound-dressing supplies.',
+      icon: Award,
+      badge: 'Immediate',
+      color: '#d97706',
+      bg: '#fef3c7'
+    },
+    {
+      title: 'Vitamins & Immunity',
+      desc: 'Multivitamins, zinc, vitamin C chewables, and nutritional supplements for daily wellness.',
+      icon: Sparkles,
+      badge: 'OTC Wellness',
+      color: '#7c3aed',
+      bg: '#ede9fe'
+    }
+  ];
+
+  // Why Choose Features (Exact 6 features required)
   const whyChooseFeatures = [
     {
-      title: 'Medicine Delivery Across India',
-      desc: 'Choose a delivery address anywhere in India. Standard delivery estimates are shown at checkout.',
+      title: 'Fast Medicine Delivery',
+      desc: 'Direct connection to neighborhood pharmacies ensures rapid 10-minute dispatch for critical needs.',
       icon: Zap,
-      color: '#059669',
-      bg: '#ecfdf5'
+      color: 'var(--medical-blue)',
+      bg: 'var(--medical-blue-light)'
+    },
+    {
+      title: 'Easy Prescription Upload',
+      desc: 'Snap a photo or upload a PDF of your doctor’s prescription for immediate digital review.',
+      icon: Upload,
+      color: 'var(--health-green)',
+      bg: 'var(--health-green-light)'
     },
     {
       title: 'Nearby Pharmacy Network',
-      desc: 'Connected to over 250+ licensed local pharmacies with 100% verified authentic stock.',
+      desc: 'Partnered with over 250+ certified neighborhood retail pharmacies with 100% genuine inventory.',
       icon: Store,
       color: '#0284c7',
       bg: '#e0f2fe'
     },
     {
-      title: 'Easy Prescription Upload',
-      desc: 'Simply snap a photo of your doctor’s prescription. Our certified pharmacists verify it instantly.',
-      icon: Upload,
-      color: '#8b5cf6',
-      bg: '#f5f3ff'
-    },
-    {
-      title: 'Secure Online Payments',
-      desc: 'Multiple secure digital payment methods: Instant UPI, Cards, NetBanking, and Cash on Delivery.',
+      title: 'Secure Payments',
+      desc: 'Multiple encrypted digital payment options including Instant UPI, Cards, NetBanking, and Cash on Delivery.',
       icon: CreditCard,
       color: '#f59e0b',
       bg: '#fffbeb'
     },
     {
       title: 'Real-Time Order Tracking',
-      desc: 'Live interactive GPS map tracking your rider from store packing to your doorstep.',
+      desc: 'Live interactive GPS map tracking your rider from pharmacy shelf packing to your doorstep.',
       icon: Navigation,
       color: '#ec4899',
       bg: '#fdf2f8'
     },
     {
       title: 'Convenient Doorstep Delivery',
-      desc: 'Contactless, tamper-proof insulated medical packaging ensuring sterile medicine integrity.',
+      desc: 'Tamper-evident, temperature-controlled insulated packaging ensuring sterile medication integrity.',
       icon: Home,
       color: '#10b981',
       bg: '#f0fdf4'
     }
   ];
 
+  // Customer Reviews (Newbay Medical Patient Testimonials)
+  const customerReviews = [
+    {
+      name: 'Dr. Priya Sharma',
+      role: 'Family Physician & Patient',
+      rating: 5,
+      comment: 'Med-in-Minutes is a lifesaver for my elderly patients who cannot travel to the chemist at night. The prescription review process is thorough, professional, and remarkably swift.',
+      location: 'South Extension, New Delhi'
+    },
+    {
+      name: 'Rajesh Mehra',
+      role: 'Verified Customer',
+      rating: 5,
+      comment: 'Ordered fever medicine for my 5-year-old daughter at 11:30 PM. The package was delivered with cold-chain packaging in exactly 9 minutes! Incredible service and genuine medicine.',
+      location: 'Indirapuram, Ghaziabad'
+    },
+    {
+      name: 'Ananya Deshmukh',
+      role: 'Chronic Care Patient',
+      rating: 5,
+      comment: 'I rely on Med-in-Minutes for my parents’ blood pressure and diabetes medicines every month. The invoice is accurate and the delivery partner verification code ensures total peace of mind.',
+      location: 'Bandra West, Mumbai'
+    }
+  ];
+
+  // FAQs
   const faqs = [
     {
       q: 'How does 10-minute medicine delivery work?',
-      a: 'Med-in-Minutes utilizes a proprietary hyperlocal fulfillment network. When you enter your PIN code, we connect your order to the nearest licensed pharmacy within 1.5 km of your location. A dedicated delivery partner is assigned in under 60 seconds, picks up the sealed medical pouch, and delivers it via electric scooter in 10 minutes.'
+      a: 'Med-in-Minutes utilizes a hyperlocal pharmacy fulfillment network. When you enter your PIN code, we connect your order to the nearest licensed pharmacy within 1.5 km of your location. A dedicated delivery partner is assigned in under 60 seconds, collects the sealed medical pouch, and delivers it via electric scooter in 10 minutes.'
     },
     {
       q: 'Can I upload a prescription?',
-      a: 'Yes, absolutely! For all Schedule H and prescription-only medications (indicated with an Rx badge), you can upload a photo or PDF of your doctor’s prescription. Our on-duty licensed pharmacist reviews the dosage and approves the order in real time before dispatch.'
+      a: 'Yes, absolutely! For all Schedule H and prescription-only medications (indicated with an Rx badge), you can upload a photo or PDF of your doctor’s prescription. Our on-duty licensed pharmacist reviews the dosage and validates the order before dispatch.'
     },
     {
       q: 'How do I track my order?',
-      a: 'Every order receives a unique Order ID (the Order ID shown in your confirmation). You can visit the "Track Order" page in the navigation bar to see fulfillment status updates as the pharmacy processes your order.'
+      a: 'Every order receives a unique Order ID. You can visit the "Track Order" page in the navigation bar to see real-time fulfillment status updates and view rider location on the interactive map.'
     },
     {
       q: 'What if my location is not serviceable?',
-      a: 'If your PIN code is not currently in our 10-minute express zone, our platform informs you immediately and prevents checkout to avoid false promises. You can change your delivery address or sign up for notifications as we expand to new neighborhoods weekly.'
+      a: 'If your PIN code is not currently in our 10-minute express zone, our platform informs you immediately and prevents checkout to avoid false promises. You can change your delivery address or sign up for notifications as we expand.'
     },
     {
       q: 'Can I cancel an order?',
@@ -147,7 +262,23 @@ export const HomepageAdditionalSections = () => {
           .home-section-pad {
             padding: 36px 0 !important;
           }
+          .services-grid {
+            grid-template-columns: 1fr !important;
+            gap: 14px !important;
+          }
+          .about-split-grid {
+            grid-template-columns: 1fr !important;
+            gap: 24px !important;
+          }
           .why-choose-grid {
+            grid-template-columns: 1fr !important;
+            gap: 14px !important;
+          }
+          .featured-meds-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 10px !important;
+          }
+          .reviews-grid {
             grid-template-columns: 1fr !important;
             gap: 14px !important;
           }
@@ -169,32 +300,234 @@ export const HomepageAdditionalSections = () => {
         }
       `}</style>
 
-      {/* SECTION A: WHY CHOOSE MED-IN-MINUTES? */}
-      <section className="home-section-pad" style={{ padding: '70px 0', background: 'var(--bg-main)' }}>
+      {/* SECTION C: HEALTHCARE SERVICES / CATEGORIES (NEWBAY MEDICAL STYLE) */}
+      <section className="home-section-pad" style={{ padding: '72px 0', background: 'white', borderBottom: '1px solid var(--border-color)' }}>
         <div className="container">
-          <div style={{ textAlign: 'center', maxWidth: '640px', margin: '0 auto 40px' }}>
-            <span className="badge badge-express" style={{ marginBottom: '12px' }}>
-              🌟 WHY CHOOSE US
+          <div style={{ textAlign: 'center', maxWidth: '680px', margin: '0 auto 48px' }}>
+            <span className="badge" style={{ background: 'var(--medical-blue-light)', color: 'var(--medical-blue)', fontWeight: 700, marginBottom: '12px' }}>
+              🏥 HEALTHCARE CATEGORIES
             </span>
-            <h2 style={{ fontSize: 'clamp(1.7rem, 3vw, 2.4rem)', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.5px', marginBottom: '10px' }}>
+            <h2 style={{ fontSize: 'clamp(1.8rem, 3.2vw, 2.5rem)', fontWeight: 800, color: 'var(--dark-navy)', letterSpacing: '-0.5px', marginBottom: '12px' }}>
+              Our Pharmaceutical Services & Categories
+            </h2>
+            <p style={{ fontSize: '1rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+              Carefully organized therapeutic ranges to ensure rapid access to verified medications when you need them most.
+            </p>
+          </div>
+
+          <div className="services-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '22px' }}>
+            {healthcareCategories.map((cat) => {
+              const Icon = cat.icon;
+              return (
+                <div
+                  key={cat.title}
+                  style={{
+                    background: 'white',
+                    borderRadius: 'var(--radius-lg)',
+                    padding: '28px 24px',
+                    border: '1.5px solid var(--border-color)',
+                    boxShadow: 'var(--shadow-sm)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    transition: 'all 0.25s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                    e.currentTarget.style.borderColor = 'var(--medical-blue)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+                    e.currentTarget.style.borderColor = 'var(--border-color)';
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                    <div
+                      style={{
+                        width: '50px',
+                        height: '50px',
+                        borderRadius: '12px',
+                        background: cat.bg,
+                        color: cat.color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <Icon size={24} />
+                    </div>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, background: 'var(--bg-main)', color: 'var(--dark-navy)', padding: '3px 10px', borderRadius: 'var(--radius-full)', border: '1px solid var(--border-color)' }}>
+                      {cat.badge}
+                    </span>
+                  </div>
+
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--dark-navy)', marginBottom: '8px' }}>
+                    {cat.title}
+                  </h3>
+
+                  <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6, flexGrow: 1, marginBottom: '20px' }}>
+                    {cat.desc}
+                  </p>
+
+                  <button
+                    onClick={() => setActiveTab('medicines')}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontSize: '0.85rem',
+                      fontWeight: 700,
+                      color: 'var(--medical-blue)',
+                      background: 'transparent',
+                      padding: 0,
+                      textAlign: 'left'
+                    }}
+                  >
+                    Explore Medicines <ArrowRight size={15} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION D: ABOUT MED-IN-MINUTES (IMAGE & TEXT SPLIT SECTION) */}
+      <section className="home-section-pad" style={{ padding: '76px 0', background: 'var(--bg-main)', borderBottom: '1px solid var(--border-color)' }}>
+        <div className="container">
+          <div className="about-split-grid" style={{ display: 'grid', gridTemplateColumns: '1.05fr 0.95fr', gap: '48px', alignItems: 'center' }}>
+            {/* Left Column: Clinical Content */}
+            <div>
+              <span className="badge" style={{ background: 'var(--health-green-light)', color: 'var(--health-green)', fontWeight: 700, marginBottom: '14px' }}>
+                🤝 PATIENT-FIRST HEALTHCARE
+              </span>
+              <h2 style={{ fontSize: 'clamp(2rem, 3.5vw, 2.75rem)', fontWeight: 800, color: 'var(--dark-navy)', letterSpacing: '-0.5px', marginBottom: '18px', lineHeight: 1.2 }}>
+                Making Healthcare More Accessible, One Delivery at a Time.
+              </h2>
+              <p style={{ fontSize: '1.05rem', color: 'var(--text-body)', lineHeight: 1.6, marginBottom: '16px' }}>
+                At Med-in-Minutes, we believe no patient should endure painful delays, closed pharmacies, or long travel when urgent health supplies are needed.
+              </p>
+              <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: 1.65, marginBottom: '26px' }}>
+                We bridge the critical gap between patients and licensed neighbourhood pharmacies. Through intelligent inventory routing and rapid cold-chain transport, we bring authentic prescription drugs, infant nutrition, and emergency wellness aids straight to your doorstep in just 10 minutes.
+              </p>
+
+              {/* Clinical Assurance Pillars */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '32px' }}>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                  <CheckCircle2 size={18} color="var(--health-green)" style={{ flexShrink: 0, marginTop: '3px' }} />
+                  <div>
+                    <strong style={{ fontSize: '0.9rem', color: 'var(--dark-navy)', display: 'block' }}>100% Genuine Supplies</strong>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Sourced only from licensed retail chemists.</span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                  <CheckCircle2 size={18} color="var(--health-green)" style={{ flexShrink: 0, marginTop: '3px' }} />
+                  <div>
+                    <strong style={{ fontSize: '0.9rem', color: 'var(--dark-navy)', display: 'block' }}>Cold-Chain Integrity</strong>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Insulated bags maintain temperature stability.</span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                  <CheckCircle2 size={18} color="var(--health-green)" style={{ flexShrink: 0, marginTop: '3px' }} />
+                  <div>
+                    <strong style={{ fontSize: '0.9rem', color: 'var(--dark-navy)', display: 'block' }}>Pharmacist Verification</strong>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Rigorous clinical safety checks on every Rx item.</span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                  <CheckCircle2 size={18} color="var(--health-green)" style={{ flexShrink: 0, marginTop: '3px' }} />
+                  <div>
+                    <strong style={{ fontSize: '0.9rem', color: 'var(--dark-navy)', display: 'block' }}>Safe Handover Code</strong>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Unique OTP ensures verified customer receipt.</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                <button
+                  onClick={() => setActiveTab('medicines')}
+                  className="btn btn-primary"
+                  style={{ padding: '12px 24px', fontSize: '0.95rem' }}
+                >
+                  <ShoppingBag size={18} /> Browse Pharmacy
+                </button>
+                <button
+                  onClick={() => setIsPrescriptionModalOpen(true)}
+                  className="btn btn-secondary"
+                  style={{ padding: '12px 24px', fontSize: '0.95rem' }}
+                >
+                  <Upload size={18} color="var(--medical-blue)" /> Upload Doctor’s Rx
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column: High Quality Clinical & Medicine Imagery */}
+            <div style={{ position: 'relative' }}>
+              <div
+                style={{
+                  borderRadius: '24px',
+                  overflow: 'hidden',
+                  boxShadow: 'var(--shadow-xl)',
+                  border: '5px solid white',
+                  background: 'white'
+                }}
+              >
+                <img
+                  src="/delivery_hero.jpg"
+                  alt="Doctor and licensed pharmacist reviewing prescription for Med-in-Minutes"
+                  style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }}
+                />
+              </div>
+
+              {/* Clinical Trust Stat Overlay */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '-16px',
+                  right: '-16px',
+                  background: 'var(--dark-navy)',
+                  color: 'white',
+                  padding: '16px 20px',
+                  borderRadius: '16px',
+                  boxShadow: 'var(--shadow-lg)',
+                  border: '2px solid white'
+                }}
+              >
+                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--health-green)' }}>9.8 Mins</div>
+                <div style={{ fontSize: '0.75rem', color: '#E9EFF2' }}>Avg. Handover Speed</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION E: WHY CHOOSE MED-IN-MINUTES? (3 OR 4 COLUMN FEATURE LAYOUT) */}
+      <section className="home-section-pad" style={{ padding: '72px 0', background: 'white', borderBottom: '1px solid var(--border-color)' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', maxWidth: '640px', margin: '0 auto 44px' }}>
+            <span className="badge" style={{ background: 'var(--medical-blue-light)', color: 'var(--medical-blue)', fontWeight: 700, marginBottom: '12px' }}>
+              ⭐ CLINICAL EXCELLENCE
+            </span>
+            <h2 style={{ fontSize: 'clamp(1.8rem, 3.2vw, 2.5rem)', fontWeight: 800, color: 'var(--dark-navy)', letterSpacing: '-0.5px', marginBottom: '12px' }}>
               Why Choose Med-in-Minutes?
             </h2>
-            <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)' }}>
+            <p style={{ fontSize: '1rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
               Built specifically for health emergencies, elderly care, and urgent family wellness needs.
             </p>
           </div>
 
-          <div className="why-choose-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '20px' }}>
+          <div className="why-choose-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '22px' }}>
             {whyChooseFeatures.map((feat) => {
               const Icon = feat.icon;
               return (
                 <div
                   key={feat.title}
                   style={{
-                    background: 'white',
+                    background: 'var(--bg-main)',
                     borderRadius: 'var(--radius-lg)',
-                    padding: '28px',
-                    border: '1px solid var(--border-color)',
+                    padding: '28px 24px',
+                    border: '1.5px solid var(--border-color)',
                     boxShadow: 'var(--shadow-sm)',
                     display: 'flex',
                     gap: '18px',
@@ -204,10 +537,12 @@ export const HomepageAdditionalSections = () => {
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = 'translateY(-4px)';
                     e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                    e.currentTarget.style.borderColor = 'var(--medical-blue)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = 'translateY(0)';
                     e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+                    e.currentTarget.style.borderColor = 'var(--border-color)';
                   }}
                 >
                   <div
@@ -226,7 +561,7 @@ export const HomepageAdditionalSections = () => {
                     <Icon size={24} />
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '8px' }}>
+                    <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--dark-navy)', marginBottom: '8px' }}>
                       {feat.title}
                     </h3>
                     <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
@@ -240,115 +575,235 @@ export const HomepageAdditionalSections = () => {
         </div>
       </section>
 
-      {/* SECTION B: OUR DELIVERY PROMISE */}
-      <section style={{ padding: '70px 0', background: 'linear-gradient(135deg, #064e3b 0%, #047857 50%, #065f46 100%)', color: 'white' }}>
+      {/* SECTION G: FEATURED MEDICINES (REAL PRODUCTS LOADED FROM DATABASE) */}
+      <section className="home-section-pad" style={{ padding: '72px 0', background: 'var(--bg-main)', borderBottom: '1px solid var(--border-color)' }}>
         <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '40px', alignItems: 'center' }} className="promise-grid">
-            <style>{`
-              @media (min-width: 900px) {
-                .promise-grid { gridTemplateColumns: 1.1fr 0.9fr !important; }
-              }
-            `}</style>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px', marginBottom: '36px' }}>
             <div>
-              <span className="badge" style={{ background: '#f59e0b', color: '#0f172a', fontWeight: 700, marginBottom: '16px' }}>
-                🤝 OUR SACRED COMMITMENT
+              <span className="badge" style={{ background: 'var(--health-green-light)', color: 'var(--health-green)', fontWeight: 700, marginBottom: '8px' }}>
+                💊 PHARMACY CATALOG
               </span>
-              {/* Exact heading requirement */}
-              <h2 style={{ fontSize: 'clamp(2rem, 3.5vw, 2.8rem)', fontWeight: 800, color: 'white', letterSpacing: '-0.5px', marginBottom: '18px', lineHeight: 1.2 }}>
-                Healthcare Should Never Have to Wait.
+              <h2 style={{ fontSize: 'clamp(1.8rem, 3.2vw, 2.4rem)', fontWeight: 800, color: 'var(--dark-navy)', letterSpacing: '-0.5px' }}>
+                Featured Essential Medicines
               </h2>
-              <p style={{ fontSize: '1.05rem', color: '#a7f3d0', lineHeight: 1.6, marginBottom: '16px' }}>
-                When a child has a sudden 103°F fever at midnight or an elderly parent runs out of critical blood pressure medicine, a 2-day delivery window simply isn’t good enough.
+              <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                Verified therapeutic formulations available for immediate 10-minute dispatch.
               </p>
-              <p style={{ fontSize: '0.95rem', color: '#ecfdf5', lineHeight: 1.6, marginBottom: '28px' }}>
-                Med-in-Minutes directly connects customers to neighborhood licensed pharmacies and rapid-response electric scooter riders within a 2-kilometer micro-radius. By keeping travel distances ultra-short and automating pharmacist inventory checks, we reduce critical waiting time from hours to just 10 minutes.
-              </p>
+            </div>
 
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
-                <div style={{ background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(10px)', padding: '14px 20px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fef08a' }}>9.8 Mins</div>
-                  <div style={{ fontSize: '0.8rem', color: '#ecfdf5' }}>Average Express Fulfillment</div>
+            <button
+              onClick={() => setActiveTab('medicines')}
+              className="btn btn-secondary"
+              style={{ fontSize: '0.85rem', padding: '10px 18px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              View Full Catalog ({featuredMeds.length}+ items) <ArrowRight size={15} />
+            </button>
+          </div>
+
+          {/* Medicines Grid */}
+          <div className="featured-meds-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '20px' }}>
+            {featuredMeds.map((med) => (
+              <div
+                key={med.id}
+                style={{
+                  background: 'white',
+                  borderRadius: 'var(--radius-lg)',
+                  border: '1.5px solid var(--border-color)',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  boxShadow: 'var(--shadow-sm)',
+                  transition: 'all 0.25s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                  e.currentTarget.style.borderColor = 'var(--medical-blue)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+                  e.currentTarget.style.borderColor = 'var(--border-color)';
+                }}
+              >
+                {/* Product Image Frame */}
+                <div style={{ position: 'relative', height: '160px', background: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px' }}>
+                  <img
+                    src={med.imageUrl || '/hero.png'}
+                    alt={med.name}
+                    style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
+                    onError={(e) => {
+                      e.currentTarget.src = '/hero.png';
+                    }}
+                  />
+                  {/* Badges */}
+                  <div style={{ position: 'absolute', top: '10px', left: '10px', display: 'flex', gap: '6px' }}>
+                    {med.prescriptionRequired ? (
+                      <span className="badge badge-rx" style={{ fontSize: '0.65rem', padding: '2px 7px', fontWeight: 800 }}>
+                        Rx Required
+                      </span>
+                    ) : (
+                      <span className="badge badge-otc" style={{ fontSize: '0.65rem', padding: '2px 7px', fontWeight: 800 }}>
+                        OTC
+                      </span>
+                    )}
+                  </div>
+                  {med.discountPercent > 0 && (
+                    <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'var(--accent-orange)', color: 'white', fontSize: '0.65rem', fontWeight: 800, padding: '2px 6px', borderRadius: '4px' }}>
+                      {med.discountPercent}% OFF
+                    </div>
+                  )}
                 </div>
-                <div style={{ background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(10px)', padding: '14px 20px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fef08a' }}>250+</div>
-                  <div style={{ fontSize: '0.8rem', color: '#ecfdf5' }}>Licensed Local Pharmacies</div>
-                </div>
-                <div style={{ background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(10px)', padding: '14px 20px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fef08a' }}>100%</div>
-                  <div style={{ fontSize: '0.8rem', color: '#ecfdf5' }}>Tamper-Evident Seals</div>
+
+                {/* Card Body */}
+                <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '4px' }}>
+                    {med.category} • {med.packaging || 'Standard Pack'}
+                  </div>
+                  <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--dark-navy)', lineHeight: 1.3, marginBottom: '6px' }}>
+                    {med.name}
+                  </h4>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '14px' }}>
+                    {med.composition || med.dosageForm || 'Certified formula'}
+                  </div>
+
+                  {/* Pricing & Add to Cart */}
+                  <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border-light)', paddingTop: '12px' }}>
+                    <div>
+                      <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--dark-navy)' }}>
+                        ₹{med.price}
+                      </div>
+                      {med.mrp > med.price && (
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', textDecoration: 'line-through' }}>
+                          ₹{med.mrp}
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        addToCart(med);
+                        showToast(`Added ${med.name} to cart`);
+                      }}
+                      className="btn btn-primary"
+                      style={{ padding: '8px 14px', fontSize: '0.8rem', borderRadius: '8px' }}
+                    >
+                      <Plus size={15} /> Add
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div style={{ background: 'rgba(255, 255, 255, 0.08)', borderRadius: '20px', padding: '28px', border: '1px solid rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(12px)' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'white', marginBottom: '16px' }}>
-                Our Delivery Ethics
-              </h3>
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                <li style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                  <CheckCircle2 size={20} color="#10b981" style={{ flexShrink: 0, marginTop: '2px' }} />
-                  <span style={{ fontSize: '0.9rem', color: '#ecfdf5' }}>
-                    <strong>Zero False Promises:</strong> If weather, inventory, or distance exceeds 10 minutes, we provide transparent real-time arrival estimates.
-                  </span>
-                </li>
-                <li style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                  <CheckCircle2 size={20} color="#10b981" style={{ flexShrink: 0, marginTop: '2px' }} />
-                  <span style={{ fontSize: '0.9rem', color: '#ecfdf5' }}>
-                    <strong>Prescription Rigor:</strong> Scheduled medicines are strictly vetted by on-duty certified pharmacists before release.
-                  </span>
-                </li>
-                <li style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                  <CheckCircle2 size={20} color="#10b981" style={{ flexShrink: 0, marginTop: '2px' }} />
-                  <span style={{ fontSize: '0.9rem', color: '#ecfdf5' }}>
-                    <strong>Safe Rider Standards:</strong> Rapid delivery is achieved through proximity and smart hub density, never by reckless driving.
-                  </span>
-                </li>
-              </ul>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* SECTION C: ORDER TRACKING PREVIEW */}
-      <section style={{ padding: '70px 0', background: 'white' }}>
+      {/* SECTION H: DELIVERY AND ORDER TRACKING CTA */}
+      <section className="home-section-pad" style={{ padding: '72px 0', background: 'white', borderBottom: '1px solid var(--border-color)' }}>
         <div className="container">
-          <div style={{ textAlign: 'center', maxWidth: '640px', margin: '0 auto 40px' }}>
-            <span className="badge badge-express" style={{ marginBottom: '12px' }}>
-              📡 LIVE TRANSPARENCY
+          <div style={{ maxWidth: '840px', margin: '0 auto', textAlign: 'center', marginBottom: '40px' }}>
+            <span className="badge" style={{ background: 'var(--medical-blue-light)', color: 'var(--medical-blue)', fontWeight: 700, marginBottom: '12px' }}>
+              ⚡ HYPERLOCAL DISPATCH
             </span>
-            <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.4rem)', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.5px', marginBottom: '12px' }}>
-              Order Tracking Preview
+            <h2 style={{ fontSize: 'clamp(2rem, 3.5vw, 2.8rem)', fontWeight: 800, color: 'var(--dark-navy)', letterSpacing: '-0.5px', marginBottom: '14px' }}>
+              Your Medicines Are Just Minutes Away.
             </h2>
-            <p style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>
-              Follow your medicines every single step of the way—from licensed pharmacy shelf to your front door.
+            <p style={{ fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '24px' }}>
+              Experience seamless doorstep medicine dispatch with real-time GPS tracking and live status updates. Enter your PIN code below to confirm immediate 10-minute delivery.
             </p>
+
+            {/* Pincode Availability Checker */}
+            <div className="pincode-checker-card" style={{ background: 'var(--bg-main)', borderRadius: '24px', padding: '36px 32px', border: '1.5px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
+              <form onSubmit={handleCheckArea} className="pincode-form" style={{ display: 'flex', gap: '12px', maxWidth: '480px', margin: '0 auto 16px', flexWrap: 'wrap' }}>
+                <input
+                  type="text"
+                  maxLength={6}
+                  inputMode="numeric"
+                  className="pincode-input"
+                  placeholder="Enter 6-digit PIN code (e.g. 110001)"
+                  value={checkerPincode}
+                  onChange={(e) => setCheckerPincode(e.target.value.replace(/\D/g, ''))}
+                  style={{
+                    flex: 1,
+                    minWidth: '220px',
+                    padding: '14px 18px',
+                    borderRadius: '12px',
+                    border: '1.5px solid var(--border-color)',
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    color: 'var(--dark-navy)',
+                    background: 'white'
+                  }}
+                />
+                <button
+                  type="submit"
+                  disabled={checking}
+                  className="btn btn-primary pincode-btn"
+                  style={{ padding: '14px 26px', borderRadius: '12px' }}
+                >
+                  {checking ? 'Checking...' : 'Check Availability'}
+                </button>
+              </form>
+
+              {/* Result display */}
+              {checkerResult && (
+                <div
+                  style={{
+                    marginTop: '16px',
+                    padding: '16px 20px',
+                    borderRadius: '12px',
+                    background: checkerResult.serviceable ? 'var(--health-green-light)' : '#fef2f2',
+                    border: `1.5px solid ${checkerResult.serviceable ? 'var(--health-green-border)' : '#fecaca'}`,
+                    textAlign: 'left'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                    <div>
+                      <h4 style={{ fontWeight: 800, fontSize: '1rem', color: checkerResult.serviceable ? 'var(--dark-navy)' : '#991b1b', marginBottom: '4px' }}>
+                        {checkerResult.serviceable ? (checkerResult.expressEligible ? '⚡ 10-Minute Express Delivery Active!' : '⏱️ Standard Delivery (18 mins) Available') : 'Delivery Not Available Yet'}
+                      </h4>
+                      <p style={{ fontSize: '0.85rem', color: checkerResult.serviceable ? 'var(--health-green-hover)' : '#b91c1c' }}>
+                        {checkerResult.message}
+                      </p>
+                      {checkerResult.serviceable && (
+                        <p style={{ fontSize: '0.8rem', color: 'var(--dark-navy)', marginTop: '6px' }}>
+                          Nearest Store: <strong>{checkerResult.pharmacyName}</strong> • Delivery Fee: <strong>{checkerResult.deliveryFee === 0 ? 'FREE' : `₹${checkerResult.deliveryFee}`}</strong>
+                        </p>
+                      )}
+                    </div>
+                    {checkerResult.serviceable && (
+                      <button
+                        type="button"
+                        onClick={() => applyPincode(checkerResult)}
+                        className="btn btn-primary"
+                        style={{ fontSize: '0.8rem', padding: '8px 14px', flexShrink: 0 }}
+                      >
+                        Set Delivery Location
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Tracking CTA Button */}
+              <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Already placed an order?</span>
+                <button
+                  onClick={() => setActiveTab('track')}
+                  className="btn btn-navy"
+                  style={{ padding: '10px 20px', fontSize: '0.875rem' }}
+                >
+                  <Navigation size={16} /> Track Your Order Now
+                </button>
+              </div>
+            </div>
           </div>
 
-          {/* Interactive Illustrated Timeline Preview */}
-          <div style={{ background: 'var(--bg-main)', border: '1.5px solid var(--border-color)', borderRadius: '20px', padding: '32px 24px', boxShadow: 'var(--shadow-sm)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', borderBottom: '1px solid var(--border-color)', paddingBottom: '20px', marginBottom: '28px' }}>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-main)' }}>
-                    How order tracking works
-                  </span>
-
-                </div>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Progress updates appear here after your order is placed. • Arriving in 4 Mins
-                </p>
-              </div>
-
-              <button
-                onClick={() => setActiveTab('track')}
-                className="btn btn-primary"
-                style={{ fontSize: '0.875rem', padding: '8px 16px' }}
-              >
-                Open Full Tracking Dashboard →
-              </button>
+          {/* 7-Step Live Order Progress Preview */}
+          <div style={{ background: 'var(--bg-main)', border: '1.5px solid var(--border-color)', borderRadius: '20px', padding: '28px 24px' }}>
+            <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--medical-blue)', textTransform: 'uppercase', marginBottom: '12px', textAlign: 'center' }}>
+              Full Order Tracking Workflow
             </div>
-
-            {/* Order progress preview */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
               {[
                 { label: '1. Placed', icon: CheckCircle2 },
@@ -357,7 +812,7 @@ export const HomepageAdditionalSections = () => {
                 { label: '4. Packing', icon: Package },
                 { label: '5. Rider assigned', icon: Bike },
                 { label: '6. Out for delivery', icon: Navigation },
-                { label: '7. Delivered', icon: Home }
+                { label: '7. Delivered (OTP)', icon: Home }
               ].map((step) => {
                 const Icon = step.icon;
                 return (
@@ -365,16 +820,14 @@ export const HomepageAdditionalSections = () => {
                     key={step.label}
                     style={{
                       background: 'white',
-                      border: '1.5px solid',
-                      borderColor: '#e2e8f0',
+                      border: '1.5px solid var(--border-color)',
                       borderRadius: '12px',
                       padding: '12px 10px',
                       textAlign: 'center',
-                      color: 'var(--text-main)',
-                      boxShadow: 'none'
+                      color: 'var(--dark-navy)'
                     }}
                   >
-                    <Icon size={18} style={{ margin: '0 auto 6px' }} />
+                    <Icon size={18} color="var(--medical-blue)" style={{ margin: '0 auto 6px' }} />
                     <div style={{ fontSize: '0.75rem', fontWeight: 700 }}>{step.label}</div>
                   </div>
                 );
@@ -384,108 +837,114 @@ export const HomepageAdditionalSections = () => {
         </div>
       </section>
 
-      {/* SECTION D: SERVICE AVAILABILITY (PIN CODE CHECKER) */}
-      <section className="home-section-pad" style={{ padding: '70px 0', background: 'linear-gradient(180deg, #f8fafc 0%, #ecfdf5 100%)' }}>
+      {/* SECTION I: CUSTOMER REVIEWS (NEWBAY MEDICAL PATIENT TESTIMONIALS) */}
+      <section className="home-section-pad" style={{ padding: '72px 0', background: 'var(--bg-main)', borderBottom: '1px solid var(--border-color)' }}>
         <div className="container">
-          <div className="pincode-checker-card" style={{ maxWidth: '680px', margin: '0 auto', background: 'white', borderRadius: '24px', padding: '40px 32px', boxShadow: 'var(--shadow-lg)', border: '1.5px solid var(--border-color)', textAlign: 'center' }}>
-            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--primary-light)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-              <MapPin size={28} />
-            </div>
-
-            {/* Mandatory exact heading */}
-            <h2 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '8px' }}>
-              Service Availability
+          <div style={{ textAlign: 'center', maxWidth: '640px', margin: '0 auto 48px' }}>
+            <span className="badge" style={{ background: 'var(--health-green-light)', color: 'var(--health-green)', fontWeight: 700, marginBottom: '12px' }}>
+              💬 PATIENT TRUST
+            </span>
+            <h2 style={{ fontSize: 'clamp(1.8rem, 3.2vw, 2.4rem)', fontWeight: 800, color: 'var(--dark-navy)', letterSpacing: '-0.5px', marginBottom: '12px' }}>
+              What Our Patients & Doctors Say
             </h2>
-
-            {/* Mandatory exact text */}
-            <p style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '24px' }}>
-              Check whether Med-in-Minutes delivers to your area.
+            <p style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>
+              Real experiences from families and healthcare professionals who trust Med-in-Minutes every day.
             </p>
+          </div>
 
-            <form onSubmit={handleCheckArea} className="pincode-form" style={{ display: 'flex', gap: '10px', maxWidth: '460px', margin: '0 auto 20px', flexWrap: 'wrap' }}>
-              <input
-                type="text"
-                maxLength={6}
-                inputMode="numeric"
-                className="pincode-input"
-                placeholder="Enter 6-digit PIN code (e.g. 110001)"
-                value={checkerPincode}
-                onChange={(e) => setCheckerPincode(e.target.value.replace(/\D/g, ''))}
-                style={{
-                  flex: 1,
-                  minWidth: '200px',
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  border: '1.5px solid var(--border-color)',
-                  fontSize: '1rem',
-                  fontWeight: 600
-                }}
-              />
-              <button
-                type="submit"
-                disabled={checking}
-                className="btn btn-primary pincode-btn"
-                style={{ padding: '12px 24px', borderRadius: '12px' }}
-              >
-                {checking ? 'Checking...' : 'Check Availability'}
-              </button>
-            </form>
-
-            {/* Result display */}
-            {checkerResult && (
+          <div className="reviews-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+            {customerReviews.map((rev) => (
               <div
+                key={rev.name}
                 style={{
-                  marginTop: '16px',
-                  padding: '16px 20px',
-                  borderRadius: '12px',
-                  background: checkerResult.serviceable ? '#ecfdf5' : '#fef2f2',
-                  border: `1.5px solid ${checkerResult.serviceable ? '#a7f3d0' : '#fecaca'}`,
-                  textAlign: 'left'
+                  background: 'white',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '32px 26px',
+                  border: '1.5px solid var(--border-color)',
+                  boxShadow: 'var(--shadow-sm)',
+                  display: 'flex',
+                  flexDirection: 'column'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
+                {/* 5 Stars */}
+                <div style={{ display: 'flex', gap: '4px', color: '#f59e0b', marginBottom: '14px' }}>
+                  {[...Array(rev.rating)].map((_, i) => (
+                    <Star key={i} size={17} fill="currentColor" />
+                  ))}
+                </div>
+
+                <p style={{ fontSize: '0.925rem', color: 'var(--text-body)', lineHeight: 1.65, fontStyle: 'italic', flexGrow: 1, marginBottom: '20px' }}>
+                  "{rev.comment}"
+                </p>
+
+                <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div>
-                    <h4 style={{ fontWeight: 800, fontSize: '1rem', color: checkerResult.serviceable ? '#064e3b' : '#991b1b', marginBottom: '4px' }}>
-                      {checkerResult.serviceable ? (checkerResult.expressEligible ? '⚡ 10-Minute Express Delivery Available!' : '⏱️ Standard Delivery (18 mins) Available') : 'Delivery Not Available Yet'}
-                    </h4>
-                    <p style={{ fontSize: '0.85rem', color: checkerResult.serviceable ? '#047857' : '#b91c1c' }}>
-                      {checkerResult.message}
-                    </p>
-                    {checkerResult.serviceable && (
-                      <p style={{ fontSize: '0.8rem', color: '#065f46', marginTop: '6px' }}>
-                        Nearest Store: <strong>{checkerResult.pharmacyName}</strong> • Delivery Fee: <strong>{checkerResult.deliveryFee === 0 ? 'FREE' : `₹${checkerResult.deliveryFee}`}</strong>
-                      </p>
-                    )}
+                    <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--dark-navy)' }}>
+                      {rev.name}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      {rev.role} • {rev.location}
+                    </div>
                   </div>
-                  {checkerResult.serviceable && (
-                    <button
-                      type="button"
-                      onClick={() => applyPincode(checkerResult)}
-                      className="btn btn-primary"
-                      style={{ fontSize: '0.8rem', padding: '8px 14px', flexShrink: 0 }}
-                    >
-                      Set Location
-                    </button>
-                  )}
+                  <span className="badge badge-otc" style={{ fontSize: '0.65rem', padding: '2px 8px' }}>
+                    Verified
+                  </span>
                 </div>
               </div>
-            )}
+            ))}
           </div>
         </div>
       </section>
 
-      {/* SECTION E: FREQUENTLY ASKED QUESTIONS */}
-      <section style={{ padding: '70px 0', background: 'white', borderTop: '1px solid var(--border-color)' }}>
+      {/* SECTION J: FINAL CTA SECTION (NEWBAY MEDICAL HEALTHCARE CTA) */}
+      <section style={{ padding: '80px 0', background: 'var(--dark-navy)', color: 'white', position: 'relative', overflow: 'hidden' }}>
+        {/* Subtle background glow */}
+        <div style={{ position: 'absolute', top: '-20%', left: '10%', width: '380px', height: '380px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(8, 126, 139, 0.25) 0%, rgba(18,59,93,0) 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '-20%', right: '10%', width: '380px', height: '380px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(32, 184, 106, 0.2) 0%, rgba(18,59,93,0) 70%)', pointerEvents: 'none' }} />
+
+        <div className="container" style={{ position: 'relative', zIndex: 2, textAlign: 'center', maxWidth: '720px' }}>
+          <span className="badge" style={{ background: 'var(--health-green)', color: 'white', fontWeight: 800, marginBottom: '16px' }}>
+            🏥 24x7 EMERGENCY DISPENSING ACTIVE
+          </span>
+          <h2 style={{ fontSize: 'clamp(2.1rem, 4vw, 3rem)', fontWeight: 800, color: 'white', letterSpacing: '-0.5px', marginBottom: '16px', lineHeight: 1.2 }}>
+            Need Medicines? We're Here to Help.
+          </h2>
+          <p style={{ fontSize: '1.05rem', color: '#E9EFF2', lineHeight: 1.6, marginBottom: '32px' }}>
+            Connect with verified neighbourhood pharmacies for instant 10-minute medicine delivery, or securely upload your prescription for immediate licensed pharmacist verification.
+          </p>
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setActiveTab('medicines')}
+              className="btn btn-green"
+              style={{ padding: '14px 28px', fontSize: '1rem', borderRadius: '12px' }}
+            >
+              <ShoppingBag size={19} /> Shop Medicines
+            </button>
+
+            <button
+              onClick={() => setIsPrescriptionModalOpen(true)}
+              className="btn btn-secondary"
+              style={{ padding: '14px 28px', fontSize: '1rem', borderRadius: '12px', background: 'white', color: 'var(--dark-navy)', border: 'none' }}
+            >
+              <Upload size={19} color="var(--medical-blue)" /> Upload Prescription
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION K: FREQUENTLY ASKED QUESTIONS */}
+      <section style={{ padding: '72px 0', background: 'white' }}>
         <div className="container">
           <div style={{ textAlign: 'center', maxWidth: '640px', margin: '0 auto 48px' }}>
-            <span className="badge badge-express" style={{ marginBottom: '12px' }}>
+            <span className="badge" style={{ background: 'var(--medical-blue-light)', color: 'var(--medical-blue)', fontWeight: 700, marginBottom: '12px' }}>
               ❓ CLARITY & TRANSPARENCY
             </span>
-            <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.4rem)', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.5px', marginBottom: '12px' }}>
+            <h2 style={{ fontSize: 'clamp(1.8rem, 3.2vw, 2.4rem)', fontWeight: 800, color: 'var(--dark-navy)', letterSpacing: '-0.5px', marginBottom: '12px' }}>
               Frequently Asked Questions
             </h2>
             <p style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>
-              Everything you need to know about rapid 10-minute medicine delivery.
+              Everything you need to know about compliant 10-minute medicine delivery.
             </p>
           </div>
 
@@ -496,9 +955,9 @@ export const HomepageAdditionalSections = () => {
                 <div
                   key={faq.q}
                   style={{
-                    background: isOpen ? '#f8fafc' : 'white',
+                    background: isOpen ? 'var(--bg-main)' : 'white',
                     border: '1.5px solid',
-                    borderColor: isOpen ? 'var(--primary)' : 'var(--border-color)',
+                    borderColor: isOpen ? 'var(--medical-blue)' : 'var(--border-color)',
                     borderRadius: '14px',
                     overflow: 'hidden',
                     transition: 'all 0.2s'
@@ -517,15 +976,15 @@ export const HomepageAdditionalSections = () => {
                       textAlign: 'left',
                       fontWeight: 700,
                       fontSize: '1.05rem',
-                      color: isOpen ? 'var(--primary-dark)' : 'var(--text-main)'
+                      color: isOpen ? 'var(--dark-navy)' : 'var(--text-body)'
                     }}
                   >
                     <span>{faq.q}</span>
-                    {isOpen ? <ChevronUp size={20} color="var(--primary)" /> : <ChevronDown size={20} color="var(--text-muted)" />}
+                    {isOpen ? <ChevronUp size={20} color="var(--medical-blue)" /> : <ChevronDown size={20} color="var(--text-muted)" />}
                   </button>
 
                   {isOpen && (
-                    <div style={{ padding: '0 24px 20px', fontSize: '0.925rem', color: 'var(--text-muted)', lineHeight: 1.6, borderTop: '1px solid #f1f5f9', paddingTop: '14px' }}>
+                    <div style={{ padding: '0 24px 20px', fontSize: '0.925rem', color: 'var(--text-muted)', lineHeight: 1.6, borderTop: '1px solid var(--border-light)', paddingTop: '14px' }}>
                       {faq.a}
                     </div>
                   )}

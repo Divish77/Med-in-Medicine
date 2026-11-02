@@ -114,35 +114,35 @@ export const MedicinesPage = () => {
 
       <div className="container">
         {/* Page Header */}
-        <div style={{ marginBottom: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
-            <span className="badge badge-express" style={{ fontSize: '0.72rem', padding: '2px 8px' }}>
+        <div style={{ marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
+            <span className="badge" style={{ background: 'var(--health-green)', color: 'white', fontSize: '0.72rem', padding: '3px 9px', fontWeight: 800 }}>
               ⚡ 10-MIN EXPRESS
             </span>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
               Nearest Store: <strong>{deliveryLocation.pharmacyName || 'Central Partner Chemist'}</strong>
             </span>
           </div>
-          <h1 className="meds-header-title" style={{ fontSize: '2.1rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.5px', marginBottom: '4px' }}>
+          <h1 className="meds-header-title" style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--dark-navy)', letterSpacing: '-0.5px', marginBottom: '6px' }}>
             Verified Healthcare &amp; Medicines
           </h1>
-          <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-            100% genuine pharmaceutical inventory verified by certified pharmacists.
+          <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)' }}>
+            100% genuine pharmaceutical inventory verified by certified pharmacists and dispatched in 10 minutes.
           </p>
         </div>
 
         {/* Search Bar & Filter Controls Card */}
-        <div className="search-filter-card" style={{ background: 'white', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)', marginBottom: '24px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px', alignItems: 'center' }} className="search-filter-grid">
+        <div className="search-filter-card" style={{ background: 'white', padding: '18px 22px', borderRadius: '16px', border: '1.5px solid var(--border-color)', boxShadow: 'var(--shadow-sm)', marginBottom: '28px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '14px', alignItems: 'center' }} className="search-filter-grid">
             <style>{`
               @media (min-width: 768px) {
-                .search-filter-grid { gridTemplateColumns: 1fr auto !important; }
+                .search-filter-grid { grid-template-columns: 1fr auto !important; }
               }
             `}</style>
 
             {/* Search Input with Search Icon and Clear Button */}
             <div style={{ position: 'relative', width: '100%' }}>
-              <Search size={18} color="var(--primary)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
+              <Search size={18} color="var(--medical-blue)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="text"
                 placeholder="Search medicines, salts, symptoms (e.g. Dolo, Pan 40)..."
@@ -156,10 +156,11 @@ export const MedicinesPage = () => {
                   fontSize: '0.925rem',
                   fontWeight: 600,
                   outline: 'none',
-                  background: '#f8fafc',
+                  background: 'var(--bg-main)',
+                  color: 'var(--dark-navy)',
                   transition: 'border-color 0.2s'
                 }}
-                onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.background = '#ffffff'; }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--medical-blue)'; e.currentTarget.style.background = '#ffffff'; }}
                 onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; }}
               />
               {searchQuery && (
@@ -190,7 +191,7 @@ export const MedicinesPage = () => {
             </div>
 
             {/* Rx Filter Segment Radios */}
-            <div style={{ display: 'flex', gap: '4px', background: '#f1f5f9', padding: '4px', borderRadius: '10px', width: '100%' }}>
+            <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-main)', padding: '4px', borderRadius: '10px', width: '100%', border: '1px solid var(--border-color)' }}>
               {[
                 { id: 'all', label: 'All Items' },
                 { id: 'otc', label: 'OTC Only' },
@@ -202,14 +203,14 @@ export const MedicinesPage = () => {
                   onClick={() => setRxFilter(filter.id)}
                   style={{
                     flex: 1,
-                    padding: '8px 10px',
+                    padding: '8px 12px',
                     borderRadius: '8px',
                     fontSize: '0.78rem',
                     fontWeight: 700,
                     border: 'none',
                     background: rxFilter === filter.id ? 'white' : 'transparent',
-                    color: rxFilter === filter.id ? 'var(--primary-dark)' : 'var(--text-muted)',
-                    boxShadow: rxFilter === filter.id ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                    color: rxFilter === filter.id ? 'var(--medical-blue)' : 'var(--text-muted)',
+                    boxShadow: rxFilter === filter.id ? '0 1px 3px rgba(18,59,93,0.1)' : 'none',
                     cursor: 'pointer',
                     transition: 'all 0.15s ease',
                     whiteSpace: 'nowrap',
@@ -223,7 +224,7 @@ export const MedicinesPage = () => {
           </div>
 
           {/* Category Chips Bar (Horizontally scrollable) */}
-          <div className="no-scrollbar" style={{ display: 'flex', gap: '8px', overflowX: 'auto', padding: '12px 0 2px', WebkitOverflowScrolling: 'touch' }}>
+          <div className="no-scrollbar" style={{ display: 'flex', gap: '8px', overflowX: 'auto', padding: '14px 0 2px', WebkitOverflowScrolling: 'touch' }}>
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -231,14 +232,14 @@ export const MedicinesPage = () => {
                 onClick={() => setSelectedCategory(cat)}
                 style={{
                   whiteSpace: 'nowrap',
-                  padding: '7px 14px',
+                  padding: '7px 16px',
                   borderRadius: 'var(--radius-full)',
                   fontSize: '0.8rem',
                   fontWeight: 700,
-                  border: '1px solid',
-                  borderColor: selectedCategory === cat ? 'var(--primary)' : 'var(--border-color)',
-                  background: selectedCategory === cat ? 'var(--primary)' : '#f8fafc',
-                  color: selectedCategory === cat ? 'white' : 'var(--text-main)',
+                  border: '1.5px solid',
+                  borderColor: selectedCategory === cat ? 'var(--medical-blue)' : 'var(--border-color)',
+                  background: selectedCategory === cat ? 'var(--medical-blue)' : 'white',
+                  color: selectedCategory === cat ? 'white' : 'var(--dark-navy)',
                   cursor: 'pointer',
                   flexShrink: 0,
                   transition: 'all 0.15s ease'
@@ -313,7 +314,7 @@ export const MedicinesPage = () => {
 
                 {/* Details */}
                 <div className="med-card-body" style={{ padding: '14px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                  <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '2px' }}>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--medical-blue)', textTransform: 'uppercase', marginBottom: '2px' }}>
                     {med.brand || 'Licensed Chemist'}
                   </div>
 
@@ -323,7 +324,7 @@ export const MedicinesPage = () => {
                     style={{
                       fontSize: '0.95rem',
                       fontWeight: 800,
-                      color: 'var(--text-main)',
+                      color: 'var(--dark-navy)',
                       cursor: 'pointer',
                       lineHeight: 1.35,
                       marginBottom: '4px',
@@ -346,7 +347,7 @@ export const MedicinesPage = () => {
                   <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #f1f5f9', paddingTop: '10px', gap: '6px' }}>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                        <span className="med-card-price" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                        <span className="med-card-price" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--dark-navy)' }}>
                           ₹{med.price}
                         </span>
                         {med.mrp > med.price && (
@@ -356,7 +357,7 @@ export const MedicinesPage = () => {
                         )}
                       </div>
                       {med.discountPercent > 0 && (
-                        <span style={{ fontSize: '0.65rem', color: '#059669', fontWeight: 800 }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--health-green)', fontWeight: 800 }}>
                           {med.discountPercent}% OFF
                         </span>
                       )}

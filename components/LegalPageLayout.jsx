@@ -127,7 +127,7 @@ export const LegalPageLayout = ({
         {/* Hero Header */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #064e3b 0%, #065f46 60%, #047857 100%)',
+            background: 'linear-gradient(135deg, var(--dark-navy) 0%, #0d2c47 60%, var(--medical-blue) 100%)',
             color: 'white',
             padding: '48px 0 40px',
             position: 'relative',
@@ -147,7 +147,7 @@ export const LegalPageLayout = ({
                   borderRadius: 'var(--radius-full)',
                   fontSize: '0.785rem',
                   fontWeight: 700,
-                  color: '#a7f3d0',
+                  color: 'var(--health-green)',
                   marginBottom: '16px',
                   letterSpacing: '0.05em'
                 }}
@@ -158,15 +158,15 @@ export const LegalPageLayout = ({
               <h1 style={{ fontSize: 'clamp(2rem, 4vw, 2.75rem)', fontWeight: 800, color: 'white', marginBottom: '14px', lineHeight: 1.2 }}>
                 {title}
               </h1>
-              <p style={{ fontSize: '1.05rem', color: '#d1fae5', lineHeight: 1.6, marginBottom: '20px' }}>
+              <p style={{ fontSize: '1.05rem', color: '#E9EFF2', lineHeight: 1.6, marginBottom: '20px' }}>
                 {subtitle}
               </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap', fontSize: '0.8rem', color: '#a7f3d0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap', fontSize: '0.8rem', color: '#E9EFF2' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Clock size={14} /> Last Updated: {lastUpdated}
+                  <Clock size={14} color="var(--health-green)" /> Last Updated: {lastUpdated}
                 </span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <CheckCircle2 size={14} /> Verified for Med-in-Minutes Platform
+                  <CheckCircle2 size={14} color="var(--health-green)" /> Verified for Med-in-Minutes Platform
                 </span>
               </div>
             </div>

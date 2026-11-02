@@ -5,53 +5,53 @@ import { MapPin, Search, CreditCard, Bike, ArrowRight, CheckCircle2 } from 'luci
 import { useApp } from '@/context/AppContext';
 
 export const HowItWorksSection = () => {
-  const { setIsLocationModalOpen, setActiveTab } = useApp();
+  const { setIsLocationModalOpen, setIsPrescriptionModalOpen, setActiveTab } = useApp();
 
   const steps = [
     {
       step: '01',
-      title: 'Enter Your Location',
-      description: 'Share your GPS location or enter your 6-digit PIN code to connect to nearby partner pharmacies with instant inventory.',
+      title: 'Select your location',
+      description: 'Enter your 6-digit PIN code or detect your location to link instantly with nearby licensed retail pharmacies.',
       icon: MapPin,
-      color: '#059669',
-      bg: '#ecfdf5',
-      actionText: 'Set Location',
+      color: 'var(--medical-blue)',
+      bg: 'var(--medical-blue-light)',
+      actionText: 'Choose Location',
       onClick: () => setIsLocationModalOpen(true)
     },
     {
       step: '02',
-      title: 'Choose Medicines',
-      description: 'Search from thousands of authentic OTC and chronic medicines, or easily upload your doctor’s prescription in seconds.',
+      title: 'Search or upload your prescription',
+      description: 'Find required medicines from verified pharmacy inventory, or securely upload your doctor’s prescription for rapid validation.',
       icon: Search,
-      color: '#0284c7',
-      bg: '#e0f2fe',
-      actionText: 'Browse Medicines',
-      onClick: () => setActiveTab('medicines')
+      color: 'var(--health-green)',
+      bg: 'var(--health-green-light)',
+      actionText: 'Upload or Browse',
+      onClick: () => setIsPrescriptionModalOpen(true)
     },
     {
       step: '03',
-      title: 'Place Your Order',
-      description: 'Review your items and place your order with Cash on Delivery. Prescription medicines need pharmacist approval before checkout.',
+      title: 'Place your order',
+      description: 'Review genuine medicines, cold-chain handling, and choose from Instant UPI, Card, NetBanking, or Cash on Delivery.',
       icon: CreditCard,
-      color: '#8b5cf6',
-      bg: '#f5f3ff',
-      actionText: 'View Cart',
+      color: '#0284c7',
+      bg: '#e0f2fe',
+      actionText: 'View Medicines',
       onClick: () => setActiveTab('medicines')
     },
     {
       step: '04',
-      title: 'Get It Delivered',
-      description: 'Follow order progress as the pharmacy prepares and dispatches your medicines. Confirm handover with your one-time delivery code.',
+      title: 'Track and receive your medicines',
+      description: 'Watch live delivery progress on an interactive GPS map and confirm tamper-evident handover with your secure delivery code.',
       icon: Bike,
-      color: '#f97316',
-      bg: '#fff7ed',
-      actionText: 'Track Orders',
+      color: '#d97706',
+      bg: '#fef3c7',
+      actionText: 'Track Delivery',
       onClick: () => setActiveTab('track')
     }
   ];
 
   return (
-    <section className="how-it-works-section" style={{ padding: '60px 0', background: 'white', borderBottom: '1px solid var(--border-color)' }}>
+    <section className="how-it-works-section" style={{ padding: '64px 0', background: 'white', borderBottom: '1px solid var(--border-color)' }}>
       <style>{`
         @media (max-width: 767px) {
           .how-it-works-section {
@@ -73,21 +73,21 @@ export const HowItWorksSection = () => {
         }
       `}</style>
       <div className="container">
-        {/* Section Header */}
-        <div className="how-it-works-header" style={{ textAlign: 'center', maxWidth: '680px', margin: '0 auto 44px' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', background: 'var(--primary-light)', color: 'var(--primary-dark)', borderRadius: 'var(--radius-full)', fontSize: '0.8rem', fontWeight: 700, marginBottom: '12px' }}>
-            <CheckCircle2 size={14} /> SIMPLE 4-STEP PROCESS
+        {/* Section Header - Newbay Medical Style */}
+        <div className="how-it-works-header" style={{ textAlign: 'center', maxWidth: '680px', margin: '0 auto 48px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 14px', background: 'var(--medical-blue-light)', color: 'var(--medical-blue)', borderRadius: 'var(--radius-full)', fontSize: '0.8rem', fontWeight: 700, marginBottom: '12px' }}>
+            <CheckCircle2 size={14} color="var(--medical-blue)" /> SIMPLE 4-STEP PROCESS
           </div>
-          <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.5px', marginBottom: '12px' }}>
+          <h2 style={{ fontSize: 'clamp(1.8rem, 3.2vw, 2.5rem)', fontWeight: 800, color: 'var(--dark-navy)', letterSpacing: '-0.5px', marginBottom: '14px' }}>
             How Med-in-Minutes Works
           </h2>
-          <p style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>
-            We redesigned medicine procurement from the ground up to get urgent health supplies to your doorstep in minutes, not days.
+          <p style={{ fontSize: '1rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+            A transparent and compliant healthcare delivery workflow connecting licensed pharmacists to your doorstep in minutes.
           </p>
         </div>
 
         {/* 4 Steps Grid */}
-        <div className="how-it-works-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px' }}>
+        <div className="how-it-works-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' }}>
           {steps.map((item) => {
             const Icon = item.icon;
             return (
@@ -108,7 +108,7 @@ export const HowItWorksSection = () => {
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-6px)';
                   e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
-                  e.currentTarget.style.borderColor = item.color;
+                  e.currentTarget.style.borderColor = 'var(--medical-blue)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
@@ -120,9 +120,9 @@ export const HowItWorksSection = () => {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                   <div
                     style={{
-                      width: '56px',
-                      height: '56px',
-                      borderRadius: '16px',
+                      width: '54px',
+                      height: '54px',
+                      borderRadius: '14px',
                       background: item.bg,
                       display: 'flex',
                       alignItems: 'center',
@@ -130,11 +130,11 @@ export const HowItWorksSection = () => {
                       color: item.color
                     }}
                   >
-                    <Icon size={28} />
+                    <Icon size={26} />
                   </div>
                   <span
                     style={{
-                      fontSize: '1.4rem',
+                      fontSize: '1.5rem',
                       fontWeight: 800,
                       fontFamily: 'var(--font-heading)',
                       color: '#cbd5e1'
@@ -144,7 +144,7 @@ export const HowItWorksSection = () => {
                   </span>
                 </div>
 
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '10px' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--dark-navy)', marginBottom: '10px' }}>
                   {item.title}
                 </h3>
 

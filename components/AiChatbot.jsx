@@ -311,7 +311,7 @@ export const AiChatbot = () => {
             right: '24px',
             transform: `translate3d(${btnPos.x}px, ${btnPos.y}px, 0)`,
             zIndex: 9990,
-            background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+            background: 'linear-gradient(135deg, var(--medical-blue) 0%, #066570 100%)',
             color: 'white',
             border: 'none',
             borderRadius: '50px',
@@ -319,7 +319,7 @@ export const AiChatbot = () => {
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
-            boxShadow: isDraggingBtn ? '0 16px 36px rgba(5, 150, 105, 0.6)' : '0 8px 24px rgba(5, 150, 105, 0.4)',
+            boxShadow: isDraggingBtn ? '0 16px 36px rgba(8, 126, 139, 0.6)' : '0 8px 24px rgba(8, 126, 139, 0.35)',
             cursor: isDraggingBtn ? 'grabbing' : 'grab',
             userSelect: 'none',
             touchAction: 'none',
@@ -390,7 +390,7 @@ export const AiChatbot = () => {
             onPointerUp={handleWindowPointerUp}
             title="Click & drag header to move window"
             style={{
-              background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+              background: 'linear-gradient(135deg, var(--dark-navy) 0%, var(--medical-blue) 100%)',
               color: 'white',
               padding: '14px 18px',
               display: 'flex',

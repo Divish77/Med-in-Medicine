@@ -65,7 +65,7 @@ export const BottomNav = () => {
           alignItems: 'center',
           justifyContent: 'center',
           background: 'transparent',
-          color: activeTab === 'home' && pathname === '/' ? '#059669' : '#64748b',
+          color: activeTab === 'home' && pathname === '/' ? 'var(--medical-blue)' : '#64748b',
           fontSize: '0.7rem',
           fontWeight: activeTab === 'home' && pathname === '/' ? 800 : 600,
           flex: 1,
@@ -86,7 +86,7 @@ export const BottomNav = () => {
           alignItems: 'center',
           justifyContent: 'center',
           background: 'transparent',
-          color: activeTab === 'medicines' && pathname === '/' ? '#059669' : '#64748b',
+          color: activeTab === 'medicines' && pathname === '/' ? 'var(--medical-blue)' : '#64748b',
           fontSize: '0.7rem',
           fontWeight: activeTab === 'medicines' && pathname === '/' ? 800 : 600,
           flex: 1,
@@ -118,17 +118,17 @@ export const BottomNav = () => {
             width: '48px',
             height: '48px',
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            background: 'linear-gradient(135deg, var(--medical-blue) 0%, var(--health-green) 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 14px rgba(5, 150, 105, 0.45)',
+            boxShadow: '0 4px 14px rgba(8, 126, 139, 0.45)',
             border: '3px solid white'
           }}
         >
           <Upload size={22} color="white" />
         </div>
-        <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#059669', marginTop: '2px' }}>
+        <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--medical-blue)', marginTop: '2px' }}>
           Upload Rx
         </span>
       </button>
@@ -142,7 +142,7 @@ export const BottomNav = () => {
           alignItems: 'center',
           justifyContent: 'center',
           background: 'transparent',
-          color: activeTab === 'track' && pathname === '/' ? '#059669' : '#64748b',
+          color: activeTab === 'track' && pathname === '/' ? 'var(--medical-blue)' : '#64748b',
           fontSize: '0.7rem',
           fontWeight: activeTab === 'track' && pathname === '/' ? 800 : 600,
           flex: 1,

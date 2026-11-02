@@ -83,29 +83,29 @@ export const Navbar = () => {
   };
 
   return (
-    <header style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(255, 255, 255, 0.98)', backdropFilter: 'blur(10px)', borderBottom: '1px solid var(--border-color)', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
-      {/* Top Emergency & Express Banner */}
-      <div style={{ background: 'linear-gradient(90deg, #064e3b 0%, #059669 50%, #0284c7 100%)', color: 'white', padding: '5px 0', fontSize: '0.75rem', fontWeight: 600 }}>
-        <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span className="badge" style={{ background: '#f59e0b', color: '#0f172a', padding: '2px 7px', fontSize: '0.68rem', fontWeight: 800 }}>
+    <header style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(255, 255, 255, 0.98)', backdropFilter: 'blur(10px)', borderBottom: '1px solid var(--border-color)', boxShadow: '0 2px 10px rgba(18, 59, 93, 0.04)' }}>
+      {/* Top Clinical & Emergency Banner - Newbay Medical Style */}
+      <div style={{ background: 'var(--dark-navy)', color: 'white', padding: '6px 0', fontSize: '0.75rem', fontWeight: 600 }}>
+        <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span className="badge" style={{ background: 'var(--health-green)', color: 'white', padding: '2px 8px', fontSize: '0.68rem', fontWeight: 800 }}>
               ⚡ 10-MIN EXPRESS
             </span>
-            <span className="banner-subtext">Connecting nearby verified pharmacies to your doorstep.</span>
+            <span className="banner-subtext" style={{ color: '#E9EFF2' }}>Connecting verified neighbourhood pharmacies to your doorstep.</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '0.72rem' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Clock size={12} /> 24x7 Night Delivery
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '0.72rem' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#E9EFF2' }}>
+              <Clock size={12} color="var(--health-green)" /> 24x7 Night Dispensing
             </span>
-            <a href="tel:1800633646" style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'white', textDecoration: 'none' }}>
-              <PhoneCall size={12} /> 1800-633-646
+            <a href="tel:1800633646" style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#E9EFF2', textDecoration: 'none', fontWeight: 700 }}>
+              <PhoneCall size={12} color="var(--health-green)" /> 1800-633-646
             </a>
           </div>
         </div>
       </div>
 
       {/* Main Navbar Bar */}
-      <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '64px', gap: '10px' }}>
+      <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '68px', gap: '12px' }}>
         {/* Left: Brand Logo */}
         <div
           onClick={handleLogoClick}
@@ -114,7 +114,7 @@ export const Navbar = () => {
           <img
             src="/logo.png"
             alt="Med-in-Minutes"
-            style={{ height: '42px', maxWidth: '140px', objectFit: 'contain', display: 'block' }}
+            style={{ height: '44px', maxWidth: '145px', objectFit: 'contain', display: 'block' }}
           />
         </div>
 
@@ -125,35 +125,36 @@ export const Navbar = () => {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
-            padding: '6px 10px',
-            background: 'var(--primary-light)',
-            border: '1.5px solid var(--primary-border)',
+            gap: '8px',
+            padding: '6px 12px',
+            background: 'var(--medical-blue-light)',
+            border: '1.5px solid var(--medical-blue-border)',
             borderRadius: 'var(--radius-md)',
-            color: 'var(--primary-dark)',
+            color: 'var(--dark-navy)',
             fontSize: '0.78rem',
             fontWeight: 600,
             cursor: 'pointer',
-            maxWidth: '220px',
+            maxWidth: '230px',
             textAlign: 'left',
-            minHeight: '38px'
+            minHeight: '40px',
+            transition: 'all 0.15s ease'
           }}
           title="Click to change delivery location"
           suppressHydrationWarning
         >
-          <MapPin size={16} color="var(--primary)" style={{ flexShrink: 0 }} />
+          <MapPin size={16} color="var(--medical-blue)" style={{ flexShrink: 0 }} />
           <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }} suppressHydrationWarning>
-            <div style={{ fontSize: '0.65rem', color: 'var(--primary)', fontWeight: 800, textTransform: 'uppercase' }} suppressHydrationWarning>
+            <div style={{ fontSize: '0.65rem', color: 'var(--medical-blue)', fontWeight: 800, textTransform: 'uppercase' }} suppressHydrationWarning>
               {deliveryLocation.serviceable ? (deliveryLocation.etaLabel || `10 MINS`) : 'UNAVAILABLE'}
             </div>
-            <div style={{ color: 'var(--text-main)', fontSize: '0.78rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} suppressHydrationWarning>
+            <div style={{ color: 'var(--dark-navy)', fontSize: '0.78rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} suppressHydrationWarning>
               {deliveryLocation.pincode ? `${deliveryLocation.area || 'Location'}, ${deliveryLocation.pincode}` : 'Select PIN'}
             </div>
           </div>
-          <ChevronDown size={13} color="var(--primary)" style={{ flexShrink: 0, marginLeft: 'auto' }} />
+          <ChevronDown size={13} color="var(--medical-blue)" style={{ flexShrink: 0, marginLeft: 'auto' }} />
         </button>
 
-        {/* Desktop Navigation Links */}
+        {/* Desktop Navigation Links - Newbay Medical Style */}
         <nav style={{ display: 'none', alignItems: 'center', gap: '4px' }} className="desktop-nav">
           <style>{`
             @media (min-width: 1024px) {
@@ -176,19 +177,19 @@ export const Navbar = () => {
                 key={link.id}
                 onClick={() => handleNavClick(link)}
                 style={{
-                  padding: '7px 12px',
+                  padding: '8px 13px',
                   borderRadius: '8px',
                   fontSize: '0.85rem',
                   fontWeight: isActive ? 700 : 600,
-                  color: isActive ? 'var(--primary)' : 'var(--text-muted)',
-                  background: isActive ? 'var(--primary-light)' : 'transparent',
+                  color: isActive ? 'var(--medical-blue)' : 'var(--dark-navy)',
+                  background: isActive ? 'var(--medical-blue-light)' : 'transparent',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '5px',
+                  gap: '6px',
                   transition: 'all 0.15s'
                 }}
               >
-                {link.id === 'upload-rx' && <Upload size={14} color="var(--primary)" />}
+                {link.id === 'upload-rx' && <Upload size={14} color="var(--medical-blue)" />}
                 {link.label}
               </button>
             );
@@ -210,11 +211,11 @@ export const Navbar = () => {
                 gap: '5px',
                 padding: '6px 10px',
                 borderRadius: 'var(--radius-md)',
-                border: activeTab === 'admin' ? '1.5px solid #0f766e' : '1px solid #99f6e4',
-                background: activeTab === 'admin' ? '#ccfbf1' : '#f0fdfa',
+                border: activeTab === 'admin' ? '1.5px solid var(--medical-blue)' : '1px solid var(--medical-blue-border)',
+                background: activeTab === 'admin' ? 'var(--medical-blue-light)' : '#f0fdfa',
                 fontSize: '0.78rem',
                 fontWeight: 700,
-                color: '#0f766e',
+                color: 'var(--medical-blue)',
                 minHeight: '38px'
               }}
               title="Open website administration"
@@ -231,19 +232,19 @@ export const Navbar = () => {
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '6px 10px',
+              padding: '6px 12px',
               borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--border-color)',
+              border: '1.5px solid var(--border-color)',
               background: 'white',
               fontSize: '0.8rem',
               fontWeight: 600,
-              color: 'var(--text-main)',
+              color: 'var(--dark-navy)',
               minHeight: '38px',
               cursor: 'pointer'
             }}
             title={user ? `Signed in as ${user.name}` : 'Sign in to account'}
           >
-            <User size={16} color="var(--primary)" />
+            <User size={16} color="var(--medical-blue)" />
             <span style={{ display: 'none' }} className="user-name-span">
               <style>{`@media (min-width: 640px) { .user-name-span { display: inline !important; } }`}</style>
               {user ? user.name.split(' ')[0] : 'Sign in'}
@@ -256,14 +257,14 @@ export const Navbar = () => {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
-              padding: '6px 12px',
+              gap: '7px',
+              padding: '7px 14px',
               borderRadius: 'var(--radius-md)',
-              background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+              background: 'linear-gradient(135deg, #087E8B 0%, #066570 100%)',
               color: 'white',
               fontSize: '0.825rem',
               fontWeight: 700,
-              boxShadow: '0 2px 8px rgba(5, 150, 105, 0.25)',
+              boxShadow: '0 2px 8px rgba(8, 126, 139, 0.25)',
               minHeight: '38px',
               cursor: 'pointer'
             }}
@@ -276,7 +277,7 @@ export const Navbar = () => {
             {cartCount > 0 && (
               <span
                 style={{
-                  background: '#f97316',
+                  background: 'var(--health-green)',
                   color: 'white',
                   borderRadius: '50%',
                   width: '18px',
@@ -301,8 +302,8 @@ export const Navbar = () => {
             style={{
               padding: '8px',
               borderRadius: '8px',
-              background: '#f1f5f9',
-              color: 'var(--text-main)',
+              background: 'var(--border-light)',
+              color: 'var(--dark-navy)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -327,7 +328,7 @@ export const Navbar = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(15, 23, 42, 0.55)',
+            background: 'rgba(18, 59, 93, 0.55)',
             backdropFilter: 'blur(4px)',
             zIndex: 1000,
             display: 'flex',
@@ -343,7 +344,7 @@ export const Navbar = () => {
               maxWidth: '340px',
               height: '100%',
               background: 'white',
-              boxShadow: '-8px 0 30px rgba(0,0,0,0.2)',
+              boxShadow: '-8px 0 30px rgba(18, 59, 93, 0.25)',
               display: 'flex',
               flexDirection: 'column',
               animation: 'slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
@@ -359,7 +360,7 @@ export const Navbar = () => {
             {/* Drawer Header */}
             <div
               style={{
-                background: 'linear-gradient(135deg, #064e3b 0%, #059669 100%)',
+                background: 'var(--dark-navy)',
                 color: 'white',
                 padding: '20px',
                 display: 'flex',
@@ -373,7 +374,7 @@ export const Navbar = () => {
                     width: '40px',
                     height: '40px',
                     borderRadius: '50%',
-                    background: 'rgba(255, 255, 255, 0.2)',
+                    background: 'rgba(255, 255, 255, 0.15)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -386,7 +387,7 @@ export const Navbar = () => {
                   <div style={{ fontSize: '0.95rem', fontWeight: 800 }}>
                     {user ? user.name : 'Welcome Patient'}
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: '#a7f3d0' }}>
+                  <div style={{ fontSize: '0.72rem', color: '#E9EFF2' }}>
                     {user ? user.email : 'Sign in for faster 10-min delivery'}
                   </div>
                 </div>
@@ -396,15 +397,15 @@ export const Navbar = () => {
                 onClick={() => setMobileMenuOpen(false)}
                 aria-label="Close menu"
                 style={{
-                  background: 'rgba(255,255,255,0.2)',
+                  background: 'rgba(255,255,255,0.15)',
                   border: 'none',
                   borderRadius: '50%',
                   width: '32px',
                   height: '32px',
+                  color: 'white',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: 'white',
                   cursor: 'pointer'
                 }}
               >
@@ -412,126 +413,74 @@ export const Navbar = () => {
               </button>
             </div>
 
-            {/* User Quick Action */}
-            <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border-color)', background: '#f8fafc' }}>
-              {!user ? (
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    setIsAuthModalOpen(true);
-                  }}
-                  className="btn btn-primary"
-                  style={{ width: '100%', padding: '10px', fontSize: '0.85rem' }}
-                >
-                  Sign In / Register
-                </button>
-              ) : (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <button
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      setIsAuthModalOpen(true);
-                    }}
-                    style={{ background: 'transparent', color: 'var(--primary)', fontWeight: 700, fontSize: '0.825rem', padding: 0 }}
-                  >
-                    View Account &amp; Addresses &rarr;
-                  </button>
-                  {user.role === 'admin' && (
-                    <span style={{ fontSize: '0.7rem', background: '#ccfbf1', color: '#0f766e', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>
-                      Admin
-                    </span>
-                  )}
+            {/* Drawer Navigation Links */}
+            <div style={{ padding: '16px 12px', flex: 1, overflowY: 'auto' }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '0 8px 8px' }}>
+                Navigation
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {navLinks.map((link) => {
+                  const Icon = link.icon;
+                  const isActive = activeTab === link.id && pathname === '/';
+                  return (
+                    <button
+                      key={link.id}
+                      onClick={() => handleNavClick(link)}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '12px 14px',
+                        borderRadius: '10px',
+                        background: isActive ? 'var(--medical-blue-light)' : 'transparent',
+                        color: isActive ? 'var(--medical-blue)' : 'var(--dark-navy)',
+                        fontWeight: isActive ? 700 : 600,
+                        fontSize: '0.9rem',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <Icon size={18} color={isActive ? 'var(--medical-blue)' : 'var(--dark-navy)'} />
+                        <span>{link.label}</span>
+                      </div>
+                      {link.isAction && (
+                        <span className="badge" style={{ background: 'var(--health-green)', color: 'white', fontSize: '0.65rem', padding: '2px 6px' }}>
+                          Rx
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Emergency Call Box */}
+              <div style={{ marginTop: '24px', padding: '16px', background: 'var(--bg-main)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--dark-navy)', fontWeight: 800, fontSize: '0.85rem', marginBottom: '4px' }}>
+                  <ShieldCheck size={16} color="var(--medical-blue)" /> 24x7 Patient Care
                 </div>
-              )}
-            </div>
-
-            {/* Navigation Links */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              {navLinks.map((link) => {
-                const Icon = link.icon;
-                const isActive = activeTab === link.id && pathname === '/';
-                return (
-                  <button
-                    key={link.id}
-                    onClick={() => handleNavClick(link)}
-                    style={{
-                      width: '100%',
-                      textAlign: 'left',
-                      padding: '12px 14px',
-                      borderRadius: '10px',
-                      fontSize: '0.9rem',
-                      fontWeight: isActive ? 700 : 600,
-                      color: isActive ? 'var(--primary)' : 'var(--text-main)',
-                      background: isActive ? 'var(--primary-light)' : 'transparent',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <Icon size={18} color={isActive ? 'var(--primary)' : '#64748b'} />
-                    <span>{link.label}</span>
-                    {link.id === 'upload-rx' && (
-                      <span className="badge badge-express" style={{ marginLeft: 'auto', fontSize: '0.65rem', padding: '2px 6px' }}>
-                        AI OCR
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-
-              {user?.role === 'admin' && (
-                <button
-                  onClick={() => {
-                    setActiveTab('admin');
-                    if (pathname !== '/') router.push('/');
-                    setMobileMenuOpen(false);
-                  }}
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
+                  Need urgent pharmaceutical support or order assistance?
+                </p>
+                <a
+                  href="tel:1800633646"
                   style={{
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '12px 14px',
-                    borderRadius: '10px',
-                    fontSize: '0.9rem',
-                    fontWeight: 700,
-                    color: '#0f766e',
-                    background: '#f0fdfa',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '12px',
-                    marginTop: '8px'
+                    justifyContent: 'center',
+                    gap: '6px',
+                    padding: '8px 12px',
+                    background: 'var(--dark-navy)',
+                    color: 'white',
+                    borderRadius: '8px',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    textDecoration: 'none'
                   }}
                 >
-                  <Settings size={18} color="#0f766e" />
-                  <span>Admin Control Panel</span>
-                </button>
-              )}
-            </div>
-
-            {/* Drawer Footer / 24x7 Emergency Contact */}
-            <div style={{ padding: '16px', borderTop: '1px solid var(--border-color)', background: '#f8fafc' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', marginBottom: '6px' }}>
-                24x7 MEDICAL EMERGENCY DESK
+                  <PhoneCall size={14} color="var(--health-green)" /> Call 1800-633-646
+                </a>
               </div>
-              <a
-                href="tel:1800633646"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  color: 'var(--primary)',
-                  fontWeight: 800,
-                  fontSize: '0.95rem',
-                  textDecoration: 'none',
-                  padding: '8px 12px',
-                  background: 'white',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border-color)'
-                }}
-              >
-                <PhoneCall size={16} color="var(--primary)" />
-                <span>1800-633-646 (Toll-Free)</span>
-              </a>
             </div>
           </div>
         </div>
