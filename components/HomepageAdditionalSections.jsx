@@ -604,15 +604,15 @@ export const HomepageAdditionalSections = () => {
           <div className="featured-meds-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '20px' }}>
             {featuredMeds.map((med) => (
               <div
-                key={med.id}
+                key={med._id || med.id}
                 style={{
                   background: 'white',
-                  borderRadius: 'var(--radius-lg)',
+                  borderRadius: '16px',
                   border: '1.5px solid var(--border-color)',
+                  boxShadow: 'var(--shadow-sm)',
                   overflow: 'hidden',
                   display: 'flex',
                   flexDirection: 'column',
-                  boxShadow: 'var(--shadow-sm)',
                   transition: 'all 0.25s ease'
                 }}
                 onMouseEnter={(e) => {
@@ -626,69 +626,112 @@ export const HomepageAdditionalSections = () => {
                   e.currentTarget.style.borderColor = 'var(--border-color)';
                 }}
               >
-                {/* Product Image Frame */}
-                <div style={{ position: 'relative', height: '160px', background: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px' }}>
+                {/* Product Image Frame (Matches Medicine Section) */}
+                <div
+                  className="med-card-img-wrap"
+                  onClick={() => setActiveTab('medicines')}
+                  style={{ height: '160px', position: 'relative', overflow: 'hidden', background: '#f8fafc', cursor: 'pointer' }}
+                >
                   <img
-                    src={med.imageUrl || '/hero.png'}
+                    src={med.image || med.imageUrl || '/hero.png'}
                     alt={med.name}
-                    style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
+                    loading="lazy"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     onError={(e) => {
                       e.currentTarget.src = '/hero.png';
                     }}
                   />
+
                   {/* Badges */}
-                  <div style={{ position: 'absolute', top: '10px', left: '10px', display: 'flex', gap: '6px' }}>
+                  <div style={{ position: 'absolute', top: '8px', left: '8px', display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
                     {med.prescriptionRequired ? (
-                      <span className="badge badge-rx" style={{ fontSize: '0.65rem', padding: '2px 7px', fontWeight: 800 }}>
-                        Rx Required
+                      <span className="badge badge-rx" style={{ fontSize: '0.62rem', padding: '2px 6px', fontWeight: 800 }}>
+                        Rx
                       </span>
                     ) : (
-                      <span className="badge badge-otc" style={{ fontSize: '0.65rem', padding: '2px 7px', fontWeight: 800 }}>
+                      <span className="badge badge-otc" style={{ fontSize: '0.62rem', padding: '2px 6px', fontWeight: 800 }}>
                         OTC
                       </span>
                     )}
                   </div>
+
+                  <span className="badge badge-express" style={{ position: 'absolute', bottom: '8px', right: '8px', fontSize: '0.62rem', padding: '2px 6px' }}>
+                    ⚡ 10m
+                  </span>
+
                   {med.discountPercent > 0 && (
-                    <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'var(--accent-orange)', color: 'white', fontSize: '0.65rem', fontWeight: 800, padding: '2px 6px', borderRadius: '4px' }}>
+                    <div style={{ position: 'absolute', top: '8px', right: '8px', background: 'var(--accent-orange)', color: 'white', fontSize: '0.65rem', fontWeight: 800, padding: '2px 6px', borderRadius: '4px' }}>
                       {med.discountPercent}% OFF
                     </div>
                   )}
                 </div>
 
-                {/* Card Body */}
-                <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '4px' }}>
-                    {med.category} • {med.packaging || 'Standard Pack'}
-                  </div>
-                  <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--dark-navy)', lineHeight: 1.3, marginBottom: '6px' }}>
-                    {med.name}
-                  </h4>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '14px' }}>
-                    {med.composition || med.dosageForm || 'Certified formula'}
+                {/* Details */}
+                <div className="med-card-body" style={{ padding: '14px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--medical-blue)', textTransform: 'uppercase', marginBottom: '2px' }}>
+                    {med.brand || 'Licensed Chemist'}
                   </div>
 
-                  {/* Pricing & Add to Cart */}
-                  <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border-light)', paddingTop: '12px' }}>
+                  <h3
+                    className="med-card-title"
+                    onClick={() => setActiveTab('medicines')}
+                    style={{
+                      fontSize: '0.95rem',
+                      fontWeight: 800,
+                      color: 'var(--dark-navy)',
+                      cursor: 'pointer',
+                      lineHeight: 1.35,
+                      marginBottom: '4px',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      minHeight: '36px'
+                    }}
+                    title={med.name}
+                  >
+                    {med.name}
+                  </h3>
+
+                  <div className="med-card-pack" style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '10px' }}>
+                    Pack: <strong>{med.packSize || 'Standard Pack'}</strong>
+                  </div>
+
+                  {/* Price & Add to Cart */}
+                  <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #f1f5f9', paddingTop: '10px', gap: '6px' }}>
                     <div>
-                      <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--dark-navy)' }}>
-                        ₹{med.price}
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                        <span className="med-card-price" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--dark-navy)' }}>
+                          ₹{med.price}
+                        </span>
+                        {med.mrp > med.price && (
+                          <span style={{ fontSize: '0.75rem', color: '#94a3b8', textDecoration: 'line-through' }}>
+                            ₹{med.mrp}
+                          </span>
+                        )}
                       </div>
-                      {med.mrp > med.price && (
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', textDecoration: 'line-through' }}>
-                          ₹{med.mrp}
-                        </div>
+                      {med.discountPercent > 0 && (
+                        <span style={{ fontSize: '0.65rem', color: 'var(--health-green)', fontWeight: 800 }}>
+                          {med.discountPercent}% OFF
+                        </span>
                       )}
                     </div>
 
                     <button
                       onClick={() => {
-                        addToCart(med);
+                        addToCart(med, 1);
                         showToast(`Added ${med.name} to cart`);
                       }}
                       className="btn btn-primary"
-                      style={{ padding: '8px 14px', fontSize: '0.8rem', borderRadius: '8px' }}
+                      style={{
+                        padding: '7px 14px',
+                        fontSize: '0.8rem',
+                        borderRadius: '8px',
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0
+                      }}
                     >
-                      <Plus size={15} /> Add
+                      <Plus size={14} /> Add
                     </button>
                   </div>
                 </div>
